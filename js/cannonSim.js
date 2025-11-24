@@ -1,3 +1,6 @@
+let angleDeg = Math.min(Math.max(Number(angleInput.value), 0), 90);
+let speed = Math.min(Math.max(Number(speedInput.value), 0), 20);
+
 const canvas = document.getElementById("cannonCanvas");
 const ctx = canvas.getContext("2d");
 
