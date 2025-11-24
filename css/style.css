@@ -2,3 +2,4 @@ body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
 header { background: #222; color: white; padding: 1em; text-align: center; }
 nav a { color: white; margin: 0 10px; text-decoration: none; }
 main { padding: 2em; }
+canvas { display: block; margin: 20px auto; background: #f0f0f0; }
