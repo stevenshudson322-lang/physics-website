@@ -130,6 +130,7 @@
         let targetY = 0;
         let gameState = GameState.WAITING;
         let trajectory = [];
+        let ballTrail = []; // Track the path of the ball during flight
         let cannonballPos = null;
         let cannonballVel = null;
         let inputText = '';
@@ -215,9 +216,13 @@
             cannonballPos.y += cannonballVel.y * TIME_STEP * SCALE;
             cannonballVel.y += GRAVITY * TIME_STEP;
 
+            // Add current position to ball trail
+            ballTrail.push({ x: cannonballPos.x, y: cannonballPos.y });
+
             if (cannonballPos.y > canvas.height || cannonballPos.x > canvas.width) {
                 gameState = GameState.WAITING;
                 cannonballPos = null;
+                ballTrail = [];
                 return;
             }
 
@@ -246,8 +251,31 @@
             ctx.stroke();
         }
 
+        function drawBallTrail() {
+            if (ballTrail.length === 0) return;
+
+            // Draw line connecting all trail points
+            ctx.strokeStyle = GREEN;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(ballTrail[0].x, ballTrail[0].y);
+            
+            for (let i = 1; i < ballTrail.length; i++) {
+                ctx.lineTo(ballTrail[i].x, ballTrail[i].y);
+            }
+            ctx.stroke();
+
+            // Draw small circles along the trail
+            ctx.fillStyle = GREEN;
+            for (let i = 0; i < ballTrail.length; i += 3) {
+                const pos = ballTrail[i];
+                ctx.beginPath();
+                ctx.arc(pos.x, pos.y, 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
         function drawMeasurementScales() {
-            const scaleFont = '28px Arial';
             const labelFont = '32px Arial';
 
             // X-axis
@@ -259,17 +287,12 @@
             ctx.lineTo(canvas.width, canvas.height - 30);
             ctx.stroke();
 
-            ctx.fillStyle = BLACK;
-            ctx.font = scaleFont;
-            ctx.textAlign = 'center';
+            // Draw x-axis tick marks only (no labels)
             for (let i = CANNON_X; i < canvas.width; i += 50) {
                 ctx.beginPath();
                 ctx.moveTo(i, canvas.height - 30);
                 ctx.lineTo(i, canvas.height - 15);
                 ctx.stroke();
-
-                const meters = Math.round((i - CANNON_X) * meterPerPixelX);
-                ctx.fillText(`${meters}m`, i, canvas.height - 5);
             }
 
             // Y-axis
@@ -279,20 +302,17 @@
             ctx.lineTo(CANNON_X - 30, canvas.height - 50);
             ctx.stroke();
 
-            ctx.textAlign = 'right';
+            // Draw y-axis tick marks only (no labels)
             for (let i = 100; i < canvas.height - 50; i += 50) {
                 ctx.beginPath();
                 ctx.moveTo(CANNON_X - 30, i);
                 ctx.lineTo(CANNON_X - 10, i);
                 ctx.stroke();
-
-                const meters = Math.round((canvas.height - 50 - i) * meterPerPixelY);
-                ctx.fillText(`${meters}m`, CANNON_X - 35, i + 10);
             }
 
-            // Axis labels
-            ctx.font = labelFont;
+            // Axis labels only
             ctx.fillStyle = BLACK;
+            ctx.font = labelFont;
             ctx.textAlign = 'center';
             ctx.fillText('Distance (m)', canvas.width - 100, canvas.height - 50);
 
@@ -364,6 +384,9 @@
                 drawTrajectory();
             }
 
+            // Draw ball trail (shows path behind the ball)
+            drawBallTrail();
+
             // Update and draw cannonball
             updateCannonball();
             drawCannonball();
@@ -431,12 +454,14 @@
                     gameState = GameState.AIMING;
                     inputMode = 'angle';
                     inputText = '';
+                    ballTrail = []; // Clear trail for new round
                 } else if (gameState === GameState.HIT) {
                     targetX = Math.random() * (canvas.width - 400) + 400;
                     targetY = Math.random() * (canvas.height - 200) + 100;
                     gameState = GameState.AIMING;
                     inputMode = 'angle';
                     inputText = '';
+                    ballTrail = []; // Clear trail for new round
                 }
             }
         });
