@@ -273,13 +273,13 @@
             ctx.lineTo(canvas.width, canvas.height - 30);
             ctx.stroke();
 
-            // Draw x-axis labels only (no tick marks)
+            // Draw x-axis labels every 5 meters
             ctx.fillStyle = BLACK;
             ctx.font = scaleFont;
             ctx.textAlign = 'center';
-            for (let i = CANNON_X; i < canvas.width; i += 50) {
-                const meters = Math.round((i - CANNON_X) * meterPerPixelX);
-                ctx.fillText(`${meters}m`, i, canvas.height - 5);
+            for (let meters = 0; meters <= 100; meters += 5) {
+                const pixelX = CANNON_X + (meters / 100) * (canvas.width - CANNON_X);
+                ctx.fillText(`${meters}m`, pixelX, canvas.height - 5);
             }
 
             // Y-axis
@@ -289,11 +289,11 @@
             ctx.lineTo(CANNON_X - 30, canvas.height - 50);
             ctx.stroke();
 
-            // Draw y-axis labels only (no tick marks)
+            // Draw y-axis labels every 5 meters, moved right
             ctx.textAlign = 'right';
-            for (let i = 100; i < canvas.height - 50; i += 50) {
-                const meters = Math.round((canvas.height - 50 - i) * meterPerPixelY);
-                ctx.fillText(`${meters}m`, CANNON_X - 35, i + 10);
+            for (let meters = 0; meters <= 600; meters += 5) {
+                const pixelY = (canvas.height - 50) - (meters / 600) * (canvas.height - 150);
+                ctx.fillText(`${meters}m`, CANNON_X - 15, pixelY + 10);
             }
 
             // Axis labels
