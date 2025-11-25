@@ -7,42 +7,58 @@
     <title>Physics Games</title>
 
     <style>
-        canvas {
-            border: 2px solid black;
-            background: #f0f0f0;
-            display: block;
-            margin: 20px auto;
-        }
-        
-        .game-description {
-            max-width: 800px;
+        main {
+            max-width: 1200px;
             margin: 20px auto;
             padding: 20px;
-            background-color: #f9f9f9;
-            border-left: 4px solid #0066cc;
-            font-size: 16px;
-            line-height: 1.6;
         }
-        
-        .game-description h3 {
-            color: #0066cc;
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .game-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-decoration: none;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .game-card h3 {
             margin-top: 0;
+            font-size: 24px;
         }
-        
-        .game-description ul, .game-description ol {
+
+        .game-card p {
             margin: 10px 0;
-            padding-left: 30px;
+            font-size: 14px;
         }
-        
-        .game-description li {
-            margin: 8px 0;
+
+        .game-card-cta {
+            display: inline-block;
+            margin-top: 10px;
+            background: white;
+            color: #667eea;
+            padding: 8px 16px;
+            border-radius: 5px;
+            font-weight: bold;
+            text-decoration: none;
         }
-        
-        .game-description code {
-            background-color: #e6e6e6;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-family: monospace;
+
+        .game-card-cta:hover {
+            background: #f0f0f0;
         }
     </style>
 </head>
@@ -57,25 +73,16 @@
     </header>
 
     <main>
-       <h2>Cannon Launching Simulator</h2>
-       <section class="game-description">
-           <p>Welcome to the Cannon Launching Simulator! This interactive physics simulation lets you practice projectile motion calculations.</p>
-           <p><strong>How to play:</strong></p>
-           <ul>
-               <li>Press SPACE to start a new round</li>
-               <li>Enter an angle (0-90 degrees)</li>
-               <li>Enter a velocity (1-50 m/s)</li>
-               <li>Watch the trajectory and try to hit the target!</li>
-               <li>Use the measurement scales to help calculate the correct angle and velocity</li>
-           </ul>
-           <p><strong>To run the game locally:</strong></p>
-           <ol>
-               <li>Download the Python file: <code>cannonSim.py</code></li>
-               <li>Make sure you have Python 3 installed</li>
-               <li>Install pygame: <code>pip install pygame</code></li>
-               <li>Run the game: <code>python cannonSim.py</code></li>
-           </ol>
-       </section>
+        <h2>Physics Games & Simulations</h2>
+        <p>Interactive learning through engaging simulations. Click on any game to start playing!</p>
+
+        <div class="games-grid">
+            <a href="cannon-game.html" class="game-card">
+                <h3>🎯 Cannon Launching Simulator</h3>
+                <p>Master projectile motion by calculating the correct angle and velocity to hit targets. Use the measurement scales to help predict trajectories!</p>
+                <span class="game-card-cta">Play Now →</span>
+            </a>
+        </div>
     </main>
 
 </body>
