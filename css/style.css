@@ -85,6 +85,23 @@ main img {
   margin: 0.6rem 0;
 }
 
+/* Content link colors: unvisited light-blue, visited purple */
+main a:link,
+main a {
+  color: #4aa3ff; /* light blue */
+  text-decoration: underline;
+}
+
+main a:visited {
+  color: purple;
+}
+
+main a:hover,
+main a:focus {
+  color: #0b71d6; /* darker blue on hover */
+}
+
+
 
 
 
