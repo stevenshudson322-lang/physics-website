@@ -85,20 +85,22 @@ main img {
   margin: 0.6rem 0;
 }
 
-/* Content link colors: unvisited light-blue, visited purple */
+/* Content link colors: keep links blue (including visited); purple only while active */
+main a,
 main a:link,
-main a {
+main a:visited {
   color: #4aa3ff; /* light blue */
   text-decoration: underline;
 }
 
-main a:visited {
-  color: purple;
-}
-
 main a:hover,
 main a:focus {
-  color: #0b71d6; /* darker blue on hover */
+  color: #0b71d6; /* darker blue on hover/focus */
+}
+
+/* Purple only while the link is being clicked */
+main a:active {
+  color: purple;
 }
 
 
