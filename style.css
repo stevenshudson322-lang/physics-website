@@ -85,36 +85,16 @@ main img {
   margin: 0.6rem 0;
 }
 
-.hero {
-  background: linear-gradient(180deg, rgba(255,255,255,0.0), rgba(255,255,255,0.0));
-  padding: 0.75rem 0;
-}
-.hero .hero-image {
-  max-width: 100%;
-  height: auto;
-  display: block;
-  margin: 0.6rem auto;
-  border-radius: 6px;
-}
 
-/* Content link colors: keep links blue (including visited); purple only while active */
-main a,
-main a:link,
-main a:visited {
-  color: #4aa3ff; /* light blue */
-  text-decoration: underline;
-}
 
-main a:hover,
-main a:focus {
-  color: #0b71d6; /* darker blue on hover/focus */
-}
 
-/* Purple only while the link is being clicked */
-main a:active {
-  color: purple;
+/* Prevent visited links from changing to the browser default purple.
+   Keep visited links the same color as unvisited links (inherits color).
+   Use more specific selectors elsewhere (e.g. .main-nav a) to override when needed. */
+a:link,
+a:visited {
+  color: inherit;
 }
-
 
 
 
