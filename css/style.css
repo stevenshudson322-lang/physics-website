@@ -70,7 +70,6 @@ main {
   margin: 0 auto;
 }
 
-
 /* content paragraph spacing and responsive images for readability */
 main p {
   margin-bottom: 1.2rem;
@@ -83,6 +82,34 @@ main img {
   height: auto;
   display: block;
   margin: 0.6rem 0;
+}
+
+.times {
+  font-family: "Times New Roman", Times, serif;
+}
+
+.arial {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.row {
+  display: flex;
+}
+
+.column {
+  flex: 25%;
+  padding: 5px;
+}
+
+
+
+
+/* Prevent visited links from changing to the browser default purple.
+   Keep visited links the same color as unvisited links (inherits color).
+   Use more specific selectors elsewhere (e.g. .main-nav a) to override when needed. */
+a:link,
+a:visited {
+  color: inherit;
 }
 
 
