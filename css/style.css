@@ -104,10 +104,9 @@ main img {
 .div_deg {
   width: 70%;
   margin: auto;
-}
-
-.my_img{
-  float: right;
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
 }
 
 /* Prevent visited links from changing to the browser default purple.
