@@ -101,8 +101,14 @@ main img {
   padding: 5px;
 }
 
+.div_deg {
+  width: 70%;
+  margin: auto;
+}
 
-
+.my_img{
+  float: right;
+}
 
 /* Prevent visited links from changing to the browser default purple.
    Keep visited links the same color as unvisited links (inherits color).
