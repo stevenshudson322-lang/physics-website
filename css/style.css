@@ -103,7 +103,6 @@ main img {
 
 .div_deg {
   width: 70%;
-  margin: auto;
   display: flex;
   align-items: flex-start;
   gap: 15px;
