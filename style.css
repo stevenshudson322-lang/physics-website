@@ -1,7 +1,16 @@
 /* css/style.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 :root {
-  --header-bg: #111;   /* very dark */
-  --header-foreground: #fff;
+  --primary:       #1e3a5f;
+  --accent:        #2563eb;
+  --accent-hover:  #1d4ed8;
+  --bg:            #f8fafc;
+  --surface:       #ffffff;
+  --text:          #1e293b;
+  --text-muted:    #64748b;
+  --border:        #e2e8f0;
+  --header-bg:     #1e3a5f;
   --container-max: 1000px;
 }
 
@@ -9,16 +18,18 @@
 
 body {
   margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  color: #222;
-  background: #fff;
+  font-family: 'Inter', Arial, Helvetica, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.75;
 }
 
+/* ── Header ─────────────────────────────────────────────────── */
 .site-header {
   background: var(--header-bg);
-  color: var(--header-foreground);
+  color: #fff;
   width: 100%;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.25);
   position: sticky;
   top: 0;
   z-index: 50;
@@ -27,7 +38,7 @@ body {
 .site-header .container {
   max-width: var(--container-max);
   margin: 0 auto;
-  padding: 14px 16px;
+  padding: 16px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -35,67 +46,257 @@ body {
 
 .site-title {
   margin: 0;
-  font-size: 1.25rem;
-  line-height: 1;
-  color: var(--header-foreground);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
 }
 
-.main-nav ul {
+/* ── Navigation ──────────────────────────────────────────────── */
+nav ul {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
-  gap: 12px;
+  gap: 8px;
   align-items: center;
 }
 
-.main-nav a {
-  color: var(--header-foreground);
+nav a {
+  color: rgba(255,255,255,0.82);
   text-decoration: none;
-  padding: 6px 10px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  padding: 6px 12px;
   border-radius: 6px;
-  transition: background .15s ease;
-  font-weight: 600;
+  transition: background 0.18s, color 0.18s;
 }
 
-.main-nav a:hover,
-.main-nav a:focus {
-  background: rgba(255,255,255,0.08);
+nav a:hover,
+nav a:focus {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
 }
 
-/* main content spacing */
+nav a:active {
+  color: #93c5fd;
+}
+
+/* ── Main content ────────────────────────────────────────────── */
 main {
-  padding: 2rem 1rem;
+  padding: 2.5rem 1.5rem;
   max-width: var(--container-max);
   margin: 0 auto;
 }
 
-
-/* content paragraph spacing and responsive images for readability */
-main p {
-  margin-bottom: 1.2rem;
-  line-height: 1.6;
-  max-width: 900px;
+/* ── Typography ──────────────────────────────────────────────── */
+h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin: 0 0 1rem;
+  line-height: 1.3;
 }
 
+h2 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--primary);
+  margin: 2rem 0 0.75rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 2px solid var(--border);
+}
+
+h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--primary);
+  margin: 1.5rem 0 0.5rem;
+}
+
+h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--primary);
+  margin: 1.2rem 0 0.4rem;
+}
+
+h6 {
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--text-muted);
+  font-style: italic;
+  margin: 0.5rem 0;
+  line-height: 1.5;
+}
+
+main p {
+  margin-bottom: 1.2rem;
+  line-height: 1.8;
+  max-width: 900px;
+  color: var(--text);
+}
+
+ul, ol {
+  line-height: 1.9;
+  margin-bottom: 1.2rem;
+  padding-left: 1.5rem;
+}
+
+li {
+  margin-bottom: 0.25rem;
+}
+
+/* ── Images ──────────────────────────────────────────────────── */
 main img {
   max-width: 100%;
   height: auto;
   display: block;
-  margin: 0.6rem 0;
+  margin: 0.75rem 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.09);
 }
 
+/* ── Links ───────────────────────────────────────────────────── */
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
 
+a:hover {
+  text-decoration: underline;
+}
 
-
-/* Prevent visited links from changing to the browser default purple.
-   Keep visited links the same color as unvisited links (inherits color).
-   Use more specific selectors elsewhere (e.g. .main-nav a) to override when needed. */
-a:link,
 a:visited {
   color: inherit;
 }
 
+/* ── Button ──────────────────────────────────────────────────── */
+button {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: 'Inter', Arial, sans-serif;
+  letter-spacing: 0.02em;
+  transition: background 0.18s;
+}
 
+button:hover {
+  background: var(--accent-hover);
+}
 
+/* ── Utility classes ─────────────────────────────────────────── */
+.times { font-family: "Times New Roman", Times, serif; }
+.arial { font-family: 'Inter', Arial, Helvetica, sans-serif; }
 
+.centered-text { text-align: center; }
+.red-text       { color: #dc2626; }
+.black          { color: #1e293b; }
+
+/* ── Row / column layout ─────────────────────────────────────── */
+.row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+}
+
+.column {
+  flex: 1;
+  min-width: 200px;
+  padding: 8px;
+}
+
+/* ── Boxed formula / answer text ─────────────────────────────── */
+.boxed-text {
+  display: block;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  background: #eff6ff;
+  padding: 14px 18px;
+  border-radius: 0 8px 8px 0;
+  margin: 12px 0;
+  max-width: 100%;
+  font-size: 0.95rem;
+}
+
+/* ── Right-floated images ────────────────────────────────────── */
+.right-img {
+  float: right;
+  margin-left: 24px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* ── Toggle link ─────────────────────────────────────────────── */
+.toggle-link {
+  color: var(--accent);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.toggle-link:active {
+  color: #7c3aed;
+}
+
+/* ── Topics page – topic link cards ─────────────────────────── */
+main > nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 1rem;
+  max-width: 540px;
+}
+
+main > nav a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  padding: 14px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: background 0.18s, border-color 0.18s, box-shadow 0.18s;
+  display: block;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+main > nav a:hover {
+  background: #eff6ff;
+  border-color: var(--accent);
+  box-shadow: 0 2px 8px rgba(37,99,235,0.1);
+  text-decoration: none;
+}
+
+/* ── Draggable Desmos calculator ─────────────────────────────── */
+.draggable-calculator {
+  position: absolute;
+  top: 100px;
+  left: 50px;
+  z-index: 1000;
+  cursor: move;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.15);
+  overflow: hidden;
+}
+
+.draggable-calculator .drag-handle {
+  background: var(--header-bg);
+  color: #fff;
+  padding: 8px 14px;
+  cursor: move;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+}
