@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang = "en">
+<head>
+    <meta charset="UTF-8">
+    <meta name = "viewport" content="width=device-width, initial-scale=1" />
+    <title>Forces - Physics Fun</title>
+
+    <link rel="stylesheet" href="css/style.css"/>
+<style>
+.right-img{
+    float: right;
+    margin-left: 20px;
+    margin-bottom: 15px;
+}
+
+.centered-text {
+    text-align: center;
+}
+
+.red-text {
+    color: red;
+}
+
+
+
+.boxed-text {
+    display: inline-block;
+    border: 1px solid black;
+    padding: 10px;
+    margin: 10px 0;
+    max-width: 100%;
+}
+
+.toggle-link {
+    color: inherit;
+    text-decoration: underline;
+}
+
+.toggle-link:active {
+    color: purple;
+}
+</style>
+    <script>
+        window.MathJax = {
+        tex: { inlineMath: [['\\(', '\\)']] }
+        };
+
+        
+        function toggleText() {
+            let text = document.getElementById("answer");
+            let link = event.target;
+
+            if (text.style.display === "none") {
+                text.style.display = "inline";
+                link.textContent = "Click to hide";
+            } else {
+                text.style.display = "none";
+                link.textContent = "Deriving a Planets Period";
+            }
+
+            event.preventDefault();
+        }
+
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+        
+    <header class = "site-header">
+        <div class = "container">
+          <h1 class = "site-title">Power, Energy, and Work</h1>
+           <nav>
+               <a href = "index.html">Home</a>
+               <a href = "topics.html">Topics</a>
+               <a href = "games.html">Games</a>
+            </nav>
+        </div>
+    </header>
+<main>
+<h2>Power, Energy, and Work - How Things Move and Change</h2>
+

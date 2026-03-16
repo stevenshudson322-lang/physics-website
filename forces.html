@@ -6,6 +6,79 @@
     <title>Forces - Physics Fun</title>
 
     <link rel="stylesheet" href="css/style.css"/>
+<style>
+/* page-level overrides — base styles live in css/style.css */
+</style>
+    <script>
+        window.MathJax = {
+        tex: { inlineMath: [['\\(', '\\)']] }
+        };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <div id="desmos-container" style="display:none;">
+    <div class="draggable-calculator">
+        <div class="drag-handle">Drag Calculator</div>
+        <div id="calculator" style="width:600px; height:400px;"></div>
+    </div>
+</div>
+
+<script src="https://www.desmos.com/api/v1.11/calculator.js?apiKey=1a36ee8eec4c471e97c71548300ded67"></script>
+<!--         Desmos calculator          -->
+<script>
+let calculatorCreated = false;
+let calculator;
+
+function toggleDesmos() {
+    const container = document.getElementById("desmos-container");
+    const button = document.getElementById("desmos-toggle");
+
+    if (container.style.display === "none") {
+        container.style.display = "block";
+        button.textContent = "Hide Calculator";
+
+        if (!calculatorCreated) {
+            const elt = document.getElementById("calculator");
+            calculator = Desmos.GraphingCalculator(elt);
+            calculatorCreated = true;
+        }
+
+    } else {
+    container.style.display = "none";
+        button.textContent = "Show Calculator";
+}
+}
+
+// Dragging functionality for the calculator
+let isDragging = false;
+let dragOffsetX, dragOffsetY;
+
+document.addEventListener('DOMContentLoaded', function() {
+    const dragHandle = document.querySelector('.drag-handle');
+    const draggable = document.querySelector('.draggable-calculator');
+
+    if (dragHandle && draggable) {
+        dragHandle.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            dragOffsetX = e.clientX - draggable.offsetLeft;
+            dragOffsetY = e.clientY - draggable.offsetTop;
+            draggable.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (isDragging) {
+                const newX = e.clientX - dragOffsetX;
+                const newY = e.clientY - dragOffsetY;
+                draggable.style.left = newX + 'px';
+                draggable.style.top = newY + 'px';
+            }
+        });
+
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+            draggable.style.cursor = 'move';
+        });
+    }
+});</script>
 
 </head>
 <body>
@@ -16,7 +89,8 @@
            <nav>
                <a href = "index.html">Home</a>
                <a href = "topics.html">Topics</a>
-               <a href = "games.html">games</a>
+               <a href = "games.html">Games</a>
+               <button id="desmos-toggle" onclick="toggleDesmos()">Show Calculator</button>
             </nav>
         </div>
     </header>
@@ -28,38 +102,40 @@
         <p>Forces are the interactions between objects that change their motion, energy, or shape. The simplest way to think of a force is as a <strong>push</strong> or a <strong>pull</strong>. 
         A force is the result of an interaction between two objects. Now, forces can be described as a contact or non contact force. A contact being something like force of friction and a non contact 
         being something strong force that holds subatomic particles together. For now lets not worry about all these types of forces, as youll learn about the basic ones on this page 
-        and others on later units like electicity and magnetism. Lastly, during this unit youll learn about different types of forces, force diagrams, vectors, newtons 3 laws, and how to solve equations.
+        and others on later units like electricity and magnetism. Lastly, during this unit youll learn about different types of forces, force diagrams, vectors, newtons 3 laws, and how to solve equations.
         Forces are a very important unit that Will show up in later units, so make sure you understand them</p>
 
-        <p><h3>Terms:</h3></p>
+        <p><h2>Terms:</h2></p>
 
         <p><strong>(F) Force</strong> - An interaction between two or more objects that causes a change in motion, energy or shape. Measured in Newtons (kg x m/s<sup>2</sup>).</p>
             <p>Equation: F = ma (F = force(newtons), m = mass(kg), a = acceleration(m/s<sup>2</sup>))</p>
 
-        <p><strong>(M) Mass</strong> - The amount of matter in an objects regardless of where it is located, measured in kilograms. *Note: Mass is not the same as an objects weigth.</p>
+        <p><strong>(M) Mass</strong> - The amount of matter in an object regardless of where it is located, measured in kilograms. *Note: Mass is not the same as an object's weight.</p>
 
-        <p><strong>Weight</strong> - The force of gravity acing on a object, measured in newtons.</p>
+        <p><strong>Weight</strong> - The force of gravity acting on an object, measured in newtons.</p>
 
-            <p>Equation: W = mg (W = weigth(newtons), m = mass(kg), g = gravity(9.8 m/s<sup>2</sup>))</p>
+            <p>Equation: W = mg (W = weight(newtons), m = mass(kg), g = gravity(9.8 m/s<sup>2</sup>))</p>
         
-        
-        <h3>Newtons first law of Motion</h3>
+    
+        <h2>Newton's Laws of Motion</h2>
         
         <p><strong>Newtons First Law (Law of Inertia)</strong> - Newtons first law states that an object at rest stays at rest and an object in motion stays in motion at a constant velocity unless acted upon by a net external force.
-        This law is essentiall to the way that we think about forces and motion. It tells us that an object will remian at rest or at a constant veloicyt if there is no net force on it. However if there is a net force 
+        This law is essential to the way that we think about forces and motion. It tells us that an object will remain at rest or at a constant velocity if there is no net force on it. However if there is a net force 
         acting on it, the object will accelerate in the direction of the net force.  
 
-        <p><strong>Newtons Second Law (Law of Acceleration)</strong> - Newtons second law of motion states that the acceleration of an object is direcelty proportional to the force acting on it.</p>
+        <p><strong>Newtons Second Law (Law of Acceleration)</strong> - Newtons second law of motion states that the acceleration of an object is directly proportional to the force acting on it.</p>
             
             <p> Equation: F<sub>NET</sub> = ma (F<sub>NET</sub> = net force(Newtons), m = mass (kilograms), a = acceleration(m/s<sup>2</sup>) )</p>
 
         <p>This law is crucial to deriving the motion of objects and determining the acceleration on them and will be your best friend throughout this unit.</p>
 
         <p><strong>Newtons Third Law (Law of Action-Reaction)</strong> - Newtons third law states that for every action there is an equal and opposite reaction. What this law means is that when there is a force or action done on something 
-        there is an equal force acting back. This may sound strange and thats becasue it is not typically intuitive, so think of it like this. When you hit a ball with a bat, the ball is also hitting the bat. Or when if you hit a wall, 
-        the wall also hits you. This is why it would hurt if you punch a wall, or when you push water back with your arm as you swim it pushes you forweard.</p>
+        there is an equal force acting back. This may sound strange and that's because it is not typically intuitive, so think of it like this. When you hit a ball with a bat, the ball is also hitting the bat. Or when if you hit a wall, 
+        the wall also hits you. This is why it would hurt if you punch a wall, or when you push water back with your arm as you swim it pushes you forward.</p>
 
-        <p><h3>Types of Forces:</h3></p>
+    
+
+        <p><h2>Types of Forces:</h2></p>
 
         <p><strong>Gravitational Force (F<sub>g</sub>)</strong> - The force between two objects due to their masses.</p>
 
@@ -74,31 +150,86 @@
         <p><strong>Force Drag (F<sub>D</sub>)</strong> - The force that opposes an object motion when traveling through a fluid.</p>
 
         
-        <h3>Free body diagrams:</h3>
+        <p><h2>Common Forces:</h2></p>
 
-        <p>Free body diagrams are a way to represent forces acting on an object to easily determine the net forces exerted on them. Thye consisit of a box, representing the system of object with the forces acting upon it. Forces are represented by
-        vectors shwoing the direction and magntiude of the force. If you do not know about or havent learned about vectors, click on this link to learn about them first: <a href="vectors.html">Click Here</a>
-        </p>
+<br>
+        <p><h4>Gravity (Weight)</h4></p>
+        <p>         F<sub>g</sub> = mg <br> m = mass of object (kg), g = acceleration due to gravity (9.8 m/s<sup>2</sup>)</p>
 
-        <p><strong>Examples:</strong></p>
-        <p><em>Directions: Determine if there is a net force and if the object is at rest or in motion.</em></p>
+        <p><h4>Normal Force</h4></p>
+        <p> The normal force is the force that is perpendicular to the surface its on. The best way to think of the normal force is as a support force exerted by the surface a object is on to keep the block from going through that surface.
+            If a block is on a flat surface, the normal force will be pointing upwards and be equal to the F<sub>g</sub>, canceling out the forces and keeping the block from accelerating up or down. However, if the block 
+            is pushed down on a surface, the normal force will now be equal to the F<sub>g</sub> plus the applied force to cancel out the forces and keep the block from accelerating up or down, meaning F<sub>N</sub> > F<sub>g</sub>. 
+
+        <p><h4>Friction (force that opposes motion)</h4></p>
+        <p>F<sub>f</sub> = μF<sub>N</sub> <br> μ = coefficient of friction (depends on the surfaces in contact and is always < 1), F<sub>N</sub> = normal force</p>
+
+<br>
+        <h2>Free body diagrams:</h2>
+
+        <p>Free body diagrams are a way to represent forces acting on an object to easily determine the net forces exerted on them. Draw a box to represent the object or system, then draw arrow representing the forces acting upon it. The bigger a force is, the longer the arrow will be. Forces are represented by
+        vectors showing the direction and magnitude of the force. If you do not know about or haven't learned about vectors, click on this link to learn about them first: <font class="red-text"><a href="vectors.html">Click Here</a></font>
+        <br> 
+
+            </p>
+
+
+        <h2>Examples:</h2>
+        <p><em>Here are 4 different free body diagram examples with their forces labeled and the description of what is happening to the object.</em></p>
         <div class="row">
             <div class="column">
-                <img src="Images/Screenshot 2026-01-12 at 9.07.40 PM.png" alt="Free body diagram of an object on a ramp" style="width:100%"> 
+                <img src="Images/Screenshot 2026-02-25 at 10.57.16 PM.png" alt="Free body diagram of an object on a ramp" width="300" height="300"> 
+                <h6>The FBD represents a object resting on a surface at rest. There are no forces acting on the side of the block, and the F<sub>g</sub> is balanced by the F<sub>N</sub>, meaning there is no net force on this object</h6>
             </div>
             <div class="column">
-                <img src="Images/Screenshot 2026-01-12 at 9.07.46 PM.png" alt="Free body diagram block on flat surface" style="width:100%"> 
+                <img src="Images/Screenshot 2026-02-25 at 10.59.19 PM.png" alt="Free body diagram block on flat surface" width="300" height="300"> 
+                <h6>The FBD represents an object on a surface with an applied force to the right, and a frictional force to the left. The F<sub>N</sub> cancel with the F<sub>g</sub>, but because the applied force to the right is much larger than the F<sub>f</sub> to the left, the object has a net force and accelerates to the right.</h6>
             </div>
             <div class="column">
-                <img src="Images/Screenshot 2026-01-12 at 9.07.51 PM.png" alt="Free body diagram of block being pulled" style="width:100%"> 
+                <img src="Images/Screenshot 2026-02-25 at 11.01.58 PM.png" alt="Free body diagram of block being pulled" width="300" height="300"> 
+                <h6>The FBD represents an object with one force acting on it, F<sub>g</sub>. This situations represent an object in free fall ignoring the effect of air resistance.</h6>
             </div>
             <div class="column">
-                <img src="Images/Screenshot 2026-01-12 at 9.07.56 PM.png" alt="Free body diagram of block in space" style="width:100%">
+                <img src="Images/Screenshot 2026-02-25 at 11.16.50 PM.png" alt="Free body diagram of block in space" width="300" height="300">
+                <h6>The FBD represents an object being pulled to the right on a surface with friction, but this time it is being pulled by a rope at an angle upwards. Notice how the F<sub>T</sub> is broken into vertical and horizontal parts. We can first figure out that the horizontal part of F<sub>T</sub> is greater than the frictional force, so the object accelerates to the right.
+                Another important thing to see is that in this case, the F<sub>N</sub> is smaller than the F<sub>g</sub>, but if you look closely, you will notice that the size of the vertical component of F<sub>T</sub> + F<sub>N</sub> is equal F<sub>g</sub>, meaning that the upward and downward forces cancel out and the object only accelerates to the right.</h6>
             </div>
         </div>
-        <a href="answers.html">Click here to see answers</a></p>
+        
+        <ul>
+            <li>Read the question to understand what is being asked or what the situation is</li>
+            <li>Draw a free body diagram or image of what is happening to the object or system and accurately label the forces <sup>*</sup><em>Make sure to represent the magnitude and direction of the forces correctly</em><sup>*</sup></li>
+            <li>Add or subtract the forces to find the net force (F<sub>net</sub>) on the object/system</li>
+            <li>Use the equation F<sub>net</sub> = ma to solve for unknowns</li>
+        </ul>
+        <p><h3>Example Problem</h3></p>
+        <p> 1) A box of mass 20kg is inside of an elevator that is accelerating upwards at 5m/s<sup>2</sup>. A scale is placed underneath the box in the elevator. What is the reading on the scale in kg?  <em><sup>*</sup>Hint: 1 Newton = 0.102 kg<sup>*</sup></em></p>
+        
+        <ol type="A">
+        <li><em><strong>First</strong> lets understand what is happening. A block of mass 20kg is accelerating upwards at <font color="red">5 m/s<sup>2</sup></font> inside a elevator.</em></li>
+    <br>
+        <li><em>Next, we draw a free body diagram showing two forces: F<sub>g</sub> pointing downwards and and a larger arrow representing F<sub>N</sub> pointing upwards.</em></li>
+<br>
+        <li><p class="centered-text"><em> F<sub>net</sub> = F<sub>N</sub> - F<sub>g</sub> <br> F<sub>net</sub> = ma <br> ma = F<sub>N</sub> - F<sub>g</sub> <br> ma = F<sub>N</sub> - mg <br> ma + mg = F<sub>N</sub> <br> F<sub>N</sub> = m(a + g) <br> F<sub>N</sub> = 20kg(<font color="red">5m/s²</font> + 9.8m/s²) <br> F<sub>N</sub> = 20kg(14.8m/s²) <br> F<sub>N</sub> = 296N <br>296(0.102 kg) = <mark>30.2 kg</mark></em></li>
+<br>
+        <li><div class="boxed-text"><em>Now we have gotten out answer. The scale inside the elevator will read about <mark>30.2 kilograms</mark> on it!</em></div></li>
 
-        <h2>Practice Problems:</h2>
+<h2>Forces on Inclines:</h2>
+
+    <p>When a object is on an incline, the forces acting on it are typically broken down into components due to the angle of the incline.</p>
+    <h4>Here is how the forces are broken down on a FBD</h4>
+    <img class="right-img" src="Images/Screenshot 2026-02-27 at 12.25.54 AM.png" alt="Free body diagram of block on incline" width="300" height="300">
+    <ul> 
+        <li>F<sub>g</sub> is still represent mg and is pointing downwards normally. However, since the block is at a incline, F<sub>g</sub> is broken down into two components: F<sub>g</sub> parallel to the incline <mark>[mg sinθ]</mark> and F<sub>g</sub> perpendicular to the incline <mark>[mg cosθ]</mark>.</li>
+        <br>
+        <li>F<sub>N</sub> is the normal force, which is perpendicular to the surface of the incline and is equal to the component of F<sub>g</sub> perpendicular to the incline <mark>[mg cosθ]</mark>.</li>
+        <br>
+        <li>F<sub>f</sub> is the frictional force, which is parallel to the surface of the incline is equal to the component of F<sub>g</sub> parallel to the incline <mark>[mg sinθ]</mark>.</li>
+    </ul>
+    <p>These forces all cancel each other out and represent a block at rest on an incline, the main force holding it on the incline is the frictional force, opposing the motion of the block down the ramp.</p>
+    
+<br>
+      <h2>Practice Problems:</h2>
         <ol>
             <li>
                 What do you know about an object that is being acted upon by balanced forces?
@@ -110,8 +241,9 @@
                     <li>Two of these could be true</li>
                 </ol>
             </li>
+            <br>
             <li>
-                Mike slides a glass acorss the counter. When it leaves his hand and it is sliding, what forces are acting on the plate? <em>Ignore air resistance.</em>
+                Mike slides a glass across the counter. When it leaves his hand and it is sliding, what forces are acting on the plate? <em>Ignore air resistance.</em>
                 <ol type="A">
                     <li> Gravity, normal force, and constant frictional force</li>
                     <li> Gravity and normal force only</li>
@@ -119,8 +251,9 @@
                     <li> Force normal, frictional force, and applied force</li>
                 </ol>
             </li>
+            <br>
             <li>
-                A person is trying to lift a block of weigth F<sub>g</sub> with a force of F<sub>A</sub> but is not able to lift it off the floor. What is the ranking of the magnitudes of the forces acting on the block?
+                A person is trying to lift a block of weight F<sub>g</sub> with a force of F<sub>A</sub> but is not able to lift it off the floor. What is the ranking of the magnitudes of the forces acting on the block?
                 <ol type="A">
                     <li>F<sub>A</sub> + F<sub>N</sub> < F<sub>g</sub></li>
                     <li>F<sub>A</sub> + F<sub>N</sub> = F<sub>g</sub></li>
@@ -128,6 +261,7 @@
                     <li>F<sub>A</sub> + F<sub>N</sub> = F<sub>g</sub></li>
                 </ol>
             </li>
+            <br>
             <li> 
                 A refirgerator is being pushed across the floor with a force of F. The weigth is 400 N, the normal force is 400 N, and the force of friction if 250 N. The refirgerator is acceleratig at 0.5 m/s<sup>2</sup>. What is the value of the force F most nearly to?
                 <ol type="A">
@@ -137,24 +271,50 @@
                     <li> 270 N</li>
                 </ol>
             </li>
+            <br>
             <li>
-                <div class="div_deg">
-                    <div>
-                        <p>
-                            The two block shown are connected by a rope, the masses of the blocks are 5 kg and 10 kg. 
-                            The magnitude of the applied force on the upper block is F. Answer these following questions:
-                        </p>
+                <img class="right-img" src="Images/Screenshot 2026-02-18 at 11.42.10 PM.png" alt="Diagram showing to forces hanging connected by a string" width="250" height="300">
+                The two block shown are connected by a rope, the masses of the blocks are 5 kg and 10 kg. 
+                <br>The magnitude of the applied force on the upper block is F. Answer these following questions:
+                <ol  type="A">
+                    <li>If the blocks are both moving at a constant speed, what is the value of the force F?</li>
+                    <br>
+                    <li>To be continued...</li>
+                    <br>
+                    <li>To be continued...</li>
+                    <br>
+                </ol>
+            </li>
+            <br>
+            <li>
+                A block of mass m is pushed across a rough surface by an applied force of F<sub>A</sub>. F<sub>A</sub> is directed and an angle θ above the horizontal. The block experience a 
+                frictinal force of F<sub>f</sub> in the opposite direction of its motion. What is the coefficient of frction between the surface and the block?
+                
+                <ol type="A">
+                    <li>\( \frac{F_f}{mg} \)</li>
 
-                        <ol type="A">
-                            <li>If the blocks are both moving at a constant speed, what is the value of the force F?</li>
+                    <li>\( \frac{F_f}{F_A\cos\theta + mg} \)</li>
 
-                            <li>To be continued...</li>
-                        </ol>
-                    </div>
+                    <li>\( \frac{F_f}{F_A\sin\theta + mg} \)</li>
 
-                    <img src="Images/Screenshot 2026-02-18 at 11.42.10 PM.png" alt="Diagram showing to forces hanging connected by a string" width="150" height="200">
+                    <li>\( \frac{F_A\cos\theta}{mg} \)</li>
+                </ol>
+            </li>
+            <br>
+            <li>
+                Two blocks of mass M<sub>1</sub> and M<sub>2</sub> [M<sub>1</sub> > M<sub>2</sub>] are connected by a string of nelgible mass hung over a pulley system. When the blocks are released,
+                what is the magnitude of the acceleration of the system equal to?
+                <ol type="A">
+                    <li>\( \frac{g(M_1 -M_2)}{M_1 + M_2} \)</li>
+<br>
+                    <li>\( \frac{g(M_2 - M_1)}{M_1 + M_2} \)</li>
+<br>
+                    <li>\( {g(M_1)} \)</li>
+<br>
+                    <li>\( \frac{g(M_1 + M_2)}{M_2 - M_1} \)</li>
+                </ol>
 
-                </div>
+
             </li>
         </ol>
 

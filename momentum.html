@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang = "en">
+<head>
+    <meta charset="UTF-8">
+    <meta name = "viewport" content="width=device-width, initial-scale=1" />
+    <title>Forces - Physics Fun</title>
+
+    <link rel="stylesheet" href="css/style.css"/>
+<style>
+/* page-level overrides — base styles live in css/style.css */
+</style>
+    <script>
+        window.MathJax = {
+        tex: { inlineMath: [['\\(', '\\)']] }
+        };
+
+        
+        function toggleText() {
+            let text = document.getElementById("answer");
+            let link = event.target;
+
+            if (text.style.display === "none") {
+                text.style.display = "inline";
+                link.textContent = "Click to hide";
+            } else {
+                text.style.display = "none";
+                link.textContent = "How we got this";
+            }
+
+            event.preventDefault();
+        }
+
+        function toggleImage() {
+            let text = document.getElementById("image");
+            let link = event.target;
+
+            if (text.style.display === "none") {
+                text.style.display = "inline";
+                link.textContent = "Click to hide";
+            } else {
+                text.style.display = "none";
+                link.textContent = "Image example";
+            }
+
+            event.preventDefault();
+        }
+
+        function toggleSolution(event) {
+            let text = document.getElementById("solution");
+            let link = event.target;
+            if (text.style.display === "none") {
+                text.style.display = "block";
+                link.textContent = "Hide solution";
+            } else {
+                text.style.display = "none";
+                link.textContent = "Show full solution";
+            }
+            event.preventDefault();
+        }
+
+        function toggleAnswerKey(event) {
+            let div = document.getElementById("answer-key");
+            let btn = event.target;
+            if (div.style.display === "none") {
+                div.style.display = "block";
+                btn.textContent = "Hide Answer Key";
+            } else {
+                div.style.display = "none";
+                btn.textContent = "Answer Key";
+            }
+            event.preventDefault();
+        }
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<!--         Desmos calculator          -->
+
+<div id="desmos-container" style="display:none;">
+    <div class="draggable-calculator">
+        <div class="drag-handle">Drag Calculator</div>
+        <div id="calculator" style="width:600px; height:400px;"></div>
+    </div>
+</div>
+
+<script src="https://www.desmos.com/api/v1.11/calculator.js?apiKey=1a36ee8eec4c471e97c71548300ded67"></script>
+
+<script>
+let calculatorCreated = false;
+let calculator;
+
+function toggleDesmos() {
+    const container = document.getElementById("desmos-container");
+    const button = document.getElementById("desmos-toggle");
+
+    if (container.style.display === "none") {
+        container.style.display = "block";
+        button.textContent = "Hide Calculator";
+
+        if (!calculatorCreated) {
+            const elt = document.getElementById("calculator");
+            calculator = Desmos.GraphingCalculator(elt);
+            calculatorCreated = true;
+        }
+
+    } else {
+    container.style.display = "none";
+        button.textContent = "Show Calculator";
+}
+}
+
+// Dragging functionality for the calculator
+let isDragging = false;
+let dragOffsetX, dragOffsetY;
+
+document.addEventListener('DOMContentLoaded', function() {
+    const dragHandle = document.querySelector('.drag-handle');
+    const draggable = document.querySelector('.draggable-calculator');
+
+    if (dragHandle && draggable) {
+        dragHandle.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            dragOffsetX = e.clientX - draggable.offsetLeft;
+            dragOffsetY = e.clientY - draggable.offsetTop;
+            draggable.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (isDragging) {
+                const newX = e.clientX - dragOffsetX;
+                const newY = e.clientY - dragOffsetY;
+                draggable.style.left = newX + 'px';
+                draggable.style.top = newY + 'px';
+            }
+        });
+
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+            draggable.style.cursor = 'move';
+        });
+    }
+});
+</script>
+
+
+</head>
+<body>
+        
+    <header class = "site-header">
+        <div class = "container">
+          <h1 class = "site-title">Momentum and Impulse</h1>
+           <nav>
+               <a href = "index.html">Home</a>
+               <a href = "topics.html">Topics</a>
+               <a href = "games.html">games</a>
+               <button id="desmos-toggle" onclick="toggleDesmos()">Show Calculator</button>
+            </nav>
+        </div>
+    </header>
+<main>
+
+
+<h2>Momentum and Impulse - Mass in Motion</h2>
+
+<h2>Momentum</h2>
+
+<p>Momentum what we call the measure of "mass in motion". It is a vector quantity, meaning it has a direction and a magnitude to it. 
+    We represent momentum with the symbol P. The equation for momnetum is:</p>
+<h1>\( P = mv \) </h1>
+<p>Where:</p>
+<ul>
+    <li>\( P \) is the momentum</li>
+    <li>\( m \) is the mass of the object (kg)</li>
+    <li>\( v \) is the velocity of the object (m/s)</li>
+</ul>
+<p>Note that momentum changes with different masses and velocity. An example is that a truck moving very slow could have the same momentum as a baseball moving really fast.</p>
+<p>The reason that we use and calculate momentum is to help us figure out 
+how a system or objects movement will change after and interaction. For example, if we know an object has a momentum of 10 kg⋅m/s, but after a crash it now has a 
+momentum of 5 kg⋅m/s, we can determine what the velocity will be after that crash, and what amount of force caused the change in velocity. </p>
+
+<h2>Conservation of Momentum</h2>
+
+<p>The law on conservation of momentum states that if no external force acts on a system, the  momentum of a system before an interaction equals the momentum after the interaction.</p>
+<p class="centered-text">\( P_{initial} = P_{final} \)</p>
+<p> When you are measuring the momentum of a system of two objects interacting:</p>
+<p class="centered-text">\( m_1 v_{1i} + m_2 v_{2i} = m_1 v_{1f} + m_2 v_{2f} \)</p>
+<p>They key idea behind this topic is that momentum can transfer between objects in a system, but the total stays constant.</p>
+<br>
+
+<h2>Types of Collisions</h2>
+
+<p>In this unit and AP Physics, you will focus on two main types of collisions: <strong>Elastic</strong> and <strong>Inelastic</strong>.</p>
+<br>
+<h3>Elastic Collisions</h3>
+<p>Elastic collisions are collisions between two or more objects where crash, bounce off each other, and separate. The two typically are moving towards each other
+    before they crash, though not always. Momentum and kinetic energy is conserved during elastic collisions.</p>
+<strong><a href="#" onclick="toggleImage()" class="toggle-link">Image example</a></strong>
+<div id="image" style="display:none;">
+    <div class="boxed-text">
+        <img src="Images/Screenshot 2026-03-15 at 1.20.31 PM.png" alt="elastic collision of two balls before and after collision" width="400" height="400">
+    </div>
+</div>
+
+<h3>Inelastic Collisions</h3>
+<p>Inelastic collisions are collissiosn between two or more objects where the objects stick together after a collision. They are typically traveling towards each other 
+before the collision, but not always. Momentum is conserved. Because the two stick together after the collisions, we can set the momentum before and after equal to:</p>
+<p class="centered-text">\( m_1 v_{1i} + m_2 v_{2i} = (m_1 + m_2) v_f \)</p>
+
+
+<h2>Impulse</h2>
+
+<p>Impulse is the change in momentum over a period of time. It is represented by the symbol J and is calculated as:</p>
+<h1>\( J = \Delta P =  m \Delta v \) </h1>
+<p>Where:</p>
+<ul>
+    <li>\( J \) is the impulse</li>
+    <li>\( \Delta P \) is the change in momentum</li>
+    <li>\( m \) is the mass of the object (kg)</li>
+    <li>\( \Delta v \) is the change in velocity (m/s)</li>
+</ul>
+<p>The reason that impulse is important is that it is the next step that allows us to figure the result of collisions. We can use impulse 
+    to help us find the force that was acting on an object, solve how long it was acting on something, what the change in an objects' velocity was, 
+    what acceleration it went through and more.</p>
+
+<p>Impulse is also related to the force applied over a period of time. Remember that to change an object's velocity, there needs to 
+    be a net force on it. And to <strong>change an object's momentum</strong>, there needs to be a net force for an amount of time.</p>
+<h1>\( J = F \Delta t = m \Delta v \) </h1>
+<strong><a href="#" onclick="toggleText()" class="toggle-link">How we got this </a></strong></p>
+<!--Explanation toggle button to explain the derivation-->
+<span  id="answer" style="display:none;">
+<div class="boxed-text">
+    <p class="centered-text"> We know that \( F_{net} = ma \) and that acceleration equals \(\frac{\Delta v}{\Delta t}\). <br>So, we can rewrite the equation for net force 
+        as <br>\( \frac{F_{net}}{m} = \frac{\Delta v}{\Delta t}\). <br>Rearranging this equation gives us <br>\( F_{net} \Delta t = m \Delta v \). <br>And we know that \(m\Delta v\) equals impulse, the change in momentum.</p>
+</div>
+</span>
+
+<p>Where:</p>
+<ul>
+    <li>\( F \) is the force applied</li>
+    <li>\( \Delta t \) is the time interval over which the force is applied</li>
+</ul>
+
+<p>The reason that knowing this equation is important is that it shows the relationship of time and force during a change in momentum. 
+    For example, if you fall off your bike and hit your head, there will be an impulse on your head when it hits the ground and changes its velocity from moving to stopped.
+    If you had a helmet on when you hit the ground, your head would be in contact with the padding in your helmet for a longer period of time, meaning that the force applied on your head during the impulse would be less.
+    But if you were not wearing a helmet, your head would be in contact with the ground for a small fraction of time, meaning there would be a dramatically larger amount of force applied to your head, and you would be a lot more hurt.
+    This is the same idea behind why cars have airbags and the front of the car is designed to crumple during a crash. The air bag and crumpling of the car increases the time that the person's body is in contact with the car during the 
+    crash, which reduces the force applied to their body and helps save lives.</p>
+
+<h2>Force vs Time Graphs</h2>
+<p> We talked above about how impulse is related to the Force on and object for the amount of time it was applied. A graph that will most likely show up on a test or as a mcq problem will be a Force vs. Time graph.
+    This graph is important because the area underneath the curve of this graph will be the impulse on an object. This is because the area under the curve is found my multiplying the y component of the graph, Force, by the x component of the graph, 
+    time. 
+
+<h2>Newton's Third law and Momentum</h2>
+
+<p>We know from Newton's third law that for every action, there is an equal and opposite reaction. In terms of impulse, this means that when objects collide, they exert equal and opposite impulses on each other too. This may not seem very 
+    intuitive at first, but it's a fundamental principle in physics. An example of this is hitting a golf ball with a club. The ball is at rest before it is hit, but when the club hits it, it exerts an impulse on the ball for a small period 
+    of time, meaning it exerts a large force and accelerates the ball forward. The ball also exerts and equal and opposite impulse on the golf club, but because the club has such a high velocity before hitting the ball, the impulse will barely 
+    change the speed of the club, allowing you to easily swing through the shot.</p>
+
+<h2>Common Problems</h2>
+<p>Common problems you'll see in the topic for AP Physics include</p>
+<ul>
+    <li><strong>Recoil</strong> <br> a cannon launching a ball and moving in opposite directions</li>
+    <li><strong>Collision</strong> <br> Two cars or blocks colliding</li>
+    <li><strong>Explosion</strong> <br> Objects splitting into two pieces</li>
+    <li><strong>Impulse</strong> <br> An impulse changing an object momentum or a force acting on something for a period of time</li>
+    <li><strong>Graphs</strong> Determining how much the velocity or another component of an object changed from a Force vs. Time graph</li>
+</ul>
+<h2>Understanding Systems</h2>
+<p>Not directly related to this unit, though it is very important, systems are something you should have a strong understanding of in this unit. 
+    Try to answer the question below about the diagram:
+</p>
+
+<h2>Practice Problems</h2>
+<ol>
+    <li>
+    A 3kg ball is moving along a straight line, at a constant speed of 5 m/s of 10 seconds. The momentum of the object is most nearly?
+        <br>
+        A) 15 kg m/s
+        <br>
+        B) 150 kg m/s
+        <br>
+        C) 30 kg m/s
+        <br>
+        D) 25 kg m/s
+    </li>
+<br>
+    <li>
+    A tennis ball with 5 units of momentum strikes a bowling at rest and free to move and bounces backwards. The bowling ball is set in motion with an momentum of?
+    <br>
+        A) more than 5 units of momentum
+        <br>
+        B) equal to 5 units of momentum
+        <br>
+        C) less than 5 units of momentum
+        <br>
+        D) not enough information to tell us so
+    </li>
+<br>
+    <li>
+    A railroad car of mass m is moving at a speed v when it collides with a second car of mass M which was at rest. If the two cars instantaneously lock together and continue moving,
+    what is the final velocity right after the collision?
+    <br>
+        A) \( \frac{(m + M)v}{Mm}\)
+        <br>
+        B) \(\frac{Mm}{v}\)
+        <br>
+        C \(\frac{mv}{m+M}\)
+        <br>
+        D)\(\frac{v}{2}\)
+        </li>
+<br>
+    <li>
+    A constant force of 10N is applied for 4 second on a body that is initially at rest. The final velocity is 6 m/s. What is the mass of the body?
+    <br>
+        A) 2.4 kg
+        <br>
+        B) 15 kg
+        <br>
+        C) 40 kg
+        <br>
+        D) 6.67 kg
+    </li>
+<br>
+    <li>
+    A ball of mass .5 kg travels horizontally and strikes a vertical wall at a speed of 10 m/s. It bounces off of the wall at a speed of 7 m/s. The ball was in contact
+    with the wall for 0.15 seconds. What is the average magnitude of the force exerted onto the wall by the ball?
+    <br>
+    A) 10 N
+    <br>
+    B) 56.67 N
+    <br>
+    C) 23.33 N
+    <br>
+    D) 23.33 N
+    </li>
+
+<br>
+    <li>
+     <img class="right-img" src="Images/Screenshot 2026-03-15 at 4.48.46 PM.png" width="300" height="300">
+    A ball is traveling horizontally and strikes a vertical wall from which is rebounds horizontally. The contact force between the wall and the ball, F, varies of the time of contact, T.
+    The maximum value of F is F<sub>max</sub>. What is the change in momentum of the ball?
+    <br>
+    A) \(\frac{F_{max}}{2T}\)
+    <br>
+    B)\(\frac{F_{max}T}{2}\)
+    <br>
+    C)\(\frac{F_{max}}{T}\)
+    <br>
+    D)\({F_{max}}{T}\)
+    </li>
+<br>
+    <li>
+    Block A of mass 5kg is moving to the right at 10 m/s, and block B of 3 kg is moving the left at a speed of 1 m/s. The blocks hit each other and bounce off and go separate directions. Which of the following accurately tells the velocity of the two 
+    aftet their collision?
+    <br>
+    A) V<sub>A</sub>= 10 m/s, V<sub>B</sub>= 3 m/s
+    <br>
+    B) V<sub>A</sub>= 5 m/s, V<sub>B</sub>= 10 m/s
+    <br>
+    C) V<sub>A</sub>= -10 m/s, V<sub>B</sub>= 1 m/s
+    <br>
+    D) V<sub>A</sub>= 1.75 m/s, V<sub>B</sub>= 12.75 m/s
+    </li>
+<br>
+    <li>
+        An object initially at rest experience a force over a period of time \( \Delta t\). The force linearly increases from 0 to \( F_{max}\) then return to 0. What is the final velocity of the object 
+        in terms of \( m , \Delta t, \) and \(F_{max}\).
+        <br>
+        A) \(\frac{F_{max}\Delta t}{m}\)
+        <br>
+        B)\( {2{F_{max}}\Delta t}\)
+        <br>
+        C)\(\frac{F_{max}\Delta t}{2}\)
+        <br>
+        D)\(\frac{F_{max}\Delta t}{2m}\)
+        
+    </li>
+<br>
+    <li>
+        A 1500 kg car moving at 20 m/s rear-ends a stationary 1000 kg car. The two vehicles lock together on impact. How much kinetic energy is lost in the collision?
+        <br>
+        A) 60,000 J
+        <br>
+        B) 120,000 J
+        <br>
+        C) 180,000 J
+        <br>
+        D) 300,000 J
+    </li>
+<br>
+    <li>
+        A 0.50 kg ball is dropped from a height of 5.0 m. It strikes the floor and rebounds upward to a height of 3.2 m. What is the magnitude of the impulse exerted on the ball by the floor? (Use \(g = 10 \text{ m/s}^2\))
+        <br>
+        A) 1.0 N·s
+        <br>
+        B) 4.0 N·s
+        <br>
+        C) 9.0 N·s
+        <br>
+        D) 5.0 N·s
+    </li>
+<br>
+    <li>
+        Two carts of equal mass \(m\) are on a frictionless horizontal track. Cart 1 moves at speed \(v\) and collides elastically with stationary Cart 2. Which of the following is true immediately after the collision?
+        <br>
+        A) Cart 1 stops and Cart 2 moves at \(v\); both momentum and kinetic energy are conserved.
+        <br>
+        B) Both carts move at \(\frac{v}{2}\); momentum is conserved but kinetic energy is not.
+        <br>
+        C) Cart 1 moves at \(\frac{v}{2}\) and Cart 2 moves at \(v\); only kinetic energy is conserved.
+        <br>
+        D) Cart 1 bounces back at \(v\) and Cart 2 remains stationary; neither quantity is conserved.
+    </li>
+</ol>
+
+<br>
+<h2>Free Response</h2>
+<p>These questions are in the style of AP Physics 1 free-response problems. Show all work, define any variables you introduce, and justify your reasoning in complete sentences where asked.</p>
+
+<ol>
+    <li>
+        <em><sup>*</sup>Challenge problem<sup>*</sup></em> A cart of mass M<sub>1</sub> moving at a velocity of V<sub>1i</sub> collides with stationary cart of M<sub>2</sub>. Find the final velocities V<sub>1f</sub> and V<sub>2f</sub>.
+        <br><br>
+        <strong><a href="#" onclick="toggleSolution(event)" class="toggle-link">Show full solution</a></strong>
+        <div id="solution" style="display:none;">
+            <div class="boxed-text">
+
+                <p><strong>What we know:</strong></p>
+                <ul>
+                    <li>Cart 1 has mass \(M_1\) and initial velocity \(V_{1i}\)</li>
+                    <li>Cart 2 has mass \(M_2\) and initial velocity \(V_{2i} = 0\) (stationary)</li>
+                    <li>This is an elastic collision, so both momentum AND kinetic energy are conserved</li>
+                </ul>
+
+                <p><strong>Step 1 — Write the two conservation equations</strong></p>
+                <p>Conservation of momentum:</p>
+                <p class="centered-text">\[ M_1 V_{1i} + M_2(0) = M_1 V_{1f} + M_2 V_{2f} \]</p>
+                <p class="centered-text">\[ M_1 V_{1i} = M_1 V_{1f} + M_2 V_{2f} \quad \text{...(1)} \]</p>
+                <p>Conservation of kinetic energy:</p>
+                <p class="centered-text">\[ \tfrac{1}{2}M_1 V_{1i}^2 = \tfrac{1}{2}M_1 V_{1f}^2 + \tfrac{1}{2}M_2 V_{2f}^2 \]</p>
+                <p>Cancel the \(\tfrac{1}{2}\) from every term:</p>
+                <p class="centered-text">\[ M_1 V_{1i}^2 = M_1 V_{1f}^2 + M_2 V_{2f}^2 \quad \text{...(2)} \]</p>
+
+                <p><strong>Step 2 — Rearrange both equations to isolate the \(M_2 V_{2f}\) terms</strong></p>
+                <p>From equation (1), move cart 1 terms to the left:</p>
+                <p class="centered-text">\[ M_1 V_{1i} - M_1 V_{1f} = M_2 V_{2f} \]</p>
+                <p class="centered-text">\[ M_1(V_{1i} - V_{1f}) = M_2 V_{2f} \quad \text{...(1')} \]</p>
+                <p>From equation (2), do the same:</p>
+                <p class="centered-text">\[ M_1 V_{1i}^2 - M_1 V_{1f}^2 = M_2 V_{2f}^2 \]</p>
+                <p>Factor the left side using the difference of squares \((a^2 - b^2) = (a+b)(a-b)\):</p>
+                <p class="centered-text">\[ M_1(V_{1i} + V_{1f})(V_{1i} - V_{1f}) = M_2 V_{2f}^2 \quad \text{...(2')} \]</p>
+
+                <p><strong>Step 3 — Divide equation (2') by equation (1') to cancel terms</strong></p>
+                <p class="centered-text">\[ \frac{M_1(V_{1i} + V_{1f})(V_{1i} - V_{1f})}{M_1(V_{1i} - V_{1f})} = \frac{M_2 V_{2f}^2}{M_2 V_{2f}} \]</p>
+                <p>The \(M_1\), \(M_2\), and \((V_{1i} - V_{1f})\) cancel:</p>
+                <p class="centered-text">\[ V_{1i} + V_{1f} = V_{2f} \quad \text{...(3)} \]</p>
+
+                <p><strong>Step 4 — Substitute equation (3) back into equation (1) to solve for \(V_{1f}\)</strong></p>
+                <p>Replace \(V_{2f}\) in equation (1) with \((V_{1i} + V_{1f})\):</p>
+                <p class="centered-text">\[ M_1 V_{1i} = M_1 V_{1f} + M_2(V_{1i} + V_{1f}) \]</p>
+                <p>Expand the right side:</p>
+                <p class="centered-text">\[ M_1 V_{1i} = M_1 V_{1f} + M_2 V_{1i} + M_2 V_{1f} \]</p>
+                <p>Move the \(M_2 V_{1i}\) term to the left:</p>
+                <p class="centered-text">\[ M_1 V_{1i} - M_2 V_{1i} = M_1 V_{1f} + M_2 V_{1f} \]</p>
+                <p>Factor both sides:</p>
+                <p class="centered-text">\[ V_{1i}(M_1 - M_2) = V_{1f}(M_1 + M_2) \]</p>
+                <p>Divide both sides by \((M_1 + M_2)\):</p>
+                <p class="centered-text">\[ \boxed{V_{1f} = \frac{M_1 - M_2}{M_1 + M_2} \, V_{1i}} \]</p>
+
+                <p><strong>Step 5 — Substitute \(V_{1f}\) into equation (3) to solve for \(V_{2f}\)</strong></p>
+                <p class="centered-text">\[ V_{2f} = V_{1i} + V_{1f} = V_{1i} + \frac{M_1 - M_2}{M_1 + M_2} V_{1i} \]</p>
+                <p>Factor out \(V_{1i}\) and combine fractions:</p>
+                <p class="centered-text">\[ V_{2f} = V_{1i} \left( \frac{M_1 + M_2}{M_1 + M_2} + \frac{M_1 - M_2}{M_1 + M_2} \right) \]</p>
+                <p class="centered-text">\[ V_{2f} = V_{1i} \cdot \frac{(M_1 + M_2) + (M_1 - M_2)}{M_1 + M_2} \]</p>
+                <p class="centered-text">\[ V_{2f} = V_{1i} \cdot \frac{2M_1}{M_1 + M_2} \]</p>
+                <p class="centered-text">\[ \boxed{V_{2f} = \frac{2M_1}{M_1 + M_2} \, V_{1i}} \]</p>
+
+                <p><strong>Final Answers:</strong></p>
+                <p class="centered-text">\[ V_{1f} = \frac{M_1 - M_2}{M_1 + M_2} V_{1i} \qquad V_{2f} = \frac{2M_1}{M_1 + M_2} V_{1i} \]</p>
+                <p>Notice: if \(M_1 = M_2\), then \(V_{1f} = 0\) and \(V_{2f} = V_{1i}\) — cart 1 stops completely and cart 2 moves off at the original speed. This is exactly what you see with billiard balls!</p>
+            </div>
+        </div>
+    </li>
+    <br>
+    <li>
+        <p><strong>The Ballistic Pendulum</strong></p>
+        <p>A bullet of mass \(m = 0.010\) kg is fired horizontally and embeds itself in a wooden block of mass \(M = 0.990\) kg suspended by a light string. After the bullet embeds, the block swings upward to a height of \(h = 0.20\) m. Use \(g = 10 \text{ m/s}^2\).</p>
+        <p>(a) Using energy conservation, find the speed of the block-and-bullet system immediately after the collision.</p>
+        <p>(b) Using your result from (a), apply conservation of momentum to find the initial speed \(v_0\) of the bullet.</p>
+        <p>(c) Calculate the kinetic energy of the bullet before the collision and the kinetic energy of the system immediately after. What percentage of the original kinetic energy was lost?</p>
+        <p>(d) Explain where the lost kinetic energy went, and explain why momentum was still conserved even though kinetic energy was not.</p>
+    </li>
+<br>
+    <li>
+        <p><strong>Ramp, Collision, and Energy Accounting</strong></p>
+        <p>A block of mass \(m_1 = 3.0\) kg starts from rest at the top of a frictionless ramp of height \(h = 5.0\) m. It slides to the bottom and collides with a stationary block of mass \(m_2 = 2.0\) kg on a frictionless horizontal surface. Use \(g = 10 \text{ m/s}^2\).</p>
+        <p>(a) Find the speed of \(m_1\) at the bottom of the ramp just before the collision using energy conservation.</p>
+        <p>(b) The collision is perfectly inelastic. Find the velocity of the combined blocks immediately after the collision.</p>
+        <p>(c) Calculate how much kinetic energy was lost in the collision. Express your answer in joules and as a percentage of the pre-collision kinetic energy.</p>
+        <p>(d) If instead the collision were perfectly elastic, find the velocity of each block after the collision. Show all steps.</p>
+    </li>
+<br>
+    <li>
+        <p><strong>Cannon Recoil, Work, and Power</strong></p>
+        <p>A cannon of mass \(M = 500\) kg fires a cannonball of mass \(m = 5.0\) kg. The cannonball exits the barrel with a horizontal speed of \(v = 300\) m/s. The cannon is initially at rest on a frictionless surface. The cannonball is accelerated over a barrel length of \(d = 2.0\) m, and the firing takes \(\Delta t = 0.010\) s.</p>
+        <p>(a) Using conservation of momentum, find the recoil speed of the cannon after firing.</p>
+        <p>(b) Calculate the kinetic energy of the cannonball and the kinetic energy of the cannon separately after the firing.</p>
+        <p>(c) Using the work-energy theorem, find the average net force exerted on the cannonball while it was inside the barrel.</p>
+        <p>(d) Calculate the average power delivered to the cannonball during the firing.</p>
+    </li>
+</ol>
+
+<br>
+<div style="text-align:center; margin: 2rem 0;">
+    <a href="#" onclick="toggleAnswerKey(event)" class="toggle-link" style="font-size:1.1rem; font-weight:600;">Answer Key</a>
+</div>
+
+<div id="answer-key" style="display:none;">
+    <div>
+        <h3 style="margin-top:0;">Multiple Choice Answer Key</h3>
+
+        <p><strong>Q1 — Answer: A (15 kg·m/s)</strong><br>
+        Use \(p = mv = 3 \times 5 = 15\) kg·m/s. The "10 seconds" is a trap — momentum doesn't depend on time, only mass and velocity.</p>
+
+        <p><strong>Q2 — Answer: A (more than 5 units)</strong><br>
+        Apply conservation of momentum: \(p_{\text{tennis, i}} + p_{\text{bowling, i}} = p_{\text{tennis, f}} + p_{\text{bowling, f}}\). The tennis ball starts with +5 units and ends with a negative value (it bounced backward). That means the right side requires the bowling ball to have more than +5 units to keep the total equal to +5. In equation form: \(5 = (\text{negative}) + p_{\text{bowling}}\), so \(p_{\text{bowling}} > 5\).</p>
+
+        <p><strong>Q3 — Answer: C \(\left(\dfrac{mv}{m+M}\right)\)</strong><br>
+        Perfectly inelastic collision — objects stick together. Set momentum before = momentum after:<br>
+        \(mv + M(0) = (m+M)v_f\) → solve for \(v_f = \dfrac{mv}{m+M}\).</p>
+
+        <p><strong>Q4 — Answer: D (6.67 kg)</strong><br>
+        Find impulse first: \(J = F\Delta t = 10 \times 4 = 40\) N·s.<br>
+        Then use \(J = m\Delta v\): the object started at rest so \(\Delta v = 6\) m/s.<br>
+        \(40 = m \times 6\) → \(m = 6.67\) kg.</p>
+
+        <p><strong>Q5 — Answer: B (56.67 N)</strong><br>
+        Take toward the wall as positive. The ball's velocity changes from +10 m/s to −7 m/s, so \(\Delta v = -7 - 10 = -17\) m/s (magnitude 17 m/s).<br>
+        \(J = m|\Delta v| = 0.5 \times 17 = 8.5\) N·s — this is the impulse the wall exerts on the ball.<br>
+        By Newton's 3rd law, the ball exerts an equal and opposite force on the wall.<br>
+        \(F = \dfrac{J}{\Delta t} = \dfrac{8.5}{0.15} = 56.67\) N.</p>
+
+        <p><strong>Q6 — Answer: B \(\left(\dfrac{F_{max}\,T}{2}\right)\)</strong><br>
+        Impulse = area under the F-t graph. The graph forms a triangle, so:<br>
+        Area \(= \tfrac{1}{2} \times \text{base} \times \text{height} = \tfrac{1}{2} \times T \times F_{max} = \dfrac{F_{max}T}{2}\).</p>
+
+        <p><strong>Q7 — Answer: D (\(V_A = 1.75\) m/s, \(V_B = 12.75\) m/s)</strong><br>
+        Elastic collision — use the formulas (taking right as positive, so \(v_{Bi} = -1\) m/s):<br>
+        \(v_{Af} = \dfrac{m_A - m_B}{m_A + m_B}v_{Ai} + \dfrac{2m_B}{m_A+m_B}v_{Bi} = \dfrac{2}{8}(10) + \dfrac{6}{8}(-1) = 2.5 - 0.75 = 1.75\) m/s<br>
+        \(v_{Bf} = \dfrac{2m_A}{m_A+m_B}v_{Ai} + \dfrac{m_B - m_A}{m_A+m_B}v_{Bi} = \dfrac{10}{8}(10) + \dfrac{-2}{8}(-1) = 12.5 + 0.25 = 12.75\) m/s</p>
+
+        <p><strong>Q8 — Answer: D \(\left(\dfrac{F_{max}\,\Delta t}{2m}\right)\)</strong><br>
+        The force rises and falls in a triangle shape, so impulse = area = \(\tfrac{1}{2}F_{max}\Delta t\).<br>
+        Then \(J = mv \Rightarrow v = \dfrac{J}{m} = \dfrac{F_{max}\Delta t}{2m}\).</p>
+
+        <p><strong>Q9 — Answer: B (120,000 J)</strong><br>
+        Find velocity after collision: \(p_i = 1500 \times 20 = 30{,}000\) kg·m/s. After sticking: \(v_f = \dfrac{30000}{2500} = 12\) m/s.<br>
+        \(KE_i = \tfrac{1}{2}(1500)(20^2) = 300{,}000\) J.<br>
+        \(KE_f = \tfrac{1}{2}(2500)(12^2) = 180{,}000\) J.<br>
+        Lost \(= 300{,}000 - 180{,}000 = 120{,}000\) J.</p>
+
+        <p><strong>Q10 — Answer: C (9.0 N·s)</strong><br>
+        Speed just before hitting the floor (dropped from 5 m): \(v = \sqrt{2gh} = \sqrt{2(10)(5)} = 10\) m/s (downward).<br>
+        Speed leaving the floor (rebounds to 3.2 m): \(v = \sqrt{2(10)(3.2)} = 8\) m/s (upward).<br>
+        Impulse \(= m\Delta v = 0.5 \times (8 - (-10)) = 0.5 \times 18 = 9.0\) N·s.</p>
+
+        <p><strong>Q11 — Answer: A (Cart 1 stops, Cart 2 moves at \(v\))</strong><br>
+        For an elastic collision between two objects of equal mass, the moving one always stops completely and the stationary one moves off at the original speed. Both momentum and kinetic energy are conserved — this rules out B, C, and D.</p>
+
+        <hr style="margin: 1.5rem 0; border-color: var(--border);">
+
+        <h3>Free Response Answer Key</h3>
+
+        <p><strong>FR 1 — Challenge (Elastic Collision Derivation)</strong><br>
+        See the step-by-step solution shown above in the Free Response section.</p>
+
+        <p><strong>FR 2 — The Ballistic Pendulum</strong></p>
+        <p>(a) Energy conservation after the collision (block swings up height \(h\)):<br>
+        \(\tfrac{1}{2}(m+M)v_1^2 = (m+M)gh\)<br>
+        \(v_1 = \sqrt{2gh} = \sqrt{2(10)(0.20)} = 2\) m/s</p>
+        <p>(b) Momentum conservation during the collision (bullet embeds into block):<br>
+        \(mv_0 = (m+M)v_1\)<br>
+        \((0.010)v_0 = (1.0)(2) \Rightarrow v_0 = 200\) m/s</p>
+        <p>(c) \(KE_{\text{bullet}} = \tfrac{1}{2}(0.010)(200^2) = 200\) J<br>
+        \(KE_{\text{after}} = \tfrac{1}{2}(1.0)(2^2) = 2\) J<br>
+        Lost: \(200 - 2 = 198\) J → \(\dfrac{198}{200} \times 100\% = 99\%\) of kinetic energy was lost.</p>
+        <p>(d) The lost kinetic energy was converted into heat, sound, and the permanent deformation of the bullet and wood. Momentum is still conserved because the collision forces between the bullet and block are internal to the system — Newton's 3rd law says they are equal and opposite, so they cancel out and the total momentum doesn't change.</p>
+
+        <p><strong>FR 3 — Ramp, Collision, and Energy Accounting</strong></p>
+        <p>(a) Energy conservation down the ramp:<br>
+        \(m_1 gh = \tfrac{1}{2}m_1 v^2 \Rightarrow v = \sqrt{2gh} = \sqrt{2(10)(5)} = 10\) m/s</p>
+        <p>(b) Perfectly inelastic collision:<br>
+        \(m_1 v = (m_1 + m_2)v_f \Rightarrow 3(10) = 5\,v_f \Rightarrow v_f = 6\) m/s</p>
+        <p>(c) \(KE_{\text{before}} = \tfrac{1}{2}(3)(10^2) = 150\) J<br>
+        \(KE_{\text{after}} = \tfrac{1}{2}(5)(6^2) = 90\) J<br>
+        Lost \(= 60\) J, which is \(\dfrac{60}{150} \times 100\% = 40\%\) of the pre-collision kinetic energy.</p>
+        <p>(d) Perfectly elastic — use the elastic formulas:<br>
+        \(v_{1f} = \dfrac{m_1 - m_2}{m_1 + m_2}v_{1i} = \dfrac{1}{5}(10) = 2\) m/s<br>
+        \(v_{2f} = \dfrac{2m_1}{m_1+m_2}v_{1i} = \dfrac{6}{5}(10) = 12\) m/s</p>
+
+        <p><strong>FR 4 — Cannon Recoil, Work, and Power</strong></p>
+        <p>(a) Conservation of momentum (system starts at rest, so total = 0):<br>
+        \(0 = Mv_{\text{cannon}} + mv_{\text{ball}}\)<br>
+        \(v_{\text{cannon}} = -\dfrac{mv}{M} = -\dfrac{5 \times 300}{500} = -3\) m/s → recoil speed = <strong>3 m/s</strong></p>
+        <p>(b) \(KE_{\text{ball}} = \tfrac{1}{2}(5)(300^2) = 225{,}000\) J<br>
+        \(KE_{\text{cannon}} = \tfrac{1}{2}(500)(3^2) = 2{,}250\) J</p>
+        <p>(c) Work-energy theorem: net work = change in KE of the ball.<br>
+        \(W = \Delta KE = 225{,}000\) J<br>
+        \(W = F \cdot d \Rightarrow F = \dfrac{225{,}000}{2.0} = 112{,}500\) N</p>
+        <p>(d) Power \(= \dfrac{W}{\Delta t} = \dfrac{225{,}000}{0.010} = 22{,}500{,}000\) W \(= 22.5\) MW</p>
+    </div>
+</div>
+

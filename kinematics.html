@@ -6,6 +6,78 @@
     <title>Kinematics - Physics Fun</title>
 
     <link rel="stylesheet" href="css/style.css" />
+    <script>
+        window.MathJax = {
+        tex: { inlineMath: [['\\(', '\\)']] }
+        };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <div id="desmos-container" style="display:none;">
+    <div class="draggable-calculator">
+        <div class="drag-handle">Drag Calculator</div>
+        <div id="calculator" style="width:600px; height:400px;"></div>
+    </div>
+</div>
+
+<script src="https://www.desmos.com/api/v1.11/calculator.js?apiKey=1a36ee8eec4c471e97c71548300ded67"></script>
+<!--         Desmos calculator          -->
+<script>
+let calculatorCreated = false;
+let calculator;
+
+function toggleDesmos() {
+    const container = document.getElementById("desmos-container");
+    const button = document.getElementById("desmos-toggle");
+
+    if (container.style.display === "none") {
+        container.style.display = "block";
+        button.textContent = "Hide Calculator";
+
+        if (!calculatorCreated) {
+            const elt = document.getElementById("calculator");
+            calculator = Desmos.GraphingCalculator(elt);
+            calculatorCreated = true;
+        }
+
+    } else {
+    container.style.display = "none";
+        button.textContent = "Show Calculator";
+}
+}
+
+// Dragging functionality for the calculator
+let isDragging = false;
+let dragOffsetX, dragOffsetY;
+
+document.addEventListener('DOMContentLoaded', function() {
+    const dragHandle = document.querySelector('.drag-handle');
+    const draggable = document.querySelector('.draggable-calculator');
+
+    if (dragHandle && draggable) {
+        dragHandle.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            dragOffsetX = e.clientX - draggable.offsetLeft;
+            dragOffsetY = e.clientY - draggable.offsetTop;
+            draggable.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (isDragging) {
+                const newX = e.clientX - dragOffsetX;
+                const newY = e.clientY - dragOffsetY;
+                draggable.style.left = newX + 'px';
+                draggable.style.top = newY + 'px';
+            }
+        });
+
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+            draggable.style.cursor = 'move';
+        });
+    }
+});
+</script>
+
 </head>
 <body>
     <!--site header for the page-->
@@ -16,6 +88,7 @@
             <a href="index.html">Home</a>
             <a href="topics.html">Topics</a>
             <a href="games.html">Games</a>
+            <button id="desmos-toggle" onclick="toggleDesmos()">Show Calculator</button>
         </nav>
      </div>
   </header>
@@ -39,36 +112,47 @@
     <p><strong>(∆x) Displacement</strong> — displacement is a vector quantity (meaning it has both magnitude and direction) that measures the difference between the initial and final location of an 
         object. Displacement is measured in meters and can be negative because it's a vector quantity.</p>
 
-            <p>Equation: ∆x=x-x₀ (∆x = displacement, x = final position, x₀ = initial position)</p>
+            <p class="centered-text">\[ \Delta x = x - x_0 \]</p>
+            <p>where \(\Delta x\) = displacement, \(x\) = final position, \(x_0\) = initial position</p>
 
 
     <p><strong>(s) Speed</strong> — speed is a scalar quantity and is the rate at which an object changes its position. It is the rate of distance per time. Speed is measured in meters per second (m/s), 
         and CANNOT be negative because it is scalar.</p>
 
-            <p>Equation: s=d/∆t (s= speed, d = distance, ∆t = time interval/change in time)</p>
+            <p class="centered-text">\[ s = \frac{d}{\Delta t} \]</p>
+            <p>where \(s\) = speed, \(d\) = distance, \(\Delta t\) = time interval</p>
 
 
     <p><strong>(v) Velocity</strong> — velocity is a vector quantity, which is the rate position changes with time. The difference between speed and velocity is that velocity is displacement over time, 
         not distance. Displacement is measured in meters per second and can be negative because it is a vector quantity.</p>
 
-            <p>Equation: v=∆x/∆t (v= velocity, ∆x= displacement, ∆t= time interval/change in time)</p>
+            <p class="centered-text">\[ v = \frac{\Delta x}{\Delta t} \]</p>
+            <p>where \(v\) = velocity, \(\Delta x\) = displacement, \(\Delta t\) = time interval</p>
 
 
     <p><strong>(a) Acceleration</strong> — acceleration is a vector quantity and is the rate at which velocity changes with time. Acceleration measures how quickly an object's speed or velocity is 
         changing over time. It tells you how rapidly velocity changes and in what direction. Acceleration is measured in meters per second squared and can be negative because it is 
         a vector quantity.</p>
 
-            <p>Equation: a=∆v/∆t or a=(v<sub>x</sub>-v₀)/∆t (a= acceleration, ∆v= change in velocity, ∆t= time interval/change in time, v<sub>x</sub> = final velocity, v₀= initial velocity)</p>
+            <p class="centered-text">\[ a = \frac{\Delta v}{\Delta t} = \frac{v_x - v_0}{\Delta t} \]</p>
+            <p>where \(a\) = acceleration, \(\Delta v\) = change in velocity, \(\Delta t\) = time interval, \(v_x\) = final velocity, \(v_0\) = initial velocity</p>
 
 
 
     <h3>The Three Kinematic Equations:</h3>
         <ol>
-            <li>v<sub>x</sub> = v<sub>xo</sub> + a<sub>x</sub>t: (v<sub>x</sub> = final horizontal velocity, v<sub>xo</sub> = initial horizontal velocity, a<sub>x</sub>= horizontal acceleration, t= time)</li>
-
-            <li>x = x<sub>o</sub> + v<sub>x</sub>t+½a<sub>x</sub>t2: (x= final position, x<sub>o</sub>= initial position, v<sub>x</sub>= final horizontal velocity, a<sub>x</sub>= horizontal acceleration, t= time)</li>
-
-            <li>v<sub>x</sub><sup>2</sup> = v<sub>xo</sub><sup>2</sup> + 2a<sub>x</sub>(x-x<sub>o</sub>): (v<sub>x</sub>= final horizontal velocity, v<sub>xo</sub>= initial horizontal velocity, a<sub>x</sub > = horizontal acceleration, x= final position, x<sub>o</sub>= initial position)</li>
+            <li>
+                \[ v_x = v_{x0} + a_x t \]
+                <p>where \(v_x\) = final velocity, \(v_{x0}\) = initial velocity, \(a_x\) = acceleration, \(t\) = time</p>
+            </li>
+            <li>
+                \[ x = x_0 + v_{x0}\,t + \tfrac{1}{2}a_x t^2 \]
+                <p>where \(x\) = final position, \(x_0\) = initial position, \(v_{x0}\) = initial velocity, \(a_x\) = acceleration, \(t\) = time</p>
+            </li>
+            <li>
+                \[ v_x^2 = v_{x0}^2 + 2a_x(x - x_0) \]
+                <p>where \(v_x\) = final velocity, \(v_{x0}\) = initial velocity, \(a_x\) = acceleration, \(x\) = final position, \(x_0\) = initial position</p>
+            </li>
         </ol>
 
     <h3>Graphs:<h3>
@@ -138,16 +222,37 @@
 
     <h4>Horizontal (x) Equations:</h4>
         <ol>
-            <li>a<sub>x</sub> = 0:  ( a<sub>x</sub>= horizontal acceleration)</li>
-            <li>v<sub>x</sub> = v<sub>xo</sub>:( v<sub>x</sub>= final horizontal velocity, v<sub>xo</sub>= initial horizontal velocity)</li>
-            <li>x = x<sub>o</sub> + v<sub>xo</sub>t: (x= final horizontal position, x<sub>o</sub>= initial horizontal position, v<sub>xo</sub>=initial horizontal velocity [will remain constant because it is projectile motion], t=time)</li>
+            <li>
+                \[ a_x = 0 \]
+                <p>where \(a_x\) = horizontal acceleration</p>
+            </li>
+            <li>
+                \[ v_x = v_{x0} \]
+                <p>where \(v_x\) = final horizontal velocity, \(v_{x0}\) = initial horizontal velocity (remains constant)</p>
+            </li>
+            <li>
+                \[ x = x_0 + v_{x0}\,t \]
+                <p>where \(x\) = final horizontal position, \(x_0\) = initial horizontal position, \(v_{x0}\) = initial horizontal velocity, \(t\) = time</p>
+            </li>
         </ol>
     <h4>Vertical (y) Equations:</h4>
         <ol>
-            <li>a<sub>y</sub>=g=-9.8 m/s2: (a<sub>y</sub>= vertical acceleration, g= gravity)</li>
-            <li>v<sub>y</sub>= v<sub>yo</sub> + gt: (v<sub>y</sub>= final vertical velocity, v<sub>yo</sub>= initial vertical velocity, g= gravity, t= time)</li>
-            <li>y = y<sub>o</sub> + v<sub>yo</sub>t + ½gt2: (y= final vertical position, y<sub>o</sub>= initial vertical position, t= time, g= gravity)</li>
-            <li>v<sub>y</sub>2 = v<sub>yo</sub>2 + 2g(y-y<sub>o</sub>): (v<sub>y</sub>= final vertical velocity, v<sub>yo</sub>= initial vertical velocity, g= gravity, y= final vertical position, y<sub>o</sub> = initial vertical position)</li>
+            <li>
+                \[ a_y = g = -9.8\ \text{m/s}^2 \]
+                <p>where \(a_y\) = vertical acceleration, \(g\) = gravity</p>
+            </li>
+            <li>
+                \[ v_y = v_{y0} + g\,t \]
+                <p>where \(v_y\) = final vertical velocity, \(v_{y0}\) = initial vertical velocity, \(g\) = gravity, \(t\) = time</p>
+            </li>
+            <li>
+                \[ y = y_0 + v_{y0}\,t + \tfrac{1}{2}g\,t^2 \]
+                <p>where \(y\) = final vertical position, \(y_0\) = initial vertical position, \(t\) = time, \(g\) = gravity</p>
+            </li>
+            <li>
+                \[ v_y^2 = v_{y0}^2 + 2g(y - y_0) \]
+                <p>where \(v_y\) = final vertical velocity, \(v_{y0}\) = initial vertical velocity, \(g\) = gravity, \(y\) = final vertical position, \(y_0\) = initial vertical position</p>
+            </li>
         </ol>
 
     <h4>Projectile Motion Split Into Components:</h4>

@@ -1,460 +1,706 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="css/style.css" />
-    <title>Cannon Launching Simulator</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="css/style.css" />
+  <title>Cannon Launching Simulator</title>
+  <style>
+    main {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 20px;
+    }
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-        }
+    h1 {
+      text-align: center;
+      color: var(--primary);
+      margin-bottom: 20px;
+    }
 
-        main {
-            max-width: 1400px;
-            margin: 20px auto;
-            padding: 20px;
-        }
+    #canvas-wrap {
+      width: 1200px;
+      max-width: 100%;
+      margin: 0 auto;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
 
-        h1 {
-            text-align: center;
-            color: #333;
-        }
+    #gameCanvas {
+      display: block;
+      width: 100%;
+    }
 
-        #gameContainer {
-            position: relative;
-            width: 1200px;
-            height: 800px;
-            margin: 20px auto;
-            border: 3px solid #333;
-            background-color: white;
-        }
+    /* Controls bar */
+    .controls {
+      width: 1200px;
+      max-width: 100%;
+      margin: 14px auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr auto auto;
+      gap: 18px;
+      align-items: end;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 20px;
+    }
 
-        canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
+    .ctrl-group {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
 
-        .game-info {
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 15px;
-            background-color: #e8f4f8;
-            border-left: 5px solid #0066cc;
-            border-radius: 5px;
-        }
+    .ctrl-label {
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--primary);
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
 
-        .game-info h3 {
-            margin-top: 0;
-            color: #0066cc;
-        }
+    .ctrl-label .val {
+      color: var(--accent);
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
 
-        .game-info ul {
-            margin: 10px 0;
-            padding-left: 25px;
-        }
+    .ctrl-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-        .game-info li {
-            margin: 8px 0;
-        }
-    </style>
+    input[type="range"] {
+      flex: 1;
+      height: 6px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    input[type="number"] {
+      width: 64px;
+      padding: 6px 8px;
+      border: 1.5px solid var(--border);
+      border-radius: 5px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      color: var(--text);
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .btn {
+      padding: 10px 22px;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s, color 0.15s;
+      border: none;
+      white-space: nowrap;
+    }
+
+    #fire-btn {
+      background: var(--accent);
+      color: white;
+      letter-spacing: 0.5px;
+    }
+
+    #fire-btn:hover:not(:disabled) { background: #1d4ed8; }
+
+    #fire-btn:disabled {
+      background: #94a3b8;
+      cursor: default;
+    }
+
+    #new-btn {
+      background: white;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+    }
+
+    #new-btn:hover { background: var(--primary); color: white; }
+
+    .score-box {
+      text-align: center;
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: var(--primary);
+      padding: 8px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg);
+      min-width: 80px;
+    }
+
+    .score-box .label {
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: #64748b;
+      margin-bottom: 2px;
+    }
+
+    /* Result message bar */
+    #msg-bar {
+      width: 1200px;
+      max-width: 100%;
+      margin: 8px auto;
+      padding: 11px 18px;
+      border-radius: 6px;
+      font-weight: 600;
+      text-align: center;
+      font-size: 0.95rem;
+      display: none;
+    }
+
+    #msg-bar.hit {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #86efac;
+      display: block;
+    }
+
+    #msg-bar.miss {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+      display: block;
+    }
+
+    /* Info box */
+    .info-box {
+      width: 1200px;
+      max-width: 100%;
+      margin: 12px auto 0;
+      background: #eff6ff;
+      border-left: 4px solid var(--accent);
+      border-radius: 4px;
+      padding: 12px 18px;
+      font-size: 0.92rem;
+      color: var(--text);
+    }
+
+    .info-box strong { color: var(--primary); }
+  </style>
 </head>
 <body>
   <header class="site-header">
     <div class="container">
       <h1 class="site-title">Physics Simulations</h1>
       <nav>
-         <a href="index.html">Home</a>
-         <a href="topics.html">Topics</a>
-         <a href="games.html">Games</a>
+        <a href="index.html">Home</a>
+        <a href="topics.html">Topics</a>
+        <a href="games.html">Games</a>
       </nav>
     </div>
   </header>
 
-    <main>
-        <h1>🎯 Cannon Launching Simulator</h1>
-        
-        <div id="gameContainer">
-            <canvas id="gameCanvas"></canvas>
+  <main>
+    <h1>Cannon Launching Simulator</h1>
+
+    <div id="canvas-wrap">
+      <canvas id="gameCanvas" width="1200" height="650"></canvas>
+    </div>
+
+    <div class="controls">
+      <div class="ctrl-group">
+        <div class="ctrl-label">
+          Angle
+          <span class="val"><span id="angle-val">45</span>&deg;</span>
         </div>
-
-        <div class="game-info">
-            <h3>How to Play:</h3>
-            <ul>
-                <li><strong>Press SPACE</strong> to start a new round</li>
-                <li><strong>Enter an angle</strong> (0-90 degrees) for the cannon barrel</li>
-                <li><strong>Enter a velocity</strong> (1-50 m/s) for the launch speed</li>
-                <li>Watch the <span style="color: rgb(0, 0, 0);">green trajectory line</span> showing where the ball will go</li>
-                <li>Try to hit the red target!</li>
-                <li>Use the <strong>distance scale (bottom)</strong> and <strong>height scale (left)</strong> to calculate the correct angle and velocity</li>
-            </ul>
+        <div class="ctrl-row">
+          <input type="range"   id="angle-slider" min="1"  max="89" value="45">
+          <input type="number"  id="angle-num"    min="1"  max="89" value="45">
         </div>
-    </main>
+      </div>
 
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+      <div class="ctrl-group">
+        <div class="ctrl-label">
+          Launch Speed
+          <span class="val"><span id="speed-val">30</span> m/s</span>
+        </div>
+        <div class="ctrl-row">
+          <input type="range"   id="speed-slider" min="1"  max="50" value="30">
+          <input type="number"  id="speed-num"    min="1"  max="50" value="30">
+        </div>
+      </div>
 
-        // Set canvas size
-        canvas.width = 1200;
-        canvas.height = 800;
+      <div class="btn-group">
+        <button class="btn" id="fire-btn">FIRE!</button>
+        <button class="btn" id="new-btn">New Target</button>
+      </div>
 
-        // Game constants
-        const CANNON_X = 50;
-        const CANNON_Y = canvas.height - 50;
-        const GRAVITY = 9.81;
-        const SCALE = 10;
-        const TIME_STEP = 0.016; // 60 FPS
+      <div class="score-box">
+        <div class="label">Score</div>
+        <span id="score">0 / 0</span>
+      </div>
+    </div>
 
-        // Colors
-        const WHITE = '#ffffff';
-        const BLACK = '#000000';
-        const RED = '#ff0000';
-        const BLUE = '#0000ff';
-        const GRAY = '#808080';
-        const GREEN = '#00ff00';
+    <div id="msg-bar"></div>
 
-        // Game states
-        const GameState = {
-            WAITING: 1,
-            AIMING: 2,
-            FIRING: 3,
-            HIT: 4
-        };
+    <div class="info-box">
+      <strong>Physics Reference</strong> &nbsp;|&nbsp;
+      Range: <em>R = v&sup2;&thinsp;sin(2&theta;) / g</em> &nbsp;|&nbsp;
+      Max Height: <em>H = v&sup2;&thinsp;sin&sup2;(&theta;) / (2g)</em> &nbsp;|&nbsp;
+      <em>g = 9.81 m/s&sup2;</em> &nbsp;|&nbsp;
+      Hit zone: &plusmn;5 m from target center
+    </div>
+  </main>
 
-        // Game variables
-        let cannonAngle = 45;
-        let cannonVelocity = 10;
-        let targetX = 0;
-        let targetY = 0;
-        let gameState = GameState.WAITING;
-        let trajectory = [];
-        let ballTrail = []; // Track the path of the ball during flight
-        let cannonballPos = null;
-        let cannonballVel = null;
-        let inputText = '';
-        let inputMode = null; // null, 'angle', or 'velocity'
+  <script>
+    // ── Layout constants ──────────────────────────────────────────────────────
+    // SCALE = 4 px/m applies equally to both x and y axes.
+    // This means the parabolic arc looks physically proportional on screen.
+    //
+    // Origin (0,0 in meters) is at pixel (OX, GY).
+    // Positive x goes right, positive y goes up (canvas y is inverted).
+    //
+    // Playfield:  x: 0 → 277 m  |  y: 0 → 137 m  (at 4 px/m)
+    // Axis labels: x every 25m (0–275), y every 25m (0–125)
+    // Max range with 50 m/s, 45°: v²/g ≈ 255 m  ✓ fits in 277 m
+    // Max height with 50 m/s, 90°: v²/(2g) ≈ 127 m ✓ fits in 137 m
 
-        function drawCannon() {
-            const barrelLength = 25;
-            const endX = CANNON_X + barrelLength * Math.cos((cannonAngle * Math.PI) / 180);
-            const endY = CANNON_Y - barrelLength * Math.sin((cannonAngle * Math.PI) / 180);
+    const CW    = 1200;   // canvas width  (px)
+    const CH    = 650;    // canvas height (px)
+    const OX    = 90;     // cannon x (px) — left margin for y-axis labels
+    const GY    = 570;    // ground y (px) — bottom margin for x-axis labels
+    const SCALE = 4;      // px per meter
+    const G     = 9.81;   // gravitational acceleration (m/s²)
+    const HIT_M = 5;      // hit radius (meters)
 
-            // Draw cannon base
-            ctx.fillStyle = BLACK;
-            ctx.beginPath();
-            ctx.arc(CANNON_X, CANNON_Y, 10, 0, Math.PI * 2);
-            ctx.fill();
+    const canvas = document.getElementById('gameCanvas');
+    const ctx    = canvas.getContext('2d');
 
-            // Draw barrel
-            ctx.strokeStyle = BLACK;
-            ctx.lineWidth = 5;
-            ctx.beginPath();
-            ctx.moveTo(CANNON_X, CANNON_Y);
-            ctx.lineTo(endX, endY);
-            ctx.stroke();
+    // ── State ─────────────────────────────────────────────────────────────────
+    let angle      = 45;   // degrees
+    let speed      = 30;   // m/s
+    let targetDist = 0;    // meters
+    let firing     = false;
+    let fireStart  = null; // timestamp (ms) when ball launched
+    let fireVx     = 0;    // horizontal velocity component (m/s)
+    let fireVy     = 0;    // vertical   velocity component (m/s)
+    let trail      = [];   // [{x,y}] pixel positions for ball trail
+    let hits       = 0;
+    let shots      = 0;
+
+    // ── DOM refs ──────────────────────────────────────────────────────────────
+    const angleSlider = document.getElementById('angle-slider');
+    const angleNum    = document.getElementById('angle-num');
+    const speedSlider = document.getElementById('speed-slider');
+    const speedNum    = document.getElementById('speed-num');
+    const fireBtn     = document.getElementById('fire-btn');
+    const newBtn      = document.getElementById('new-btn');
+    const angleValEl  = document.getElementById('angle-val');
+    const speedValEl  = document.getElementById('speed-val');
+    const scoreEl     = document.getElementById('score');
+    const msgBar      = document.getElementById('msg-bar');
+
+    // ── Input sync ────────────────────────────────────────────────────────────
+    function syncAngle(v) {
+      angle = Math.max(1, Math.min(89, +v || 45));
+      angleSlider.value = angleNum.value = angleValEl.textContent = angle;
+    }
+
+    function syncSpeed(v) {
+      speed = Math.max(1, Math.min(50, +v || 30));
+      speedSlider.value = speedNum.value = speedValEl.textContent = speed;
+    }
+
+    angleSlider.addEventListener('input',  e => syncAngle(e.target.value));
+    angleNum.addEventListener('change',    e => syncAngle(e.target.value));
+    speedSlider.addEventListener('input',  e => syncSpeed(e.target.value));
+    speedNum.addEventListener('change',    e => syncSpeed(e.target.value));
+    fireBtn.addEventListener('click', fire);
+    newBtn.addEventListener('click',  newTarget);
+
+    // ── Coordinate helpers ────────────────────────────────────────────────────
+    // physics meters → canvas pixels
+    function px(mx) { return OX + mx * SCALE; }
+    function py(my) { return GY - my * SCALE; }
+
+    // ── Game logic ────────────────────────────────────────────────────────────
+    function newTarget() {
+      // 50–230 m from cannon — always visible on screen and reachable at max speed
+      targetDist = Math.round(Math.random() * 180 + 50);
+      hideMsg();
+    }
+
+    function fire() {
+      if (firing) return;
+      hideMsg();
+      shots++;
+      trail = [];
+      firing    = true;
+      fireStart = null;
+      const rad = angle * Math.PI / 180;
+      fireVx = speed * Math.cos(rad);
+      fireVy = speed * Math.sin(rad);
+      fireBtn.disabled = true;
+    }
+
+    function showMsg(type, text) {
+      msgBar.className   = type;
+      msgBar.textContent = text;
+    }
+
+    function hideMsg() {
+      msgBar.className   = '';
+      msgBar.textContent = '';
+    }
+
+    function updateScore() {
+      scoreEl.textContent = `${hits} / ${shots}`;
+    }
+
+    // ── Physics helpers ───────────────────────────────────────────────────────
+    // Analytical range on flat ground: R = vx * (2*vy/g)
+    function analyticalRange(vx, vy) {
+      return (2 * vx * vy) / G;
+    }
+
+    // Sample the parabola for drawing — returns array of [pixelX, pixelY]
+    function parabolaPoints(ang_deg, spd, steps) {
+      const rad = ang_deg * Math.PI / 180;
+      const vx  = spd * Math.cos(rad);
+      const vy  = spd * Math.sin(rad);
+      const T   = 2 * vy / G;  // time of flight
+      const pts = [];
+      for (let i = 0; i <= steps; i++) {
+        const t  = (i / steps) * T;
+        const mx = vx * t;
+        const my = vy * t - 0.5 * G * t * t;
+        const ppx = px(mx);
+        if (ppx > CW + 10) break;
+        pts.push([ppx, py(my)]);
+      }
+      return pts;
+    }
+
+    // ── Drawing ───────────────────────────────────────────────────────────────
+    function drawBackground() {
+      // Sky — light blue gradient
+      const sky = ctx.createLinearGradient(0, 0, 0, GY);
+      sky.addColorStop(0, '#bfdbfe');
+      sky.addColorStop(1, '#e0f2fe');
+      ctx.fillStyle = sky;
+      ctx.fillRect(0, 0, CW, GY);
+
+      // Ground — green gradient
+      const gnd = ctx.createLinearGradient(0, GY, 0, CH);
+      gnd.addColorStop(0, '#4a7c59');
+      gnd.addColorStop(1, '#2d5a3d');
+      ctx.fillStyle = gnd;
+      ctx.fillRect(0, GY, CW, CH - GY);
+    }
+
+    function drawGrid() {
+      ctx.strokeStyle = 'rgba(100,149,200,0.2)';
+      ctx.lineWidth   = 1;
+      ctx.setLineDash([4, 5]);
+
+      // Vertical lines every 25 m
+      for (let m = 25; m <= 275; m += 25) {
+        const x = px(m);
+        if (x > CW - 5) break;
+        ctx.beginPath();
+        ctx.moveTo(x, 28);
+        ctx.lineTo(x, GY);
+        ctx.stroke();
+      }
+
+      // Horizontal lines every 25 m
+      for (let m = 25; m <= 125; m += 25) {
+        const y = py(m);
+        if (y < 28) break;
+        ctx.beginPath();
+        ctx.moveTo(OX, y);
+        ctx.lineTo(CW - 5, y);
+        ctx.stroke();
+      }
+
+      ctx.setLineDash([]);
+    }
+
+    function drawAxes() {
+      ctx.strokeStyle    = '#334155';
+      ctx.fillStyle      = '#334155';
+      ctx.lineWidth      = 2;
+      ctx.font           = '12px Inter, system-ui, Arial, sans-serif';
+
+      // ── X-axis ──
+      ctx.beginPath();
+      ctx.moveTo(OX, GY);
+      ctx.lineTo(CW - 5, GY);
+      ctx.stroke();
+
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'top';
+      for (let m = 0; m <= 275; m += 25) {
+        const x = px(m);
+        if (x > CW - 5) break;
+        // Tick
+        ctx.beginPath();
+        ctx.moveTo(x, GY);
+        ctx.lineTo(x, GY + 6);
+        ctx.stroke();
+        // Label (skip 0, it overlaps the cannon)
+        if (m > 0) ctx.fillText(m + ' m', x, GY + 8);
+      }
+
+      // X-axis title
+      ctx.font = 'bold 12px Inter, system-ui, Arial, sans-serif';
+      ctx.fillText('Distance (m)', CW - 56, GY + 8);
+
+      // ── Y-axis ──
+      ctx.beginPath();
+      ctx.moveTo(OX, GY);
+      ctx.lineTo(OX, 28);
+      ctx.stroke();
+
+      ctx.font         = '12px Inter, system-ui, Arial, sans-serif';
+      ctx.textAlign    = 'right';
+      ctx.textBaseline = 'middle';
+      for (let m = 0; m <= 125; m += 25) {
+        const y = py(m);
+        if (y < 28) break;
+        ctx.beginPath();
+        ctx.moveTo(OX, y);
+        ctx.lineTo(OX - 6, y);
+        ctx.stroke();
+        if (m > 0) ctx.fillText(m + ' m', OX - 8, y);
+      }
+
+      // Y-axis title
+      ctx.save();
+      ctx.translate(14, (GY + 28) / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.font         = 'bold 12px Inter, system-ui, Arial, sans-serif';
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('Height (m)', 0, 0);
+      ctx.restore();
+    }
+
+    function drawTarget() {
+      const tx = px(targetDist);
+      const ty = GY;
+
+      // Stake pole
+      ctx.strokeStyle = '#374151';
+      ctx.lineWidth   = 2;
+      ctx.beginPath();
+      ctx.moveTo(tx, ty);
+      ctx.lineTo(tx, ty - 24);
+      ctx.stroke();
+
+      // Distance label (on ground below target)
+      ctx.fillStyle    = '#1e3a5f';
+      ctx.font         = 'bold 12px Inter, system-ui, Arial, sans-serif';
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText(targetDist + ' m', tx, ty + 6);
+
+      // Bullseye rings
+      const rings = [
+        { r: 14, color: '#dc2626' },
+        { r:  9, color: '#ffffff' },
+        { r:  4, color: '#dc2626' },
+      ];
+      for (const { r, color } of rings) {
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(tx, ty - 24, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // Bullseye outline
+      ctx.strokeStyle = '#991b1b';
+      ctx.lineWidth   = 1;
+      ctx.beginPath();
+      ctx.arc(tx, ty - 24, 14, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    function drawCannon() {
+      const rad = angle * Math.PI / 180;
+
+      // Wheels
+      const wheelPositions = [OX - 10, OX + 10];
+      for (const wx of wheelPositions) {
+        ctx.fillStyle = '#1e293b';
+        ctx.beginPath();
+        ctx.arc(wx, GY + 5, 10, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#475569';
+        ctx.beginPath();
+        ctx.arc(wx, GY + 5, 5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Barrel (thick rounded line)
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth   = 13;
+      ctx.lineCap     = 'round';
+      ctx.beginPath();
+      ctx.moveTo(OX, GY);
+      ctx.lineTo(OX + 42 * Math.cos(rad), GY - 42 * Math.sin(rad));
+      ctx.stroke();
+      ctx.lineCap = 'butt';
+
+      // Cannon body
+      ctx.fillStyle = '#1e293b';
+      ctx.beginPath();
+      ctx.arc(OX, GY, 15, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#334155';
+      ctx.beginPath();
+      ctx.arc(OX, GY, 8, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawPreview() {
+      if (firing) return;
+
+      const pts = parabolaPoints(angle, speed, 120);
+      if (pts.length < 2) return;
+
+      // Dashed trajectory arc
+      ctx.setLineDash([8, 8]);
+      ctx.strokeStyle = 'rgba(37,99,235,0.4)';
+      ctx.lineWidth   = 2;
+      ctx.beginPath();
+      ctx.moveTo(pts[0][0], pts[0][1]);
+      for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Predicted landing dot + label
+      const rad   = angle * Math.PI / 180;
+      const vx    = speed * Math.cos(rad);
+      const vy    = speed * Math.sin(rad);
+      const range = analyticalRange(vx, vy);
+
+      if (range > 0 && range < 280) {
+        const lx = px(range);
+        ctx.fillStyle = 'rgba(37,99,235,0.55)';
+        ctx.beginPath();
+        ctx.arc(lx, GY, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle    = '#1d4ed8';
+        ctx.font         = '12px Inter, system-ui, Arial, sans-serif';
+        ctx.textAlign    = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText(range.toFixed(1) + ' m', lx, GY - 3);
+      }
+    }
+
+    function drawTrail() {
+      if (trail.length < 2) return;
+      ctx.strokeStyle = 'rgba(220,38,38,0.5)';
+      ctx.lineWidth   = 2;
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      ctx.moveTo(trail[0][0], trail[0][1]);
+      for (let i = 1; i < trail.length; i++) ctx.lineTo(trail[i][0], trail[i][1]);
+      ctx.stroke();
+    }
+
+    function drawBall(bx, by) {
+      // Drop shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.12)';
+      ctx.beginPath();
+      ctx.ellipse(bx + 2, by + 3, 8, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Ball with radial gradient
+      const grad = ctx.createRadialGradient(bx - 2, by - 2, 1, bx, by, 7);
+      grad.addColorStop(0, '#64748b');
+      grad.addColorStop(1, '#0f172a');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(bx, by, 7, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // ── Main game loop ────────────────────────────────────────────────────────
+    function gameLoop(timestamp) {
+      ctx.clearRect(0, 0, CW, CH);
+
+      drawBackground();
+      drawGrid();
+      drawAxes();
+      drawTarget();
+      drawPreview();
+      drawTrail();
+
+      if (firing) {
+        if (fireStart === null) fireStart = timestamp;
+        const t  = (timestamp - fireStart) / 1000;  // seconds elapsed
+        const mx = fireVx * t;
+        const my = fireVy * t - 0.5 * G * t * t;    // y=0 at ground level
+        const bx = px(mx);
+        const by = py(my);
+
+        trail.push([bx, by]);
+        drawBall(bx, by);
+
+        // Detect landing (my goes negative after apex, past t=0.05 to avoid t=0 edge)
+        if (my < 0 && t > 0.05) {
+          firing = false;
+          fireBtn.disabled = false;
+
+          const range = analyticalRange(fireVx, fireVy);
+          const err   = Math.abs(range - targetDist);
+
+          if (err <= HIT_M) {
+            hits++;
+            showMsg('hit',
+              `HIT! Range: ${range.toFixed(1)} m — Target: ${targetDist} m`);
+          } else {
+            const dir = range > targetDist ? 'over by' : 'short by';
+            showMsg('miss',
+              `Miss — Range: ${range.toFixed(1)} m | Target: ${targetDist} m | ${dir} ${err.toFixed(1)} m`);
+          }
+          updateScore();
         }
 
-        function drawTarget() {
-            // Outer circle
-            ctx.fillStyle = RED;
-            ctx.beginPath();
-            ctx.arc(targetX, targetY, 12, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Middle circle
-            ctx.fillStyle = WHITE;
-            ctx.beginPath();
-            ctx.arc(targetX, targetY, 8, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Center dot
-            ctx.fillStyle = RED;
-            ctx.beginPath();
-            ctx.arc(targetX, targetY, 4, 0, Math.PI * 2);
-            ctx.fill();
+        // Ball exited right side of canvas
+        if (bx > CW + 30) {
+          firing = false;
+          fireBtn.disabled = false;
+          const range = analyticalRange(fireVx, fireVy);
+          showMsg('miss', `Miss — Ball flew past the field! Range: ${range.toFixed(1)} m`);
+          updateScore();
         }
+      }
 
-        function calculateTrajectory() {
-            trajectory = [];
-            const angleRad = (cannonAngle * Math.PI) / 180;
-            let vx = cannonVelocity * Math.cos(angleRad);
-            let vy = cannonVelocity * Math.sin(angleRad);
+      // Cannon drawn last so it sits on top of grid/trail
+      drawCannon();
 
-            let posX = CANNON_X;
-            let posY = CANNON_Y;
-            let velX = vx;
-            let velY = -vy;
+      requestAnimationFrame(gameLoop);
+    }
 
-            for (let i = 0; i < 300; i++) {
-                posX += velX * TIME_STEP * SCALE;
-                posY += velY * TIME_STEP * SCALE;
-                velY += GRAVITY * TIME_STEP;
-
-                if (posY > canvas.height || posX > canvas.width) {
-                    break;
-                }
-                trajectory.push({ x: Math.round(posX), y: Math.round(posY) });
-            }
-        }
-
-        function drawTrajectory() {
-            // Don't draw anything - trajectory is only shown as ball trail during firing
-        }
-
-        function updateCannonball() {
-            if (!cannonballPos) return;
-
-            cannonballPos.x += cannonballVel.x * TIME_STEP * SCALE;
-            cannonballPos.y += cannonballVel.y * TIME_STEP * SCALE;
-            cannonballVel.y += GRAVITY * TIME_STEP;
-
-            // Add current position to ball trail
-            ballTrail.push({ x: cannonballPos.x, y: cannonballPos.y });
-
-            if (cannonballPos.y > canvas.height || cannonballPos.x > canvas.width) {
-                gameState = GameState.WAITING;
-                cannonballPos = null;
-                ballTrail = [];
-                return;
-            }
-
-            const dx = cannonballPos.x - targetX;
-            const dy = cannonballPos.y - targetY;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-
-            if (distance < 20) {
-                gameState = GameState.HIT;
-                cannonballPos = null;
-            }
-        }
-
-        function drawCannonball() {
-            if (!cannonballPos) return;
-
-            ctx.fillStyle = BLACK;
-            ctx.beginPath();
-            ctx.arc(cannonballPos.x, cannonballPos.y, 5, 0, Math.PI * 2);
-            ctx.fill();
-
-            ctx.strokeStyle = GRAY;
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.arc(cannonballPos.x, cannonballPos.y, 5, 0, Math.PI * 2);
-            ctx.stroke();
-        }
-
-        function drawBallTrail() {
-            if (ballTrail.length === 0) return;
-
-            // Draw line connecting all trail points
-            ctx.strokeStyle = GREEN;
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(ballTrail[0].x, ballTrail[0].y);
-            
-            for (let i = 1; i < ballTrail.length; i++) {
-                ctx.lineTo(ballTrail[i].x, ballTrail[i].y);
-            }
-            ctx.stroke();
-        }
-
-        function drawMeasurementScales() {
-            const scaleFont = '28px Arial';
-            const labelFont = '32px Arial';
-
-            // X-axis
-            const meterPerPixelX = 100 / (canvas.width - CANNON_X);
-            ctx.strokeStyle = BLACK;
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(CANNON_X, canvas.height - 30);
-            ctx.lineTo(canvas.width, canvas.height - 30);
-            ctx.stroke();
-
-            // Draw x-axis labels every 5 meters
-            ctx.fillStyle = BLACK;
-            ctx.font = scaleFont;
-            ctx.textAlign = 'center';
-            for (let meters = 0; meters <= 100; meters += 5) {
-                const pixelX = CANNON_X + (meters / 100) * (canvas.width - CANNON_X);
-                ctx.fillText(`${meters}m`, pixelX, canvas.height - 5);
-            }
-
-            // Y-axis - identical spacing to X-axis, but vertical
-            ctx.beginPath();
-            ctx.moveTo(CANNON_X - 30, 100);
-            ctx.lineTo(CANNON_X - 30, canvas.height - 50);
-            ctx.stroke();
-
-            // Draw y-axis labels every 50 meters, horizontal and readable
-            ctx.textAlign = 'left';
-            for (let meters = 0; meters <= 125; meters += 25) {
-                const pixelY = (canvas.height - 50) - (meters / 125) * (canvas.height - 150);
-                ctx.fillText(`${meters}m`, CANNON_X - 25, pixelY + 10);
-            }
-
-            // Axis labels
-            ctx.font = labelFont;
-            ctx.fillStyle = BLACK;
-            ctx.textAlign = 'center';
-            ctx.fillText('Distance (m)', canvas.width - 100, canvas.height - 50);
-
-            ctx.textAlign = 'center';
-            ctx.save();
-            ctx.translate(20, canvas.height / 2);
-            ctx.rotate(-Math.PI / 2);
-            ctx.fillText('Height (m)', 0, 0);
-            ctx.restore();
-        }
-
-        function drawUI() {
-            ctx.fillStyle = BLACK;
-            ctx.font = '36px Arial';
-            ctx.textAlign = 'left';
-            ctx.fillText(`Angle: ${cannonAngle.toFixed(1)}° | Velocity: ${cannonVelocity.toFixed(1)} m/s`, 10, 40);
-
-            if (gameState === GameState.WAITING) {
-                ctx.fillStyle = BLUE;
-                ctx.font = 'bold 48px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('Press SPACE to START', canvas.width / 2, 300);
-            } else if (gameState === GameState.AIMING) {
-                if (inputMode === 'angle') {
-                    ctx.fillStyle = BLACK;
-                    ctx.font = '36px Arial';
-                    ctx.textAlign = 'left';
-                    ctx.fillText('Enter angle (0-90):', 100, 100);
-                    ctx.fillStyle = BLUE;
-                    ctx.font = 'bold 48px Arial';
-                    ctx.fillText(inputText, 100, 160);
-                } else if (inputMode === 'velocity') {
-                    ctx.fillStyle = BLACK;
-                    ctx.font = '36px Arial';
-                    ctx.textAlign = 'left';
-                    ctx.fillText('Enter velocity (1-50):', 100, 100);
-                    ctx.fillStyle = BLUE;
-                    ctx.font = 'bold 48px Arial';
-                    ctx.fillText(inputText, 100, 160);
-                }
-            } else if (gameState === GameState.FIRING) {
-                ctx.fillStyle = RED;
-                ctx.font = 'bold 48px Arial';
-                ctx.textAlign = 'left';
-                ctx.fillText('FIRING!', 100, 100);
-            } else if (gameState === GameState.HIT) {
-                ctx.fillStyle = GREEN;
-                ctx.font = 'bold 48px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('CONGRATS! You hit the target!', canvas.width / 2, 300);
-                ctx.fillStyle = BLUE;
-                ctx.font = '36px Arial';
-                ctx.fillText('Press SPACE for next round', canvas.width / 2, 360);
-            }
-        }
-
-        function gameLoop() {
-            // Clear canvas
-            ctx.fillStyle = WHITE;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Draw target if aiming or firing
-            if (gameState === GameState.AIMING || gameState === GameState.FIRING || gameState === GameState.HIT) {
-                drawTarget();
-            }
-
-            // Draw trajectory only during firing
-            if (gameState === GameState.FIRING) {
-                drawTrajectory();
-            }
-
-            // Draw ball trail (shows path behind the ball)
-            drawBallTrail();
-
-            // Update and draw cannonball
-            updateCannonball();
-            drawCannonball();
-
-            // Draw cannon and scales
-            drawCannon();
-            drawMeasurementScales();
-            drawUI();
-
-            requestAnimationFrame(gameLoop);
-        }
-
-        // Event listeners
-        document.addEventListener('keydown', (event) => {
-            if (inputMode === 'angle') {
-                if (event.key === 'Enter' && inputText) {
-                    const angle = parseFloat(inputText);
-                    if (!isNaN(angle)) {
-                        cannonAngle = Math.max(0, Math.min(90, angle));
-                        inputText = '';
-                        inputMode = 'velocity';
-                    } else {
-                        inputText = '';
-                    }
-                } else if (event.key === 'Backspace') {
-                    inputText = inputText.slice(0, -1);
-                } else if (/[\d.]/.test(event.key)) {
-                    inputText += event.key;
-                }
-            } else if (inputMode === 'velocity') {
-                if (event.key === 'Enter' && inputText) {
-                    const velocity = parseFloat(inputText);
-                    if (!isNaN(velocity)) {
-                        cannonVelocity = Math.max(1, Math.min(50, velocity));
-                        inputText = '';
-                        inputMode = null;
-
-                        // Launch cannon
-                        const angleRad = (cannonAngle * Math.PI) / 180;
-                        const barrelLength = 25;
-                        const barrelEndX = CANNON_X + barrelLength * Math.cos(angleRad);
-                        const barrelEndY = CANNON_Y - barrelLength * Math.sin(angleRad);
-
-                        cannonballPos = { x: barrelEndX, y: barrelEndY };
-                        cannonballVel = {
-                            x: cannonVelocity * Math.cos(angleRad),
-                            y: -cannonVelocity * Math.sin(angleRad)
-                        };
-
-                        gameState = GameState.FIRING;
-                        calculateTrajectory();
-                    } else {
-                        inputText = '';
-                    }
-                } else if (event.key === 'Backspace') {
-                    inputText = inputText.slice(0, -1);
-                } else if (/[\d.]/.test(event.key)) {
-                    inputText += event.key;
-                }
-            } else if (event.key === ' ') {
-                event.preventDefault();
-                if (gameState === GameState.WAITING) {
-                    targetX = Math.random() * (canvas.width - 400) + 400;
-                    targetY = Math.random() * (canvas.height - 200) + 100;
-                    gameState = GameState.AIMING;
-                    inputMode = 'angle';
-                    inputText = '';
-                    ballTrail = []; // Clear trail for new round
-                } else if (gameState === GameState.HIT) {
-                    targetX = Math.random() * (canvas.width - 400) + 400;
-                    targetY = Math.random() * (canvas.height - 200) + 100;
-                    gameState = GameState.AIMING;
-                    inputMode = 'angle';
-                    inputText = '';
-                    ballTrail = []; // Clear trail for new round
-                }
-            }
-        });
-
-        // Start game loop
-        gameLoop();
-    </script>
+    // ── Start ─────────────────────────────────────────────────────────────────
+    newTarget();
+    requestAnimationFrame(gameLoop);
+  </script>
 </body>
 </html>

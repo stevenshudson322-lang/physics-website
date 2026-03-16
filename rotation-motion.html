@@ -1,29 +1,522 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang = "en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, intial-scale=1">
-    <title>Rotational Motion</title>
-    <link rel="stylesheet" href="css/style.css">
+    <meta name = "viewport" content="width=device-width, initial-scale=1" />
+    <title>Forces - Physics Fun</title>
+
+    <link rel="stylesheet" href="css/style.css"/>
+<style>
+/* page-level overrides — base styles live in css/style.css */
+</style>
+    <script>
+        window.MathJax = {
+        tex: { inlineMath: [['\\(', '\\)']] }
+        };
+
+        
+        function toggleText() {
+            let text = document.getElementById("answer");
+            let link = event.target;
+
+            if (text.style.display === "none") {
+                text.style.display = "inline";
+                link.textContent = "Click to hide";
+            } else {
+                text.style.display = "none";
+                link.textContent = "Deriving a Planets Period";
+            }
+
+            event.preventDefault();
+        }
+        function toggleAnswerKey() {
+            let text = document.getElementById("answer-key");
+            let link = event.target;
+
+            if (text.style.display === "none") {
+                text.style.display = "inline";
+                link.textContent = "Hide Answer Key";
+            } else {
+                text.style.display = "none";
+                link.textContent = "Show Answer Key";
+            }
+
+            event.preventDefault();
+        }
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <div id="desmos-container" style="display:none;">
+    <div class="draggable-calculator">
+        <div class="drag-handle">Drag Calculator</div>
+        <div id="calculator" style="width:600px; height:400px;"></div>
+    </div>
+</div>
+
+<script src="https://www.desmos.com/api/v1.11/calculator.js?apiKey=1a36ee8eec4c471e97c71548300ded67"></script>
+<!--         Desmos calculator          -->
+<script>
+let calculatorCreated = false;
+let calculator;
+
+function toggleDesmos() {
+    const container = document.getElementById("desmos-container");
+    const button = document.getElementById("desmos-toggle");
+
+    if (container.style.display === "none") {
+        container.style.display = "block";
+        button.textContent = "Hide Calculator";
+
+        if (!calculatorCreated) {
+            const elt = document.getElementById("calculator");
+            calculator = Desmos.GraphingCalculator(elt);
+            calculatorCreated = true;
+        }
+
+    } else {
+    container.style.display = "none";
+        button.textContent = "Show Calculator";
+}
+}
+
+// Dragging functionality for the calculator
+let isDragging = false;
+let dragOffsetX, dragOffsetY;
+
+document.addEventListener('DOMContentLoaded', function() {
+    const dragHandle = document.querySelector('.drag-handle');
+    const draggable = document.querySelector('.draggable-calculator');
+
+    if (dragHandle && draggable) {
+        dragHandle.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            dragOffsetX = e.clientX - draggable.offsetLeft;
+            dragOffsetY = e.clientY - draggable.offsetTop;
+            draggable.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (isDragging) {
+                const newX = e.clientX - dragOffsetX;
+                const newY = e.clientY - dragOffsetY;
+                draggable.style.left = newX + 'px';
+                draggable.style.top = newY + 'px';
+            }
+        });
+
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+            draggable.style.cursor = 'move';
+        });
+    }
+});
+</script>
+
 </head>
 <body>
-    <header class="site-title">
-        <div class="container">
-            <h1 class="site-title">Rotational Motion</h1>
-            <nav>
-                <a href="index.html">Home</a>
-                <a href="topics.html">Topics</a>
-                <a href="games.html">Games</a>
+        
+    <header class = "site-header">
+        <div class = "container">
+          <h1 class = "site-title">Rotational Motion</h1>
+           <nav>
+               <a href = "index.html">Home</a>
+               <a href = "topics.html">Topics</a>
+               <a href = "games.html">games</a>
+               <button id="desmos-toggle" onclick="toggleDesmos()">Show Calculator</button>
             </nav>
         </div>
     </header>
-</body>
 <main>
-    <h2>Rotational Motion - The physics of Objects in Circular Motions</h2>
-    
 
-    
+<h2>Rotational Motion - The physics of Objects in Circular Motions</h2>
+<p><strong>Unit 3: Rotational Motion</strong></p>
+<!--First topic of the unit-->
+<br>
+<h2>Moving in Circles</h2>
+<p> When an object moves in a uniform circular motion, that means it is traveling in a circular path at a constant speed. The object direction changes as it goes in circles instead of traveling in a straigth line
+    due to an acceleration perpendicular to its velocity. This is what we call <strong>centripetal acceleration - A<sub>c</sub> </strong>.</p>
+
+ <img class="right-img" src="Images/Screenshot 2026-03-04 at 10.20.50 PM.png" alt="centripetal force image showing velocity and acceleration" width="500" height="500">
+
+<p> Centripetal acceleration is always <strong>directed towards the center of the circle</strong> and is given by the formula:</p>
+<h1>\( A_c = \frac{v^2}{r} \) </h1>
+<p>Where:</p>
+<ul>
+    <li>\( A_c \) is the centripetal acceleration</li>
+    <li>\( v \) is the linear speed of the object</li>
+    <li>\( r \) is the radius of the circular path</li>
+</ul>
+<p>_________________________________________________________________________________________________________</p>
+<h2>Centripetal Force - F<sub>c</sub></h2>
+<p>We know that when there is an acceleration, there is also a force. In this case of circular motion, 
+    the force is <strong> Centripetal Force</strong>, and this force also points towards the center of the circle. Centripetal force is an important concept as it helps us 
+    understand and calculation how fast an object is moving in a circle, how big of a circle it is going around, or how much the object traveling weighs. A great example of this is planets orbiting each other, where the centripetal force
+    is gravity which keeps the plants going in circles around the sun. The equation for centripetal force is: </p>
+</p>
+<h1>\( F_c = m \frac{v^2}{r} \) </h1>
+<p>Where:</p>
+<ul>
+    <li>\( F_c \) is the centripetal force</li>
+    <li>\( m \) is the mass of the object</li>
+    <li>\( v \) is the linear speed of the object</li>
+    <li>\( r \) is the radius of the circular path</li>
+</ul>
+<p>_________________________________________________________________________________________________________</p>
+<h2>Examples of Centripetal force</h2>
+
+
+<h3>Car going around a curve:</h3>
+<p>A common example you can think of for centripetal force is <strong>going around a curve in a car</strong>, more clearly, a roundabout. 
+    The reason that the car is able to go in a circle is because of <strong>friction</strong> between the tires and the road, which provides a
+    force toward the inner circle and allows you to go in a circle. If there was no friction, you would continue straight even if you turned your wheels.
+    Think about a car turning on ice, even if they turn the wheels, they won't be able to turn around or go in a circle because there is no friction to act as a F<sub>c</sub>.</p>
+</p>
+
+<h3>Planetary Orbits:</h3>
+<p>An example of centripetal force in planetary orbits is the gravitational force between a planet and the sun. This gravitational force acts as the centripetal force, pulling 
+    the planet toward the sun and keeping it in a circular orbit. The planet's inertia tries to move it in a straight line, but the gravitational pull constantly changes its 
+    direction, resulting in orbital motion.
+</p>
+
+<h3>Spinning object on a string:</h3>
+<p>An example of centripetal force in this scenario is the tension in the string, which provides the centripetal force necessary to keep the object moving in a circular path. 
+    The tension acts towards the center of the circle, changing the direction of the object's velocity and maintaining its circular motion.
+</p>
+<p>_________________________________________________________________________________________________________</p>
+
+<h2>Law of Universal Gravitation</h2>
+
+<p>Newtons Law of Universal Gravitation states that every particle in the universe attracts every other particle with a force proportional to the product of their masses and 
+    inversely proportional to the square of the distance between them.
+<br>
+    This is force that attract planets like earth to the sun, and that force is the centripetal force that keep us moving in an elliptical orbit around the sun.</p>
+</p>
+<br>
+
+<img class="right-img" src="Images/Screenshot 2026-03-09 at 11.32.10 PM.png" alt="gravitation image of two planets pulling" width="500" height="500">
+
+<h1>\( F_g = G \frac{M_1 m_2}{r^2} \) </h1>
+<p>Where:</p>
+<ul>
+    <li>\( F_g \) is the gravitational force between the two masses</li>
+    <li>\( G \) is the gravitational constant (approximately \( 6.674 \times 10^{-11} \, \text{N} \cdot \text{m}^2/\text{kg}^2 \))</li>
+    <li>\( m_1 \) and \( m_2 \) are the masses of the two objects</li>
+    <li>\( r \) is the distance between the centers of the two masses</li>
+</ul>
+<p>_________________________________________________________________________________________________________</p>
+<h2>Kepler's Laws of Planetary Motion</h2>
+
+<p><strong>Kepler's First Law:</strong> each planet's orbit about the Sun is an ellipse. The Sun's center is always located at one focus of 
+the orbital ellipse. The Sun is at one focus. The planet follows the ellipse in its orbit, meaning that the planet to Sun distance is 
+constantly changing as the planet goes around its orbit.</p>
+
+<p><strong>Kepler's Second Law:</strong> the imaginary line joining a planet and the Sun sweeps equal areas of space during equal time 
+intervals as the planet orbits. Basically, that planets do not move with constant speed along their orbits. Rather, their speed varies 
+so that the line joining the centers of the Sun and the planet sweeps out equal parts of an area in equal times. The point of nearest 
+approach of the planet to the Sun is termed perihelion. The point of greatest separation is aphelion, hence by Kepler's Second Law, a 
+planet is moving fastest when it is at perihelion and slowest at aphelion. 
+</p>
+
+<p><strong>Kepler's Third Law:</strong> The ratio of the squares of the period of any two object or planets about another object in 
+space, like the sun, is equal to the cubes of their average distances from the Sun. The equation for Kepler's Third Law is:</p> 
+<h1>\( \frac{T_1^2}{T_2^2} = \frac{r_1^3}{r_2^3} \)</h1>
+<p>Where:</p>
+<ul>
+    <li>\( T_1 \) and \( T_2 \) are the orbital periods of the two planets</li>
+    <li>\( r_1 \) and \( r_2 \) are the average distances of the two planets from the Sun</li>
+
+</ul>
+
+<br>
+<p><strong>What is this useful for?</strong> Kepler's law in ratio form allows us to determine how an object will orbit the sun 
+    based on knowing how another object orbits the sun. We use the equation to compare their ratios and solve for either the 
+    radius or orbital period of a object in space about the sun</p>
+    <p>Lastly using what we have learned so far, we can use these equations to derive the orbital period of an object around a planet. Knowing how to derive Kepler's equation can be useful, though it is not very complicated. To see how to derive it 
+    step by step click here: <strong><a href="#" onclick="toggleText()" class="toggle-link">Deriving a Planets Period</a></strong></p>
+<!-- Here is what revelas the link and what is will show-->
+    <span  id="answer" style="display:none;">
+    <div class="boxed-text">
+        <h2>Deriving Kepler's Law and the Universal Law of Universal Gravitation</h2>
+
+        <p>We know that when an object orbits a sun, there is a centripetal force causing it to follow and elliptical path. We also know that there is always a gravitational force that acts between the two objects. Therefore, the centripetal force is F<sub>g</sub>.
+            <h3 class="centered-text">\( F_c = F_g \)</h3>
+        From the equations of centripetal force and the universal law of gravitation, we can rewrite this as: 
+        <h3 class="centered-text">\( \frac{mv^2}{r} = G \frac{Mm}{r^2} \)</h3>
+        
+        <p>The m cancels out and the r terms can be simplified, leaving the simplified version as:
+            <h3 class="centered-text">\( \frac{\cancel{m}v^2}{\cancel{r}} = G \frac{M\cancel{m}}{r^{\cancel{2}}} \)</h3>
+        
+            <h3 class="centered-text">\( v^2 = G \frac{M}{r} \)</h3>
+        <p> How do we get this to involve T from Kepler's equation? Well, velocity equal distance divided by time, so we can say that:</p>
+            <h3 class="centered-text">\( v = \frac{2\pi r}{T} \)</h3>
+        <p>Where \( 2\pi r \) is the circumference of the circular path, and T is the time it takes to complete one orbit. When we now substitute this for v in the equation above we get:</p>
+            
+        <img class="right-img" src="Images/Screenshot 2026-03-10 at 1.58.36 AM.png" alt="derivation image showing the steps to derive kepler's third law" width="400" height="400">
+            <h3 class="centered-text">\( \frac{4\pi^2 r^2}{T^2} = G \frac{M}{r} \)</h3>
+            <h3 class="centered-text">\( \frac{4\pi^2 r^3}{T^2} = G M \)</h3>
+            <h3 class="centered-text">\( T^2 = \frac{4\pi^2 r^3}{GM} \)</h3>
+        <p>As a final result, we have derived Kepler's Third Law in its more useful form.</p>
+            <h3 class="centered-text"> \( T = \sqrt{\frac{4\pi^2 r^3}{GM}} \)</h3>
+
+    </div>
+    </span>
+
+
+<h2>Practice Problems:</h2>
+<h3>Multiple Choice</h3>
+
+  <ol>
+    <li>
+      A car moves at constant speed around a flat circular track. Which of the following best explains why the car is accelerating?
+      <br><br>
+      A) The car is accelerating because its speed is increasing
+      <br>
+      B) The car is accelerating because its velocity is changing direction
+      <br>
+      C) The car is not accelerating because its speed is constant
+      <br>
+      D) The car is not accelerating because the net force is zero
+    </li>
+
+    <br>
+
+    <li>
+      A ball on a string moves in a horizontal circle at constant speed. Which of the following correctly identifies the direction of the net force on the ball?
+      <br><br>
+      A) Tangent to the circle in the direction of motion
+      <br>
+      B) Tangent to the circle opposite the direction of motion
+      <br>
+      C) Toward the center of the circle
+      <br>
+      D) Away from the center of the circle
+    </li>
+
+    <br>
+
+    <li>
+      A satellite is moved from one circular orbit around a planet to another circular orbit with twice the radius. How does the gravitational force exerted on the satellite change?
+      <br><br>
+      A) It doubles
+      <br>
+      B) It becomes four times as large
+      <br>
+      C) It becomes one-half as large
+      <br>
+      D) It becomes one-fourth as large
+    </li>
+
+    <br>
+
+    <li>
+      Two planets orbit the same star. Planet X is farther from the star than Planet Y. Which statement is correct?
+      <br><br>
+      A) Planet X has the greater orbital speed
+      <br>
+      B) Planet X has the smaller orbital period
+      <br>
+      C) Planet X has the smaller orbital speed
+      <br>
+      D) Planet X and Planet Y have the same orbital speed
+    </li>
+
+    <br>
+
+    <li>
+      A planet moves in an elliptical orbit around its star. At which point is the planet's speed greatest?
+      <br><br>
+      A) When the planet is closest to the star
+      <br>
+      B) When the planet is farthest from the star
+      <br>
+      C) The speed is constant throughout the orbit
+      <br>
+      D) The speed depends only on the planet's mass
+    </li>
+
+    <br>
+
+    <li>
+      A student claims that an object moving in a circle at constant speed is in equilibrium because the speed does not change. Which of the following is the best response?
+      <br><br>
+      A) The student is correct because constant speed means zero acceleration
+      <br>
+      B) The student is correct because the forces cancel in circular motion
+      <br>
+      C) The student is incorrect because the object has centripetal acceleration caused by a net inward force
+      <br>
+      D) The student is incorrect because circular motion always requires an outward net force
+    </li>
+  </ol>
+
+  <h3>Free Response</h3>
+
+  <ol start="7">
+    <li>
+      A 1200 kg car travels at 18 m/s around a circular curve of radius 45 m.
+      <br><br>
+      A. Calculate the centripetal acceleration of the car.
+      <br>
+      B. Calculate the net force acting on the car.
+      <br>
+      C. State the direction of the net force.
+    </li>
+
+    <br>
+
+    <li>
+      A 0.80 kg ball is tied to a string and swung in a horizontal circle of radius 1.6 m at a speed of 5.0 m/s.
+      <br><br>
+      A. Calculate the centripetal force on the ball.
+      <br>
+      B. If the speed is doubled while the radius remains the same, determine the new centripetal force.
+      <br>
+      C. Explain why the force changes by that amount.
+    </li>
+
+    <br>
+
+    <li>
+      Two objects with masses \(4.0 \times 10^3\) kg and \(6.0 \times 10^3\) kg are separated by 12 m.
+      <br><br>
+      A. Calculate the gravitational force between the objects.
+      <br>
+      B. If the distance between the objects is doubled, determine the new gravitational force.
+      <br>
+      C. Explain your reasoning using the relevant proportional relationship.
+    </li>
+
+    <br>
+
+    <li>
+      Satellite A orbits a planet in a circular orbit of radius \(1.5 \times 10^6\) m with an orbital period of 500 days.
+      Satellite B orbits the same planet at a radius of \(7.6 \times 10^6\) m.
+      <br><br>
+      Use Kepler’s Third Law to determine the orbital period of Satellite B.
+    </li>
+
+    <br>
+
+    <li>
+      Planet X orbits a star in 8 years. Planet Y orbits the same star at an average orbital radius 4 times greater than that of Planet X.
+      <br><br>
+      A. Determine the orbital period of Planet Y.
+      <br>
+      B. Explain why the period increases so much even though the radius only increases by a factor of 4.
+    </li>
+
+    <br>
+
+    <li>
+      A satellite moves in a circular orbit around Earth. A student says, “Because the satellite’s speed is constant, there is no net force acting on it.”
+      <br><br>
+      Write a brief paragraph explaining why this statement is incorrect. Your response should reference velocity, acceleration, and force.
+    </li>
+
+    <br>
+
+    <li>
+      A planet moves around a star in an elliptical orbit.
+      <br><br>
+      A. State Kepler’s Second Law in words.
+      <br>
+      B. Based on this law, explain why the planet moves faster when it is closer to the star.
+    </li>
+  </ol>
 
 
 
+</span>
 
+<strong><a href="#" onclick="toggleAnswerKey()" class="toggle-link">Show Answer Key</a></strong>
+
+<span id="answer-key" style="display:none;">
+    <h3>Answer Key</h3>
+
+    <ol>
+        <li>B</li>
+        <li>C</li>
+        <li>D</li>
+        <li>C</li>
+        <li>A</li>
+        <li>C</li>
+
+        <li>
+        A) \(a_c = \frac{v^2}{r} = \frac{18^2}{45} = 7.2\ \text{m/s}^2\)
+        <br>
+        B) \(F = ma = (1200)(7.2) = 8.64 \times 10^3\ \text{N}\)
+        <br>
+        C) Toward the center of the circular path
+        </li>
+
+        <br>
+
+        <li>
+        A) \(F_c = \frac{mv^2}{r} = \frac{(0.80)(5.0^2)}{1.6} = 12.5\ \text{N}\)
+        <br>
+        B) If speed doubles, force becomes 4 times as large:
+        \(F_{new} = 50\ \text{N}\)
+        <br>
+        C. Since \(F_c\) <span title="is proportional to" class="propto-symbol">\(\propto\)</span> \(v^2\), doubling the speed multiplies the force by \(2^2 = 4\)
+       
+        </li>
+
+        <br>
+
+        <li>
+        A)\(F_g = \frac{Gm_1m_2}{r^2}\)
+        <br>
+        \(F_g = \frac{(6.67\times10^{-11})(4.0\times10^3)(6.0\times10^3)}{12^2}\)
+        <br>
+        \(F_g \approx 1.11\times10^{-5}\ \text{N}\)
+        <br>
+        B) If distance doubles, force becomes one-fourth as large:
+        \(F_{new} \approx 2.78\times10^{-6}\ \text{N}\)
+        <br>
+        C. Because \(F_g\) <span title="is proportional to" class="propto-symbol">\(\propto\)</span> \(\frac{1}{r^2}\)
+        </li>
+
+        <br>
+
+        <li>
+        \[
+        \frac{T_1^2}{T_2^2}=\frac{r_1^3}{r_2^3}
+        \]
+        \[
+        T_2 = T_1\sqrt{\frac{r_2^3}{r_1^3}}
+        \]
+        \[
+        T_2 = 500\sqrt{\frac{(7.6\times10^6)^3}{(1.5\times10^6)^3}} \approx 5.71\times10^3\ \text{days}
+        \]
+        </li>
+
+        <br>
+
+        <li>
+        A. Since \(r_Y = 4r_X\),
+        \[
+        \frac{T_X^2}{T_Y^2}=\frac{r_X^3}{r_Y^3}=\frac{1}{4^3}=\frac{1}{64}
+        \]
+        so \(T_Y^2 = 64T_X^2\), and therefore
+        \[
+        T_Y = 8T_X = 64\ \text{years}
+        \]
+        <br>
+        B. The period increases strongly because \(T^2\) <span title="is proportional to" class="propto-symbol">\(\propto\)</span> \(r^3\), so period does not scale linearly with radius
+        </li>
+
+        <br>
+
+        <li>
+        A correct response should explain that constant speed does not mean constant velocity. Since the direction of motion is continuously changing, the satellite has centripetal acceleration. Because acceleration requires a net force, there must be a net inward force acting on the satellite. That force is gravity.
+        </li>
+
+        <br>
+
+        <li>
+        A. Kepler’s Second Law states that a line joining a planet and a star sweeps out equal areas in equal times.
+        <br>
+        B. When the planet is closer to the star, it must move faster in order to sweep out the same area in the same amount of time.
+        </li>
+    </ol>
+</span>

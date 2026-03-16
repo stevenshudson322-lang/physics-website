@@ -4,37 +4,368 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Physics Website</title>
-
-  <!-- cache-bust ?v=1 so browser reloads CSS -->
   <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* Canvas sits directly below the header, full width */
+    #intro-canvas {
+      display: block;
+      width: 100%;
+      background: #0f0f14;
+    }
+
+    /* Dark theme for the content below the animation */
+    body {
+      background: #0f0f14;
+    }
+
+    main {
+      background: #0f0f14;
+      color: #ffffff;
+      opacity: 0;
+      transition: opacity 1.2s ease;
+      padding-top: 0.25rem;
+    }
+
+    main h2 {
+      color: #ffffff;
+      border-bottom-color: rgba(255,255,255,0.12);
+    }
+
+    main p {
+      color: #ffffff;
+    }
+  </style>
 </head>
 <body>
-  <!-- site header -->
+
+  <!-- ── Site Header ─────────────────────────────────────── -->
   <header class="site-header">
     <div class="container">
       <h1 class="site-title">Physics Fun!</h1>
       <nav>
-          <a href="index.html">Home</a>
-          <a href="topics.html">Topics</a>
-          <a href="games.html">Games</a>
+        <a href="index.html">Home</a>
+        <a href="topics.html">Topics</a>
+        <a href="games.html">Games</a>
       </nav>
     </div>
   </header>
 
-  <div class="hero container">
-    <img src="Images/Front page image .png" alt="Physics illustration" class="hero-image">
-  </div>
+  <!-- ── Intro Animation Canvas ─────────────────────────── -->
+  <canvas id="intro-canvas"></canvas>
 
+  <!-- ── Page Content ───────────────────────────────────── -->
   <main>
     <h2>Welcome to Physics Fun. The Only Website you Need to Learn Physics!</h2>
-   <p>Physics fun is built with the intent to provide those taking courses such as AP and IB physics with valuable knowledge
-       about the subject matter. This website containes various topics from each course with detailed explaination and formauls about
-       each topic. I addition to this, Physics Fun also includes interactive games to help visualize and experiemnt with various physics concepts
-       to learn in a more hands on manner. Now lets get started!
+    <p>Physics fun is built with the intent to provide those taking courses such as AP and IB physics with valuable knowledge
+        about the subject. This website contains various topics from each course with detailed explanation and formulas about
+        each topic. In addition to this, Physics Fun also includes interactive games to help visualize and experiment with various physics concepts
+        to learn in a more hands on manner. Now lets get started!
     </p>
   </main>
 
-  <!-- rest of page... -->
+  <!-- ============================================================
+       PHYSICS INTRO ANIMATION
+       ============================================================ -->
+  <script>
+
+    // ── EASY-TO-EDIT SETTINGS ───────────────────────────────────
+    const TITLE_TEXT   = "Physics Explained"; // ← change your title here
+    const BG_COLOR     = "#0f0f14";           // dark background
+    const BLUE_COLOR   = "#3BA6FF";           // left particle color
+    const ORANGE_COLOR = "#FF7A2F";           // right particle color
+
+    // Timing in milliseconds (total ≈ 5 seconds)
+    const T_TRAVEL   = 1800;  // particles meet at center
+    const T_FLASH    = 2200;  // collision flash ends
+    const T_FORM     = 4400;  // text fully assembled
+    const T_SETTLE   = 5200;  // glow fades to resting state
+
+    // ── CANVAS SETUP ────────────────────────────────────────────
+    const canvas = document.getElementById("intro-canvas");
+    const ctx    = canvas.getContext("2d");
+    const dpr    = window.devicePixelRatio || 1;
+
+    let W, H;               // CSS-pixel dimensions
+    let particles  = [];    // dots that form the title text
+    let sparks     = [];    // explosion fragments that fly off screen
+    let startTime  = null;
+    let burstDone  = false; // tracks whether burst velocities are assigned
+    let animFrame  = null;
+    let done       = false;
+
+    // ── EASING FUNCTIONS ────────────────────────────────────────
+    const easeIn    = t => t * t * t;
+    const easeOut   = t => 1 - Math.pow(1 - t, 3);
+    const easeInOut = t => t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2;
+
+
+    // ── CANVAS RESIZE ───────────────────────────────────────────
+    // Sets canvas dimensions and resamples text pixel positions.
+    function setup() {
+      W = canvas.offsetWidth;
+      H = Math.round(W * 0.48);          // 42% tall — widescreen feel
+      canvas.style.height = H + "px";
+      canvas.width  = W * dpr;
+      canvas.height = H * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); // reset scale
+
+      // Paint dark background immediately so there's no white flash
+      ctx.fillStyle = BG_COLOR;
+      ctx.fillRect(0, 0, W, H);
+
+      sampleText();
+    }
+
+    // ── TEXT PIXEL SAMPLING ─────────────────────────────────────
+    // Draws the title text onto an offscreen canvas, then reads which
+    // pixels are lit. Those positions become the targets for particles.
+    function sampleText() {
+      const off      = document.createElement("canvas");
+      const fontSize = Math.max(28, Math.round(W * 0.09));
+      off.width  = W;
+      off.height = H;
+      const oc = off.getContext("2d");
+      oc.fillStyle    = "white";
+      oc.font         = `bold ${fontSize}px Inter, system-ui, sans-serif`;
+      oc.textAlign    = "center";
+      oc.textBaseline = "middle";
+      oc.fillText(TITLE_TEXT, W / 2, H / 2);
+
+      const data = oc.getImageData(0, 0, W, H).data;
+      const step = Math.max(3, Math.round(W / 260)); // adaptive density
+
+      const raw = [];
+      for (let y = 0; y < H; y += step) {
+        for (let x = 0; x < W; x += step) {
+          if (data[(y * W + x) * 4 + 3] > 100) raw.push({ x, y });
+        }
+      }
+
+      // Shuffle so colors are distributed evenly, then cap at 700
+      shuffle(raw);
+      particles = raw.slice(0, 1100).map((p, i) => ({
+        tx: p.x,                                          // target x
+        ty: p.y,                                          // target y
+        bx: W / 2,                                        // burst-from x (set later)
+        by: H / 2,                                        // burst-from y (set later)
+        color: i % 2 === 0 ? BLUE_COLOR : ORANGE_COLOR,
+        size:  1.2 + Math.random() * 0.9,
+      }));
+    }
+
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+    }
+
+    // ── COLLISION BURST ─────────────────────────────────────────
+    // Called once at the moment of impact. Assigns burst positions to
+    // text particles and creates flying sparks that don't form text.
+    function createBurst(cx, cy) {
+      // Give each text particle a random nearby burst landing spot
+      particles.forEach(p => {
+        const angle = Math.random() * Math.PI * 2;
+        const dist  = 40 + Math.random() * 210;
+        p.bx = cx + Math.cos(angle) * dist;
+        p.by = cy + Math.sin(angle) * dist;
+      });
+
+      // Extra sparks that just fly off screen
+      sparks = [];
+      for (let i = 0; i < 90; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 130 + Math.random() * 580;
+        sparks.push({
+          x:     cx,
+          y:     cy,
+          vx:    Math.cos(angle) * speed,
+          vy:    Math.sin(angle) * speed,
+          color: Math.random() > 0.5 ? BLUE_COLOR : ORANGE_COLOR,
+          size:  0.7 + Math.random() * 1.8,
+          fade:  0.5 + Math.random() * 0.5, // lifetime fraction
+        });
+      }
+    }
+
+    // ── DRAW GLOWING TRAVEL PARTICLE ────────────────────────────
+    function drawTravelParticle(x, y, color) {
+      // Outer soft halo
+      const grad = ctx.createRadialGradient(x, y, 0, x, y, 36);
+      grad.addColorStop(0,   color + "cc");
+      grad.addColorStop(0.4, color + "55");
+      grad.addColorStop(1,   "transparent");
+      ctx.beginPath();
+      ctx.arc(x, y, 36, 0, Math.PI * 2);
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Bright white core
+      ctx.save();
+      ctx.shadowBlur  = 20;
+      ctx.shadowColor = color;
+      ctx.fillStyle   = "#ffffff";
+      ctx.beginPath();
+      ctx.arc(x, y, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // ── MAIN ANIMATION LOOP ─────────────────────────────────────
+    function draw(timestamp) {
+      if (done) return;
+      if (!startTime) startTime = timestamp;
+      const t  = timestamp - startTime; // ms elapsed
+      const cx = W / 2;
+      const cy = H / 2;
+
+      // ── PHASE 1: Particles travel toward center ────────────
+      if (t <= T_TRAVEL) {
+        // Semi-transparent fill creates a motion trail
+        ctx.fillStyle = "rgba(15,15,20,0.18)";
+        ctx.fillRect(0, 0, W, H);
+
+        const p = easeIn(t / T_TRAVEL); // accelerates toward center
+
+        // Blue — enters from the left
+        drawTravelParticle(p * (cx - 10), cy, BLUE_COLOR);
+
+        // Orange — enters from the right
+        drawTravelParticle(W - p * (cx - 10), cy, ORANGE_COLOR);
+      }
+
+      // ── PHASE 2: Collision Flash ───────────────────────────
+      else if (t <= T_FLASH) {
+        if (!burstDone) {
+          createBurst(cx, cy);
+          burstDone = true;
+        }
+
+        const fp    = (t - T_TRAVEL) / (T_FLASH - T_TRAVEL); // 0 → 1
+        const alpha = easeOut(1 - fp);
+
+        ctx.fillStyle = BG_COLOR;
+        ctx.fillRect(0, 0, W, H);
+
+        // Bright white flash that quickly fades
+        ctx.fillStyle = `rgba(255,255,255,${alpha * 0.88})`;
+        ctx.fillRect(0, 0, W, H);
+
+        // Expanding blue shockwave ring
+        ctx.beginPath();
+        ctx.arc(cx, cy, fp * W * 0.45, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(160,210,255,${alpha * 0.7})`;
+        ctx.lineWidth   = 4 * (1 - fp);
+        ctx.stroke();
+
+        // Smaller orange ring
+        ctx.beginPath();
+        ctx.arc(cx, cy, fp * W * 0.28, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(255,180,80,${alpha * 0.55})`;
+        ctx.lineWidth   = 3 * (1 - fp);
+        ctx.stroke();
+      }
+
+      // ── PHASE 3: Fragments assemble into text ─────────────
+      else if (t <= T_FORM) {
+        ctx.fillStyle = BG_COLOR;
+        ctx.fillRect(0, 0, W, H);
+
+        const fp        = (t - T_FLASH) / (T_FORM - T_FLASH); // 0 → 1
+        const BURST_END = 0.28; // first 28% = burst outward, then gather
+
+        // Flying sparks (fade out during burst)
+        sparks.forEach(s => {
+          const sp    = Math.min(1, fp / s.fade);
+          const alpha = easeOut(1 - sp);
+          if (alpha <= 0) return;
+          ctx.save();
+          ctx.globalAlpha = alpha;
+          ctx.shadowBlur  = 8;
+          ctx.shadowColor = s.color;
+          ctx.fillStyle   = s.color;
+          ctx.beginPath();
+          ctx.arc(s.x + s.vx * sp * 0.7, s.y + s.vy * sp * 0.7, s.size, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        });
+
+        // Text-forming particles
+        particles.forEach(p => {
+          let x, y;
+          if (fp < BURST_END) {
+            // Burst outward from center toward burst position
+            const bp = easeOut(fp / BURST_END);
+            x = cx + (p.bx - cx) * bp;
+            y = cy + (p.by - cy) * bp;
+          } else {
+            // Smoothly gather from burst position to text target
+            const gp = easeInOut((fp - BURST_END) / (1 - BURST_END));
+            x = p.bx + (p.tx - p.bx) * gp;
+            y = p.by + (p.ty - p.by) * gp;
+          }
+
+          ctx.save();
+          ctx.shadowBlur  = 9;
+          ctx.shadowColor = p.color;
+          ctx.fillStyle   = p.color;
+          ctx.beginPath();
+          ctx.arc(x, y, p.size, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        });
+      }
+
+      // ── PHASE 4: Glow settles on finished text ─────────────
+      else {
+        ctx.fillStyle = BG_COLOR;
+        ctx.fillRect(0, 0, W, H);
+
+        const sp   = Math.min(1, (t - T_FORM) / (T_SETTLE - T_FORM)); // 0 → 1
+        const glow = 9 * (1 - sp * 0.72); // glow eases down but doesn't fully vanish
+
+        particles.forEach(p => {
+          ctx.save();
+          ctx.shadowBlur  = glow;
+          ctx.shadowColor = p.color;
+          ctx.fillStyle   = p.color;
+          ctx.beginPath();
+          ctx.arc(p.tx, p.ty, p.size, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        });
+
+        // Animation complete — draw final settled state and stop
+        if (t >= T_SETTLE) {
+          done = true;
+          // Scroll down smoothly so the text comes into view, then fade it in
+          window.scrollBy({ top: 320, behavior: "smooth" });
+          setTimeout(() => {
+            document.querySelector("main").style.opacity = "1";
+          }, 600);
+          return;
+        }
+      }
+
+      animFrame = requestAnimationFrame(draw);
+    }
+
+    // ── START ───────────────────────────────────────────────────
+    window.addEventListener("resize", () => {
+      if (animFrame) cancelAnimationFrame(animFrame);
+      startTime  = null;
+      burstDone  = false;
+      done       = false;
+      sparks     = [];
+      setup();
+      animFrame = requestAnimationFrame(draw);
+    });
+
+    setup();
+    animFrame = requestAnimationFrame(draw);
+
+  </script>
+
 </body>
 </html>
-
