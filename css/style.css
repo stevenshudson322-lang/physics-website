@@ -270,6 +270,10 @@ main > nav a {
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
+main > nav a:visited {
+  color: var(--accent);
+}
+
 main > nav a:hover {
   background: #eff6ff;
   border-color: var(--accent);
