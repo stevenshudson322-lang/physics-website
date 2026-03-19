@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Energy Skate Park – Physics Fun</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .sim-wrap { max-width: 1060px; margin: 0 auto; padding: 1.5rem; }
+    .sim-layout { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
+    .canvas-col { flex: 1 1 700px; min-width: 0; }
+    #sim-canvas { display: block; width: 100%; border-radius: 10px; border: 1px solid var(--border); cursor: default; }
+    .controls-col {
+      flex: 0 0 228px; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 13px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .ctrl-head { font-weight: 700; color: var(--primary); font-size: 0.92rem;
+      border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    .ctrl-group label { display: block; font-size: 0.78rem; font-weight: 600;
+      color: var(--text-muted); margin-bottom: 3px; letter-spacing: 0.03em; text-transform: uppercase; }
+    .ctrl-group .val { font-weight: 700; color: var(--primary); }
+    input[type=range] { width: 100%; accent-color: var(--accent); margin: 2px 0; }
+    select { width: 100%; padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px;
+      font-family: inherit; font-size: 0.875rem; color: var(--text); background: var(--surface); }
+    .btn-row { display: flex; gap: 7px; }
+    .btn-row button, .btn-full { flex: 1; padding: 8px 4px; font-size: 0.8rem; border-radius: 6px;
+      border: none; color: #fff; cursor: pointer; font-weight: 600; font-family: inherit;
+      transition: opacity 0.15s; }
+    .btn-row button:hover, .btn-full:hover { opacity: 0.85; }
+    .btn-full { width: 100%; padding: 8px; font-size: 0.82rem; margin-top: 0; }
+    .btn-start { background: linear-gradient(135deg,#16a34a,#15803d); box-shadow:0 2px 6px rgba(22,163,74,0.35); }
+    .btn-pause { background: linear-gradient(135deg,#475569,#334155); box-shadow:0 2px 6px rgba(51,65,85,0.3); }
+    .btn-reset { background: linear-gradient(135deg,#dc2626,#b91c1c); box-shadow:0 2px 6px rgba(220,38,38,0.35); }
+    .btn-flag  { background: linear-gradient(135deg,#2563eb,#1d4ed8); box-shadow:0 2px 6px rgba(37,99,235,0.35); }
+
+    /* Energy bars */
+    .energy-panel { background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 16px 18px; margin-top: 14px; }
+    .energy-panel h3 { margin: 0 0 12px; font-size: 0.9rem; color: var(--primary); }
+    .energy-bars { display: flex; gap: 14px; align-items: flex-end; height: 120px; }
+    .ebar { display: flex; flex-direction: column; align-items: center; flex: 1; gap: 4px; min-width: 0; }
+    .ebar-val { font-size: 0.7rem; font-weight: 700; color: var(--text); white-space: nowrap; }
+    .ebar-track { width: 100%; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 4px; height: 88px; display: flex; align-items: flex-end; overflow: hidden; }
+    .ebar-fill { width: 100%; border-radius: 3px 3px 0 0; transition: height 0.06s linear; }
+    .ebar-label { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); }
+
+    /* Readouts */
+    .readouts { background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+      padding: 12px 16px; margin-top: 10px; display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+    .rout { text-align: center; }
+    .rout-label { font-size: 0.68rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+    .rout-val { font-size: 1rem; font-weight: 700; color: var(--primary); }
+
+    /* Status */
+    .status-bar { text-align: center; padding: 8px 12px; font-weight: 600; font-size: 0.85rem;
+      border-radius: 6px; margin-top: 8px; min-height: 32px; }
+    .s-info    { background: #eff6ff; color: var(--accent); }
+    .s-success { background: #f0fdf4; color: #16a34a; }
+    .s-warn    { background: #fef9c3; color: #854d0e; }
+
+    /* Challenge */
+    .challenge-panel { background: #eff6ff; border: 1px solid #bfdbfe;
+      border-left: 4px solid var(--accent); border-radius: 0 8px 8px 0;
+      padding: 14px 16px; margin-top: 10px; }
+    .challenge-panel h3 { margin: 0 0 6px; font-size: 0.9rem; color: var(--primary); }
+    .pred-btns { display: flex; gap: 8px; margin-top: 8px; }
+    .pred-btns button { flex: 1; padding: 7px; font-size: 0.82rem; border: none;
+      border-radius: 6px; color: #fff; cursor: pointer; font-weight: 600; font-family: inherit; }
+    .btn-yes { background: #16a34a; } .btn-no { background: #dc2626; }
+
+    .explain-panel { background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 16px 18px; margin-top: 10px; }
+    .explain-panel h3 { margin: 0 0 8px; color: var(--primary); font-size: 0.95rem; }
+    .explain-panel p { margin: 0 0 6px; font-size: 0.84rem; color: var(--text); line-height: 1.6; }
+
+    @media (max-width: 720px) {
+      .sim-layout { flex-direction: column; }
+      .controls-col { flex: none; width: 100%; box-sizing: border-box; }
+      .readouts { grid-template-columns: repeat(2,1fr); }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1 class="site-title">Energy Skate Park</h1>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="topics.html">Topics</a>
+        <a href="games.html">Games</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="sim-wrap">
+    <div class="sim-layout">
+
+      <!-- ── Canvas ─────────────────────────────────────────── -->
+      <div class="canvas-col">
+        <canvas id="sim-canvas"></canvas>
+        <div class="status-bar s-info" id="status">Choose a track and press ▶ Start.</div>
+      </div>
+
+      <!-- ── Controls ───────────────────────────────────────── -->
+      <div class="controls-col">
+        <div class="ctrl-head">Controls</div>
+
+        <div class="ctrl-group">
+          <label>Track Shape</label>
+          <select id="track-select">
+            <option value="bowl">Bowl (Parabola)</option>
+            <option value="ramp">Ramp</option>
+            <option value="loop">Loop Track</option>
+          </select>
+        </div>
+
+        <div class="ctrl-group">
+          <label>Mass &nbsp;<span class="val" id="mass-val">60 kg</span></label>
+          <input type="range" id="mass" min="10" max="100" value="60" step="5">
+        </div>
+
+        <div class="ctrl-group">
+          <label>Starting Height &nbsp;<span class="val" id="height-val">3.0 m</span></label>
+          <input type="range" id="height" min="0.5" max="5.0" value="3.0" step="0.1">
+        </div>
+
+        <div class="ctrl-group">
+          <label>Friction (μ) &nbsp;<span class="val" id="friction-val">0.00</span></label>
+          <input type="range" id="friction" min="0" max="0.40" value="0" step="0.01">
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-start" onclick="startSim()">▶ Start</button>
+          <button class="btn-pause" onclick="pauseSim()">⏸ Pause</button>
+        </div>
+        <button class="btn-full btn-reset" onclick="resetSim()">↺ Reset</button>
+        <button class="btn-full btn-flag" onclick="placeFlag()" id="flag-btn">🚩 Place Flag</button>
+        <div style="font-size:0.73rem;color:var(--text-muted);line-height:1.5;">
+          Click <strong>Place Flag</strong>, then click on the track to set a challenge target.
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Energy Bars ─────────────────────────────────────── -->
+    <div class="energy-panel">
+      <h3>Energy Breakdown</h3>
+      <div class="energy-bars">
+        <div class="ebar">
+          <div class="ebar-val" id="ke-val">0 J</div>
+          <div class="ebar-track"><div class="ebar-fill" id="ke-bar" style="background:#f97316;height:0%"></div></div>
+          <div class="ebar-label">KE</div>
+        </div>
+        <div class="ebar">
+          <div class="ebar-val" id="pe-val">0 J</div>
+          <div class="ebar-track"><div class="ebar-fill" id="pe-bar" style="background:#22c55e;height:0%"></div></div>
+          <div class="ebar-label">PE</div>
+        </div>
+        <div class="ebar">
+          <div class="ebar-val" id="th-val">0 J</div>
+          <div class="ebar-track"><div class="ebar-fill" id="th-bar" style="background:#ef4444;height:0%"></div></div>
+          <div class="ebar-label">Thermal</div>
+        </div>
+        <div class="ebar">
+          <div class="ebar-val" id="tot-val">0 J</div>
+          <div class="ebar-track"><div class="ebar-fill" id="tot-bar" style="background:#3b82f6;height:0%"></div></div>
+          <div class="ebar-label">Total E</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Readouts ────────────────────────────────────────── -->
+    <div class="readouts">
+      <div class="rout"><div class="rout-label">Speed</div><div class="rout-val" id="r-speed">0.00 m/s</div></div>
+      <div class="rout"><div class="rout-label">Height</div><div class="rout-val" id="r-height">0.00 m</div></div>
+      <div class="rout"><div class="rout-label">KE</div><div class="rout-val" id="r-ke">0 J</div></div>
+      <div class="rout"><div class="rout-label">PE</div><div class="rout-val" id="r-pe">0 J</div></div>
+      <div class="rout"><div class="rout-label">Thermal</div><div class="rout-val" id="r-th">0 J</div></div>
+      <div class="rout"><div class="rout-label">Total E</div><div class="rout-val" id="r-tot">0 J</div></div>
+    </div>
+
+    <!-- ── Challenge ──────────────────────────────────────── -->
+    <div class="challenge-panel">
+      <h3>🎯 Challenge — Predict the Skater</h3>
+      <p style="font-size:0.83rem;margin:0 0 4px;color:var(--text);">
+        Place a flag on the track, then predict whether the skater will reach it. Test your prediction!
+      </p>
+      <p style="font-size:0.8rem;color:var(--text-muted);margin:0;" id="flag-status">No flag placed yet.</p>
+      <div class="pred-btns">
+        <button class="btn-yes" onclick="predict(true)">✓ Yes — reaches flag</button>
+        <button class="btn-no"  onclick="predict(false)">✗ No — stops short</button>
+      </div>
+      <div id="pred-result" style="margin-top:8px;font-size:0.85rem;font-weight:600;min-height:20px;"></div>
+    </div>
+
+    <!-- ── Explanation ────────────────────────────────────── -->
+    <div class="explain-panel">
+      <h3>Energy Conservation on a Track</h3>
+      <p><strong>PE = mgh</strong> — gravitational potential energy grows with height. <strong>KE = ½mv²</strong> — the skater speeds up as PE converts to KE going downhill, and slows down going uphill.</p>
+      <p><strong>Without friction</strong> the total energy bar stays perfectly constant — all PE converts to KE and back. <strong>With friction</strong>, mechanical energy decreases and thermal energy grows, reducing how high the skater can climb.</p>
+      <p>For the <strong>loop track</strong>: the skater needs starting height ≥ 2.5 × r above the loop bottom (~4.25 m) to maintain contact at the top. Try h = 4.5 m with μ = 0!</p>
+    </div>
+  </div>
+
+  <script>
+    // ══════════════════════════════════════════════════════════════
+    // CONSTANTS
+    // ══════════════════════════════════════════════════════════════
+    const G       = 9.8;          // m/s²
+    const WORLD_W = 12;           // metres wide
+    const WORLD_H = 5.6;          // metres tall
+
+    const canvas = document.getElementById('sim-canvas');
+    const ctx    = canvas.getContext('2d');
+    const dpr    = window.devicePixelRatio || 1;
+
+    // Layout (CSS pixel values, computed in resizeCanvas)
+    let SCALE, ML, MB, cssW, cssH;
+
+    // ══════════════════════════════════════════════════════════════
+    // CANVAS RESIZE
+    // ══════════════════════════════════════════════════════════════
+    function resizeCanvas() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      cssW = Math.floor(Math.min(rect.width, 900));
+      cssH = Math.round(cssW * 0.52);
+      canvas.style.width  = cssW + 'px';
+      canvas.style.height = cssH + 'px';
+      canvas.width  = cssW * dpr;
+      canvas.height = cssH * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ML = 44; MB = 36;
+      const uw = cssW - ML - 16;
+      const uh = cssH - MB - 16;
+      SCALE = Math.min(uw / WORLD_W, uh / WORLD_H);
+    }
+
+    // World → CSS-pixel conversions
+    const wx = x => ML + x * SCALE;
+    const wy = y => cssH - MB - y * SCALE;
+
+    // ══════════════════════════════════════════════════════════════
+    // TRACK GENERATION  (arc-length parametrised)
+    // ══════════════════════════════════════════════════════════════
+    function buildArcLength(pts) {
+      pts[0].s = 0;
+      for (let i = 1; i < pts.length; i++) {
+        const dx = pts[i].x - pts[i-1].x;
+        const dy = pts[i].y - pts[i-1].y;
+        pts[i].s = pts[i-1].s + Math.sqrt(dx*dx + dy*dy);
+      }
+      return pts;
+    }
+
+    function generateBowl() {
+      const pts = [];
+      const A   = 4.0 / 36.0;           // y = A*(x-6)²  → max 4 m at edges
+      for (let x = 0; x <= WORLD_W; x += 0.05) {
+        pts.push({ x, y: A * Math.pow(x - 6, 2) });
+      }
+      return buildArcLength(pts);
+    }
+
+    function generateRamp() {
+      const pts = [];
+      for (let x = 0; x <= 10; x += 0.05) {
+        pts.push({ x, y: 4.5 * (1 - x / 10) });
+      }
+      for (let x = 10.05; x <= WORLD_W; x += 0.05) {
+        pts.push({ x, y: 0 });
+      }
+      return buildArcLength(pts);
+    }
+
+    function generateLoop() {
+      const pts = [];
+      // Approach ramp: (0, 4.5) → (4, 0)
+      for (let i = 0; i <= 80; i++) {
+        const t = i / 80;
+        pts.push({ x: t * 4, y: 4.5 * (1 - t) });
+      }
+      // Flat entry to loop
+      for (let x = 4.05; x < 5.85; x += 0.05) {
+        pts.push({ x, y: 0 });
+      }
+      // Full circular loop: center (6, 1.7), r = 1.7 m
+      // Start at bottom (angle = -π/2), go counterclockwise (world y-up)
+      const lx = 6, ly = 1.7, r = 1.7;
+      for (let i = 0; i <= 128; i++) {
+        const a = -Math.PI / 2 + (2 * Math.PI * i) / 128;
+        pts.push({ x: lx + r * Math.cos(a), y: ly + r * Math.sin(a) });
+      }
+      // Exit flat
+      for (let x = 6.05; x <= WORLD_W; x += 0.06) {
+        pts.push({ x, y: 0 });
+      }
+      return buildArcLength(pts);
+    }
+
+    // ── Interpolation helpers ─────────────────────────────────
+    let track = [], totalLen = 0;
+
+    function getPointAtS(s) {
+      s = Math.max(0, Math.min(totalLen, s));
+      let lo = 0, hi = track.length - 1;
+      while (hi - lo > 1) {
+        const mid = (lo + hi) >> 1;
+        if (track[mid].s <= s) lo = mid; else hi = mid;
+      }
+      const span = track[hi].s - track[lo].s;
+      const t    = span < 1e-9 ? 0 : (s - track[lo].s) / span;
+      return {
+        x: track[lo].x + t * (track[hi].x - track[lo].x),
+        y: track[lo].y + t * (track[hi].y - track[lo].y)
+      };
+    }
+
+    function getAngleAtS(s) {
+      const eps = 0.04;
+      const p1  = getPointAtS(Math.max(0, s - eps));
+      const p2  = getPointAtS(Math.min(totalLen, s + eps));
+      return Math.atan2(p2.y - p1.y, p2.x - p1.x);  // world angle
+    }
+
+    // Find arc-length position closest to a canvas click
+    function findClosestS(cxPx, cyPx) {
+      let best = 0, bestDist = Infinity;
+      for (const pt of track) {
+        const d = Math.hypot(wx(pt.x) - cxPx, wy(pt.y) - cyPx);
+        if (d < bestDist) { bestDist = d; best = pt.s; }
+      }
+      return best;
+    }
+
+    // Find the arc-length position on the LEFT side of the track
+    // closest to the requested starting height
+    function findStartingS(hTarget) {
+      const maxH   = track[0].y;
+      const h      = Math.min(hTarget, maxH); // clamp to track's max height
+      const searchX = WORLD_W * 0.46;         // only scan left portion
+      let best = 0, bestDist = Infinity;
+      for (const pt of track) {
+        if (pt.x > searchX) break;
+        const d = Math.abs(pt.y - h);
+        if (d < bestDist) { bestDist = d; best = pt.s; }
+      }
+      return best;
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // SIMULATION STATE
+    // ══════════════════════════════════════════════════════════════
+    let state     = { s: 0, dir: 1, thermal: 0, running: false };
+    let E_initial = 0;
+    let flagS     = -1;
+    let prediction   = null;   // true / false / null
+    let predResult   = '';
+    let flagPlacing  = false;
+    let animId    = null;
+    let lastTime  = null;
+
+    // ── Read control values ───────────────────────────────────
+    function getM()  { return parseFloat(document.getElementById('mass').value); }
+    function getH()  { return parseFloat(document.getElementById('height').value); }
+    function getMu() { return parseFloat(document.getElementById('friction').value); }
+
+    // ══════════════════════════════════════════════════════════════
+    // PHYSICS STEP
+    // ══════════════════════════════════════════════════════════════
+    function physicsStep(dt) {
+      if (!state.running) return;
+      const m  = getM();
+      const mu = getMu();
+      const SUBS = 10;
+      const sub  = dt / SUBS;
+
+      for (let i = 0; i < SUBS; i++) {
+        const pos  = getPointAtS(state.s);
+        const PE   = m * G * pos.y;
+        const KE   = Math.max(0, E_initial - state.thermal - PE);
+
+        if (KE < 5e-4) {
+          // Can't go further — reverse direction and nudge away
+          state.dir *= -1;
+          state.s    = Math.max(0.02, Math.min(totalLen - 0.02, state.s + state.dir * 0.05));
+          continue;
+        }
+
+        const v        = Math.sqrt(2 * KE / m);
+        const ds       = v * sub;
+        const angle    = getAngleAtS(state.s);
+        const cosTheta = Math.abs(Math.cos(angle));
+
+        // Friction removes mechanical energy
+        state.thermal  = Math.min(state.thermal + mu * m * G * cosTheta * ds, E_initial);
+
+        // Advance position
+        state.s += state.dir * ds;
+        if (state.s <= 0)          { state.s = 0.01;             state.dir =  1; }
+        if (state.s >= totalLen)   { state.s = totalLen - 0.01;  state.dir = -1; }
+      }
+
+      // ── Check flag prediction ─────────────────────────────
+      if (flagS >= 0 && prediction !== null && predResult === '') {
+        const pos = getPointAtS(state.s);
+        const KE  = Math.max(0, E_initial - state.thermal - getM() * G * pos.y);
+        const reached = (state.s >= flagS - 0.15);
+        const stalled = (KE < 1e-3);
+
+        if (reached) {
+          predResult = prediction
+            ? '✅ Correct! The skater reached the flag.'
+            : '❌ Wrong — the skater reached the flag!';
+          showPredResult(prediction ? '#16a34a' : '#dc2626');
+        } else if (stalled) {
+          predResult = !prediction
+            ? '✅ Correct! The skater stopped before the flag.'
+            : '❌ Wrong — the skater stopped short of the flag.';
+          showPredResult(!prediction ? '#16a34a' : '#dc2626');
+        }
+      }
+    }
+
+    function showPredResult(color) {
+      const el = document.getElementById('pred-result');
+      el.textContent = predResult;
+      el.style.color = color;
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // RENDERING
+    // ══════════════════════════════════════════════════════════════
+    function drawFrame() {
+      // ── Night sky background ─────────────────────────────────
+      const sky = ctx.createLinearGradient(0, 0, 0, wy(0));
+      sky.addColorStop(0,   '#060d1c');
+      sky.addColorStop(0.5, '#0d1e38');
+      sky.addColorStop(1,   '#163050');
+      ctx.fillStyle = sky;
+      ctx.fillRect(0, 0, cssW, cssH);
+
+      // Stars (static, seeded positions)
+      const STARS = [[55,12],[132,20],[215,8],[370,16],[495,9],[618,23],[672,14],
+                     [90,30],[280,26],[430,5],[560,28],[740,18],[170,7],[340,33]];
+      for (const [sx, sy] of STARS) {
+        if (sx >= cssW - 8) continue;
+        ctx.globalAlpha = 0.35 + (sx % 5) * 0.1;
+        ctx.fillStyle = '#fff';
+        ctx.beginPath(); ctx.arc(sx, sy, sy % 3 === 0 ? 1.2 : 0.7, 0, Math.PI*2); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+
+      // Grid (subtle)
+      ctx.strokeStyle = 'rgba(30,58,95,0.45)';
+      ctx.lineWidth   = 0.8;
+      for (let y = 0; y <= Math.ceil(WORLD_H); y++) {
+        ctx.beginPath();
+        ctx.moveTo(ML - 4, wy(y));
+        ctx.lineTo(wx(WORLD_W) + 4, wy(y));
+        ctx.stroke();
+      }
+      ctx.fillStyle = '#475569'; ctx.font = '10px Inter,sans-serif'; ctx.textAlign = 'right';
+      for (let y = 0; y <= 5; y++) ctx.fillText(y + ' m', ML - 7, wy(y) + 4);
+
+      // Ground with gradient
+      const groundTop = wy(0);
+      const gndGrad = ctx.createLinearGradient(0, groundTop, 0, cssH);
+      gndGrad.addColorStop(0,   '#166534');
+      gndGrad.addColorStop(0.3, '#14532d');
+      gndGrad.addColorStop(1,   '#052e16');
+      ctx.fillStyle = gndGrad;
+      ctx.fillRect(ML, groundTop, wx(WORLD_W) - ML, cssH - groundTop);
+      // Grass surface line
+      ctx.strokeStyle = 'rgba(34,197,94,0.4)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(ML, groundTop); ctx.lineTo(wx(WORLD_W), groundTop); ctx.stroke();
+
+      // Track: area fill below surface
+      if (track.length > 1) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(wx(track[0].x), wy(track[0].y));
+        for (let i = 1; i < track.length; i++) ctx.lineTo(wx(track[i].x), wy(track[i].y));
+        ctx.lineTo(wx(track[track.length - 1].x), wy(0));
+        ctx.lineTo(wx(track[0].x), wy(0));
+        ctx.closePath();
+        const aFill = ctx.createLinearGradient(0, wy(WORLD_H), 0, wy(0));
+        aFill.addColorStop(0, 'rgba(37,99,235,0.14)');
+        aFill.addColorStop(1, 'rgba(37,99,235,0.02)');
+        ctx.fillStyle = aFill; ctx.fill();
+        ctx.restore();
+
+        // Outer glow
+        ctx.save();
+        ctx.shadowBlur = 18; ctx.shadowColor = 'rgba(96,165,250,0.45)';
+        ctx.beginPath();
+        ctx.moveTo(wx(track[0].x), wy(track[0].y));
+        for (let i = 1; i < track.length; i++) ctx.lineTo(wx(track[i].x), wy(track[i].y));
+        ctx.strokeStyle = 'rgba(96,165,250,0.22)'; ctx.lineWidth = 7; ctx.stroke();
+        ctx.restore();
+
+        // Main track line
+        const trkG = ctx.createLinearGradient(ML, wy(4.5), wx(WORLD_W), wy(0));
+        trkG.addColorStop(0, '#3b82f6'); trkG.addColorStop(1, '#93c5fd');
+        ctx.beginPath();
+        ctx.moveTo(wx(track[0].x), wy(track[0].y));
+        for (let i = 1; i < track.length; i++) ctx.lineTo(wx(track[i].x), wy(track[i].y));
+        ctx.strokeStyle = trkG; ctx.lineWidth = 3.5; ctx.lineJoin = 'round'; ctx.stroke();
+
+        // Highlight sheen
+        ctx.beginPath();
+        ctx.moveTo(wx(track[0].x), wy(track[0].y));
+        for (let i = 1; i < track.length; i++) ctx.lineTo(wx(track[i].x), wy(track[i].y));
+        ctx.strokeStyle = 'rgba(219,234,254,0.3)'; ctx.lineWidth = 1; ctx.stroke();
+      }
+
+      // Flag
+      if (flagS >= 0) {
+        const fp = getPointAtS(flagS);
+        const fx = wx(fp.x), fy = wy(fp.y);
+        ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(fx, fy); ctx.lineTo(fx, fy - 30); ctx.stroke();
+        ctx.shadowBlur = 6; ctx.shadowColor = 'rgba(239,68,68,0.5)';
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.moveTo(fx, fy - 30); ctx.lineTo(fx + 16, fy - 23); ctx.lineTo(fx, fy - 16);
+        ctx.closePath(); ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#fff'; ctx.font = 'bold 6px Inter,sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('FLAG', fx + 8, fy - 21);
+      }
+
+      // ── Skater ──────────────────────────────────────────────────
+      const pos   = getPointAtS(state.s);
+      const sx    = wx(pos.x);
+      const sy    = wy(pos.y);
+      const angle = getAngleAtS(state.s);
+      const m     = getM();
+      const h     = pos.y;
+      const PE    = m * G * h;
+      const KE    = Math.max(0, E_initial - state.thermal - PE);
+      const spd   = Math.sqrt(2 * KE / Math.max(m, 0.1));
+
+      ctx.save();
+      ctx.translate(sx, sy);
+      ctx.rotate(-angle);
+
+      // Board shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.25)';
+      ctx.beginPath(); ctx.ellipse(0, 3, 13, 3, 0, 0, Math.PI*2); ctx.fill();
+
+      // Skateboard
+      const brdG = ctx.createLinearGradient(-14, -2, 14, 3);
+      brdG.addColorStop(0, '#c2410c'); brdG.addColorStop(0.4, '#f97316');
+      brdG.addColorStop(0.6, '#f97316'); brdG.addColorStop(1, '#c2410c');
+      ctx.fillStyle = brdG;
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(-14, -2, 28, 5, 2); else ctx.rect(-14, -2, 28, 5);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(124,45,18,0.6)'; ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(-14, -2, 28, 5, 2); else ctx.rect(-14, -2, 28, 5);
+      ctx.stroke();
+
+      // Wheels
+      ctx.fillStyle = '#1e293b';
+      for (const wx2 of [-9, 9]) {
+        ctx.beginPath(); ctx.arc(wx2, 3, 2.5, 0, Math.PI*2); ctx.fill();
+        ctx.strokeStyle = '#475569'; ctx.lineWidth = 0.5;
+        ctx.beginPath(); ctx.arc(wx2, 3, 1.3, 0, Math.PI*2); ctx.stroke();
+      }
+
+      // Stick figure — legs
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(-5, -2); ctx.lineTo(-2, -9); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(5, -2); ctx.lineTo(2, -9); ctx.stroke();
+
+      // Torso
+      ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.moveTo(0, -9); ctx.lineTo(0, -19); ctx.stroke();
+
+      // Arms (dynamic forward-lean pose)
+      ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(0, -15); ctx.lineTo(-8, -12); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, -15); ctx.lineTo(7, -18); ctx.stroke();
+
+      // Helmet
+      ctx.shadowBlur = 10; ctx.shadowColor = 'rgba(96,165,250,0.45)';
+      const hG = ctx.createRadialGradient(-2, -24, 1, 0, -22, 7);
+      hG.addColorStop(0, '#60a5fa'); hG.addColorStop(1, '#1e40af');
+      ctx.fillStyle = hG;
+      ctx.beginPath(); ctx.arc(0, -22, 7, 0, Math.PI*2); ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = '#1e3a5f'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(0, -22, 7, 0, Math.PI*2); ctx.stroke();
+      // Visor
+      ctx.fillStyle = 'rgba(186,230,253,0.55)';
+      ctx.beginPath(); ctx.arc(0, -21, 5.5, 0.15 * Math.PI, 0.85 * Math.PI); ctx.fill();
+
+      ctx.restore();
+
+      // Speed vector arrow (when moving)
+      if (spd > 0.3) {
+        const vLen = Math.min(spd * 4, 45);
+        const vx1 = sx + Math.cos(-angle) * 16;
+        const vy1 = sy + Math.sin(-angle) * 16;
+        const vAngle = -angle;
+        const vx2 = vx1 + Math.cos(vAngle) * vLen;
+        const vy2 = vy1 + Math.sin(vAngle) * vLen;
+        ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 2;
+        ctx.shadowColor = 'rgba(251,191,36,0.5)'; ctx.shadowBlur = 7;
+        ctx.beginPath(); ctx.moveTo(vx1, vy1); ctx.lineTo(vx2, vy2); ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath();
+        ctx.moveTo(vx2, vy2);
+        ctx.lineTo(vx2 - 9*Math.cos(vAngle - 0.4), vy2 - 9*Math.sin(vAngle - 0.4));
+        ctx.lineTo(vx2 - 9*Math.cos(vAngle + 0.4), vy2 - 9*Math.sin(vAngle + 0.4));
+        ctx.closePath(); ctx.fill();
+      }
+
+      // ── UI readouts ───────────────────────────────────────────
+      const tot  = KE + PE + state.thermal;
+      const maxE = Math.max(E_initial, 1);
+
+      document.getElementById('r-speed').textContent  = spd.toFixed(2) + ' m/s';
+      document.getElementById('r-height').textContent = h.toFixed(2)   + ' m';
+      document.getElementById('r-ke').textContent     = Math.round(KE)             + ' J';
+      document.getElementById('r-pe').textContent     = Math.round(PE)             + ' J';
+      document.getElementById('r-th').textContent     = Math.round(state.thermal)  + ' J';
+      document.getElementById('r-tot').textContent    = Math.round(tot)            + ' J';
+
+      const BAR_GRADS = {
+        'ke-bar':  'linear-gradient(to top,#ea580c,#fb923c)',
+        'pe-bar':  'linear-gradient(to top,#15803d,#4ade80)',
+        'th-bar':  'linear-gradient(to top,#b91c1c,#f87171)',
+        'tot-bar': 'linear-gradient(to top,#1d4ed8,#60a5fa)'
+      };
+      function bar(fillId, valId, val) {
+        const el = document.getElementById(fillId);
+        el.style.height     = Math.min(100, (val / maxE) * 100) + '%';
+        el.style.background = BAR_GRADS[fillId];
+        document.getElementById(valId).textContent = Math.round(val) + ' J';
+      }
+      bar('ke-bar',  'ke-val',  KE);
+      bar('pe-bar',  'pe-val',  PE);
+      bar('th-bar',  'th-val',  state.thermal);
+      bar('tot-bar', 'tot-val', tot);
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // ANIMATION LOOP
+    // ══════════════════════════════════════════════════════════════
+    function loop(ts) {
+      if (!state.running) { animId = null; return; }
+      if (!lastTime) lastTime = ts;
+      const dt = Math.min((ts - lastTime) / 1000, 0.05);
+      lastTime = ts;
+      physicsStep(dt);
+      drawFrame();
+      animId = requestAnimationFrame(loop);
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // CONTROL FUNCTIONS
+    // ══════════════════════════════════════════════════════════════
+    function buildTrack() {
+      const type = document.getElementById('track-select').value;
+      track    = type === 'bowl' ? generateBowl() : type === 'ramp' ? generateRamp() : generateLoop();
+      totalLen = track[track.length - 1].s;
+    }
+
+    function initState() {
+      buildTrack();
+      const startS  = findStartingS(getH());
+      const actualH = getPointAtS(startS).y;
+      const m       = getM();
+      state.s       = startS;
+      state.dir     = 1;
+      state.thermal = 0;
+      state.running = false;
+      E_initial = m * G * actualH + 0.5 * m * 0.01; // tiny KE boost prevents deadlock at start
+      predResult = '';
+      document.getElementById('pred-result').textContent = '';
+    }
+
+    function startSim() {
+      if (state.running) return;
+      state.running = true;
+      lastTime      = null;
+      setStatus('Simulation running…', 's-info');
+      animId = requestAnimationFrame(loop);
+    }
+
+    function pauseSim() {
+      state.running = false;
+      if (animId) { cancelAnimationFrame(animId); animId = null; }
+      setStatus('Paused. Press ▶ Start to continue.', 's-info');
+      drawFrame();
+    }
+
+    function resetSim() {
+      pauseSim();
+      flagS = -1;
+      prediction = null;
+      document.getElementById('flag-status').textContent  = 'No flag placed yet.';
+      document.getElementById('pred-result').textContent  = '';
+      initState();
+      drawFrame();
+      setStatus('Reset. Press ▶ Start to begin.', 's-info');
+    }
+
+    function placeFlag() {
+      flagPlacing = true;
+      canvas.style.cursor = 'crosshair';
+      setStatus('Click on the track to place the flag…', 's-warn');
+    }
+
+    function predict(val) {
+      prediction = val;
+      predResult = '';
+      document.getElementById('pred-result').textContent =
+        'Prediction set: ' + (val ? '"Yes, reaches flag"' : '"No, stops short"') + '. Press ▶ Start!';
+      document.getElementById('pred-result').style.color = 'var(--text-muted)';
+    }
+
+    function setStatus(msg, cls) {
+      const el       = document.getElementById('status');
+      el.textContent = msg;
+      el.className   = 'status-bar ' + cls;
+    }
+
+    // ── Canvas click → place flag ─────────────────────────────
+    canvas.addEventListener('click', e => {
+      if (!flagPlacing) return;
+      const rect = canvas.getBoundingClientRect();
+      const cxPx = e.clientX - rect.left;
+      const cyPx = e.clientY - rect.top;
+      flagS      = findClosestS(cxPx, cyPx);
+      flagPlacing = false;
+      canvas.style.cursor = 'default';
+      const fp = getPointAtS(flagS);
+      document.getElementById('flag-status').textContent =
+        `Flag at h = ${fp.y.toFixed(1)} m  (arc pos ${flagS.toFixed(1)} m)`;
+      setStatus('Flag placed! Make your prediction below, then press ▶ Start.', 's-info');
+      drawFrame();
+    });
+
+    // ── Slider live updates ───────────────────────────────────
+    function updateStartingEnergy() {
+      const startS  = findStartingS(getH());
+      state.s       = startS;
+      const actualH = getPointAtS(startS).y;
+      const m       = getM();
+      E_initial = m * G * actualH + 0.5 * m * 0.01;
+    }
+    document.getElementById('mass').addEventListener('input', e => {
+      document.getElementById('mass-val').textContent = e.target.value + ' kg';
+      if (!state.running) { updateStartingEnergy(); drawFrame(); }
+    });
+    document.getElementById('height').addEventListener('input', e => {
+      document.getElementById('height-val').textContent = parseFloat(e.target.value).toFixed(1) + ' m';
+      if (!state.running) { updateStartingEnergy(); drawFrame(); }
+    });
+    document.getElementById('friction').addEventListener('input', e => {
+      document.getElementById('friction-val').textContent = parseFloat(e.target.value).toFixed(2);
+    });
+    document.getElementById('track-select').addEventListener('change', resetSim);
+
+    window.addEventListener('resize', () => { resizeCanvas(); drawFrame(); });
+
+    // ── roundRect polyfill ────────────────────────────────────
+    if (!CanvasRenderingContext2D.prototype.roundRect) {
+      CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+        this.moveTo(x + r, y);
+        this.lineTo(x + w - r, y);
+        this.quadraticCurveTo(x + w, y,     x + w, y + r);
+        this.lineTo(x + w, y + h - r);
+        this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        this.lineTo(x + r, y + h);
+        this.quadraticCurveTo(x,     y + h, x,     y + h - r);
+        this.lineTo(x, y + r);
+        this.quadraticCurveTo(x,     y,     x + r, y);
+        this.closePath();
+        return this;
+      };
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // INIT
+    // ══════════════════════════════════════════════════════════════
+    resizeCanvas();
+    initState();
+    drawFrame();
+  </script>
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2026 Physics Fun. All rights reserved.</p>
+      <p>The content, simulations, graphics, and source code on this website are the intellectual property of Physics Fun. This material is provided for personal educational use only. No part of this website may be copied, modified, redistributed, or used to create derivative works without explicit written permission.</p>
+    </div>
+  </footer>
+</body>
+</html>

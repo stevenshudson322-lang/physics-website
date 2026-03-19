@@ -304,3 +304,24 @@ main > nav a:hover {
   font-size: 0.85rem;
   letter-spacing: 0.02em;
 }
+
+/* ── Site Footer ─────────────────────────────────────────────── */
+.site-footer {
+  background: var(--primary);
+  color: rgba(255,255,255,0.75);
+  margin-top: 3rem;
+  padding: 24px 0;
+  font-size: 0.78rem;
+  line-height: 1.7;
+}
+
+.site-footer .container {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.site-footer p {
+  margin: 0 0 4px;
+  color: rgba(255,255,255,0.75);
+}

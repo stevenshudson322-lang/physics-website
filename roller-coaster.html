@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Roller Coaster Energy – Physics Fun</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .sim-wrap { max-width: 1100px; margin: 0 auto; padding: 1.5rem; }
+    .sim-layout { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
+    .canvas-col { flex: 1 1 720px; min-width: 0; }
+    #sim-canvas {
+      display: block; width: 100%; border-radius: 12px;
+      border: 2px solid var(--border); cursor: default;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    }
+    #sim-canvas.build-mode { cursor: crosshair; }
+    .controls-col {
+      flex: 0 0 240px; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 11px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    .ctrl-head { font-weight: 700; color: var(--primary); font-size: 0.92rem;
+      border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    .ctrl-group label { display: block; font-size: 0.78rem; font-weight: 600;
+      color: var(--text-muted); margin-bottom: 3px; letter-spacing: 0.03em; text-transform: uppercase; }
+    .ctrl-group .val { font-weight: 700; color: var(--primary); }
+    input[type=range] { width: 100%; accent-color: var(--accent); margin: 2px 0; }
+    .track-btns { display: flex; gap: 7px; }
+    .track-btn {
+      flex: 1; padding: 7px 4px; font-size: 0.78rem; border-radius: 6px;
+      border: 2px solid var(--border); background: var(--surface); color: var(--text);
+      cursor: pointer; font-weight: 600; font-family: inherit; transition: all 0.15s;
+    }
+    .track-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn-row { display: flex; gap: 7px; }
+    .btn-row button, .btn-full {
+      flex: 1; padding: 8px 4px; font-size: 0.8rem; border-radius: 6px;
+      border: none; color: #fff; cursor: pointer; font-weight: 600; font-family: inherit;
+      transition: opacity 0.15s;
+    }
+    .btn-row button:hover, .btn-full:hover { opacity: 0.85; }
+    .btn-full { width: 100%; padding: 8px; font-size: 0.82rem; }
+    .btn-start { background: linear-gradient(135deg,#16a34a,#15803d); }
+    .btn-pause { background: linear-gradient(135deg,#475569,#334155); }
+    .btn-reset { background: linear-gradient(135deg,#dc2626,#b91c1c); }
+    .btn-build { background: linear-gradient(135deg,#7c3aed,#6d28d9); }
+    .btn-build-active { background: linear-gradient(135deg,#d97706,#b45309); }
+    .btn-add { background: linear-gradient(135deg,#0891b2,#0e7490); }
+    .btn-rem { background: linear-gradient(135deg,#9333ea,#7e22ce); }
+    .energy-panel { background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 16px 18px; margin-top: 14px; }
+    .energy-panel h3 { margin: 0 0 12px; font-size: 0.9rem; color: var(--primary); }
+    .energy-bars { display: flex; gap: 14px; align-items: flex-end; height: 110px; }
+    .ebar { display: flex; flex-direction: column; align-items: center; flex: 1; gap: 4px; min-width: 0; }
+    .ebar-val { font-size: 0.7rem; font-weight: 700; color: var(--text); white-space: nowrap; }
+    .ebar-track { width: 100%; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 4px; height: 78px; display: flex; align-items: flex-end; overflow: hidden; }
+    .ebar-fill { width: 100%; border-radius: 3px 3px 0 0; transition: height 0.06s linear; }
+    .ebar-label { font-size: 0.72rem; font-weight: 600; color: var(--text-muted); }
+    .readouts { background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+      padding: 12px 16px; margin-top: 10px; display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+    .rout { text-align: center; }
+    .rout-label { font-size: 0.68rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+    .rout-val { font-size: 1rem; font-weight: 700; color: var(--primary); }
+    .status-bar { text-align: center; padding: 8px 12px; font-weight: 600; font-size: 0.85rem;
+      border-radius: 6px; margin-top: 8px; min-height: 32px; }
+    .s-info    { background: #eff6ff; color: var(--accent); }
+    .s-success { background: #f0fdf4; color: #16a34a; }
+    .s-warn    { background: #fef9c3; color: #854d0e; }
+    .challenge-panel { background: #eff6ff; border: 1px solid #bfdbfe;
+      border-left: 4px solid var(--accent); border-radius: 0 8px 8px 0;
+      padding: 14px 16px; margin-top: 10px; }
+    .challenge-panel h3 { margin: 0 0 6px; font-size: 0.9rem; color: var(--primary); }
+    .build-hint { background: #fef9c3; border: 1px solid #fde047;
+      border-left: 4px solid #ca8a04; border-radius: 0 8px 8px 0;
+      padding: 10px 14px; font-size: 0.82rem; color: #713f12;
+      margin-top: 10px; display: none; }
+    .build-hint.visible { display: block; }
+    .explain-panel { background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 16px 18px; margin-top: 10px; }
+    .explain-panel h3 { margin: 0 0 8px; color: var(--primary); font-size: 0.95rem; }
+    .explain-panel p { margin: 0 0 6px; font-size: 0.84rem; color: var(--text); line-height: 1.6; }
+    @media (max-width: 760px) {
+      .sim-layout { flex-direction: column; }
+      .controls-col { flex: none; width: 100%; box-sizing: border-box; }
+      .readouts { grid-template-columns: repeat(2,1fr); }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1 class="site-title">Roller Coaster Energy</h1>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="topics.html">Topics</a>
+        <a href="games.html">Games</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="sim-wrap">
+    <div class="sim-layout">
+      <div class="canvas-col">
+        <canvas id="sim-canvas"></canvas>
+        <div class="status-bar s-info" id="status">Choose a preset or click 🔧 Build Track to design your own, then press ▶ Start.</div>
+      </div>
+
+      <div class="controls-col">
+        <div class="ctrl-head">Controls</div>
+
+        <div class="ctrl-group">
+          <label>Track Preset</label>
+          <div class="track-btns">
+            <button class="track-btn active" id="btn-easy"      onclick="selectTrack('easy')">Easy</button>
+            <button class="track-btn"        id="btn-challenge" onclick="selectTrack('challenge')">Challenge</button>
+          </div>
+        </div>
+
+        <button class="btn-full btn-build" id="btn-build" onclick="toggleBuildMode()">🔧 Build Track</button>
+
+        <div id="build-controls" style="display:none;">
+          <div class="btn-row">
+            <button class="btn-add" onclick="addControlPoint()">+ Point</button>
+            <button class="btn-rem" onclick="removeControlPoint()">− Point</button>
+          </div>
+        </div>
+
+        <div style="border-top:1px solid var(--border);"></div>
+
+        <div class="ctrl-group">
+          <label>Mass &nbsp;<span class="val" id="mass-val">800 kg</span></label>
+          <input type="range" id="mass" min="200" max="2000" value="800" step="50">
+        </div>
+
+        <div class="ctrl-group">
+          <label>Friction (μ) &nbsp;<span class="val" id="friction-val">0.00</span></label>
+          <input type="range" id="friction" min="0" max="0.30" value="0" step="0.01">
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-start" onclick="startSim()">▶ Start</button>
+          <button class="btn-pause" onclick="pauseSim()">⏸ Pause</button>
+        </div>
+        <button class="btn-full btn-reset" onclick="resetSim()">↺ Reset</button>
+
+        <div style="border-top:1px solid var(--border);padding-top:10px;">
+          <div style="font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px;">Your Prediction</div>
+          <div style="font-size:0.82rem;color:var(--text);margin-bottom:6px;">Will the coaster complete the full course?</div>
+          <div style="display:flex;gap:8px;">
+            <button style="flex:1;padding:7px;font-size:0.82rem;border:none;border-radius:6px;color:#fff;cursor:pointer;font-weight:600;font-family:inherit;background:#16a34a;" onclick="predict(true)">✓ Yes</button>
+            <button style="flex:1;padding:7px;font-size:0.82rem;border:none;border-radius:6px;color:#fff;cursor:pointer;font-weight:600;font-family:inherit;background:#dc2626;" onclick="predict(false)">✗ No</button>
+          </div>
+          <div id="pred-result" style="margin-top:8px;font-size:0.82rem;font-weight:600;min-height:18px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="build-hint" id="build-hint">
+      <strong>Build Mode:</strong> Drag the <span style="color:#b45309;font-weight:700;">yellow dots</span> to reshape the track. Use <em>+ Point</em> to add more control points, <em>− Point</em> to remove the last one. Click <em>Exit Build</em> when done.
+    </div>
+
+    <div class="energy-panel">
+      <h3>Energy Breakdown</h3>
+      <div class="energy-bars">
+        <div class="ebar">
+          <div class="ebar-val" id="ke-val">0 J</div>
+          <div class="ebar-track"><div class="ebar-fill" id="ke-bar" style="height:0%"></div></div>
+          <div class="ebar-label">KE</div>
+        </div>
+        <div class="ebar">
+          <div class="ebar-val" id="pe-val">0 J</div>
+          <div class="ebar-track"><div class="ebar-fill" id="pe-bar" style="height:0%"></div></div>
+          <div class="ebar-label">PE</div>
+        </div>
+        <div class="ebar">
+          <div class="ebar-val" id="th-val">0 J</div>
+          <div class="ebar-track"><div class="ebar-fill" id="th-bar" style="height:0%"></div></div>
+          <div class="ebar-label">Thermal</div>
+        </div>
+        <div class="ebar">
+          <div class="ebar-val" id="tot-val">0 J</div>
+          <div class="ebar-track"><div class="ebar-fill" id="tot-bar" style="height:0%"></div></div>
+          <div class="ebar-label">Total E</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="readouts">
+      <div class="rout"><div class="rout-label">Speed</div><div class="rout-val" id="r-speed">0.00 m/s</div></div>
+      <div class="rout"><div class="rout-label">Height</div><div class="rout-val" id="r-height">0.00 m</div></div>
+      <div class="rout"><div class="rout-label">KE</div><div class="rout-val" id="r-ke">0 J</div></div>
+      <div class="rout"><div class="rout-label">PE</div><div class="rout-val" id="r-pe">0 J</div></div>
+      <div class="rout"><div class="rout-label">Thermal</div><div class="rout-val" id="r-th">0 J</div></div>
+      <div class="rout"><div class="rout-label">Total E</div><div class="rout-val" id="r-tot">0 J</div></div>
+    </div>
+
+    <div class="challenge-panel">
+      <h3>🎢 Challenge Goals</h3>
+      <p style="font-size:0.83rem;margin:0 0 4px;color:var(--text);">
+        <strong>Easy:</strong> Can the cart clear both hills and reach the finish? Add friction — how much can you add and still complete the course?<br>
+        <strong>Challenge:</strong> Can the cart survive the steep hill? Try building your own track with a huge drop!
+      </p>
+      <div id="challenge-result" style="margin-top:8px;font-size:0.88rem;font-weight:600;min-height:20px;"></div>
+    </div>
+
+    <div class="explain-panel">
+      <h3>Roller Coaster Physics</h3>
+      <p><strong>Energy conservation</strong> determines whether the coaster completes the course. At any point: KE = E_total − PE − E_thermal. The cart speeds up going downhill (PE→KE) and slows going uphill (KE→PE).</p>
+      <p><strong>Friction</strong> continuously removes mechanical energy. Each metre of track costs energy equal to μmg·cos(θ)·ds. With enough friction, the cart stalls before reaching high points.</p>
+      <p><strong>Build your own track</strong> by clicking 🔧 Build Track and dragging the yellow control points. The simulation automatically fits a smooth curve through your points.</p>
+    </div>
+  </div>
+
+  <script>
+  // ═══════════════════════════════════════════════
+  // CONSTANTS
+  // ═══════════════════════════════════════════════
+  const G       = 9.8;
+  const WORLD_W = 16;
+  const WORLD_H = 9;
+
+  const canvas = document.getElementById('sim-canvas');
+  const ctx    = canvas.getContext('2d');
+  const dpr    = window.devicePixelRatio || 1;
+
+  let SCALE, ML, MB, cssW, cssH;
+
+  function resizeCanvas() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    cssW = Math.floor(Math.min(rect.width, 960));
+    cssH = Math.round(cssW * 9 / 16);
+    canvas.style.width  = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+    canvas.width  = cssW * dpr;
+    canvas.height = cssH * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ML = 52; MB = 36;
+    SCALE = Math.min((cssW - ML - 16) / WORLD_W, (cssH - MB - 20) / WORLD_H);
+  }
+
+  const wx = x => ML + x * SCALE;
+  const wy = y => cssH - MB - y * SCALE;
+  const cxToWorld = cx => (cx - ML) / SCALE;
+  const cyToWorld = cy => (cssH - MB - cy) / SCALE;
+
+  // ═══════════════════════════════════════════════
+  // CONTROL POINTS & SPLINE
+  // ═══════════════════════════════════════════════
+  const PRESET_EASY = [
+    {x:0,    y:6.8},
+    {x:2.5,  y:5.5},
+    {x:4.5,  y:0.3},
+    {x:6.5,  y:4.0},
+    {x:8.5,  y:0.3},
+    {x:10.5, y:2.5},
+    {x:13,   y:0.3},
+    {x:16,   y:0.5}
+  ];
+  const PRESET_CHALLENGE = [
+    {x:0,    y:8.0},
+    {x:2,    y:0.3},
+    {x:5,    y:0.3},
+    {x:7.5,  y:5.8},
+    {x:10,   y:0.3},
+    {x:12.5, y:1.8},
+    {x:16,   y:0.4}
+  ];
+
+  let controlPoints = PRESET_EASY.map(p => ({...p}));
+  let track = [], totalLen = 0;
+
+  function getPreset(name) {
+    return (name === 'easy' ? PRESET_EASY : PRESET_CHALLENGE).map(p => ({...p}));
+  }
+
+  function catmullRom(p0, p1, p2, p3, t) {
+    const t2 = t*t, t3 = t2*t;
+    return {
+      x: 0.5*((2*p1.x)+(-p0.x+p2.x)*t+(2*p0.x-5*p1.x+4*p2.x-p3.x)*t2+(-p0.x+3*p1.x-3*p2.x+p3.x)*t3),
+      y: 0.5*((2*p1.y)+(-p0.y+p2.y)*t+(2*p0.y-5*p1.y+4*p2.y-p3.y)*t2+(-p0.y+3*p1.y-3*p2.y+p3.y)*t3)
+    };
+  }
+
+  function rebuildTrack() {
+    const pts = [...controlPoints].sort((a,b) => a.x - b.x);
+    if (pts.length < 2) { track = []; totalLen = 0; return; }
+
+    const samples = [];
+    const N = 40;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[Math.max(0, i-1)];
+      const p1 = pts[i];
+      const p2 = pts[i+1];
+      const p3 = pts[Math.min(pts.length-1, i+2)];
+      const start = (i === 0) ? 0 : 1;
+      for (let j = start; j <= N; j++) {
+        const pt = catmullRom(p0, p1, p2, p3, j/N);
+        pt.y = Math.max(0.08, Math.min(WORLD_H - 0.3, pt.y));
+        samples.push(pt);
+      }
+    }
+
+    // Arc-length + angle
+    samples[0].s = 0;
+    for (let i = 1; i < samples.length; i++) {
+      const dx = samples[i].x - samples[i-1].x;
+      const dy = samples[i].y - samples[i-1].y;
+      samples[i].s = samples[i-1].s + Math.sqrt(dx*dx + dy*dy);
+    }
+    for (let i = 0; i < samples.length; i++) {
+      const i0 = Math.max(0, i-1), i1 = Math.min(samples.length-1, i+1);
+      samples[i].angle = Math.atan2(samples[i1].y - samples[i0].y, samples[i1].x - samples[i0].x);
+    }
+
+    track    = samples;
+    totalLen = samples[samples.length-1].s;
+  }
+
+  function getPointAtS(s) {
+    s = Math.max(0, Math.min(totalLen, s));
+    let lo = 0, hi = track.length - 1;
+    while (hi - lo > 1) {
+      const mid = (lo + hi) >> 1;
+      if (track[mid].s <= s) lo = mid; else hi = mid;
+    }
+    const span = track[hi].s - track[lo].s;
+    const t    = span < 1e-9 ? 0 : (s - track[lo].s) / span;
+    return {
+      x:     track[lo].x     + t*(track[hi].x     - track[lo].x),
+      y:     track[lo].y     + t*(track[hi].y     - track[lo].y),
+      angle: track[lo].angle + t*(track[hi].angle - track[lo].angle)
+    };
+  }
+
+  // ═══════════════════════════════════════════════
+  // SIMULATION STATE
+  // ═══════════════════════════════════════════════
+  let state      = { s:0, dir:1, thermal:0, running:false, finished:false };
+  let E_initial  = 0;
+  let trackMode  = 'easy';
+  let buildMode  = false;
+  let dragIdx    = -1;
+  let hovIdx     = -1;
+  let prediction = null;
+  let predResult = '';
+  let animId     = null;
+  let lastTime   = null;
+
+  const getM  = () => parseFloat(document.getElementById('mass').value);
+  const getMu = () => parseFloat(document.getElementById('friction').value);
+
+  // ═══════════════════════════════════════════════
+  // PHYSICS
+  // ═══════════════════════════════════════════════
+  function physicsStep(dt) {
+    if (!state.running || state.finished) return;
+    const m = getM(), mu = getMu();
+    const SUBS = 10, sub = dt / SUBS;
+    for (let i = 0; i < SUBS; i++) {
+      const pos = getPointAtS(state.s);
+      const PE  = m * G * pos.y;
+      const KE  = Math.max(0, E_initial - state.thermal - PE);
+      if (KE < 5e-4) {
+        if (!state.finished) {
+          state.finished = true; state.running = false;
+          document.getElementById('challenge-result').textContent =
+            `⚠️ Cart stalled at h = ${pos.y.toFixed(1)} m`;
+          document.getElementById('challenge-result').style.color = '#854d0e';
+          evalPrediction(false);
+        }
+        break;
+      }
+      const v  = Math.sqrt(2 * KE / m);
+      const ds = v * sub;
+      state.thermal = Math.min(state.thermal + mu * m * G * Math.abs(Math.cos(pos.angle)) * ds, E_initial);
+      state.s += state.dir * ds;
+      if (state.s <= 0)        { state.s = 0.01; state.dir = 1; }
+      if (state.s >= totalLen) {
+        state.s = totalLen - 0.01;
+        if (!state.finished) {
+          state.finished = true; state.running = false;
+          const endPt = getPointAtS(totalLen);
+          const spd   = Math.sqrt(2 * Math.max(0, E_initial - state.thermal - m*G*endPt.y) / m);
+          document.getElementById('challenge-result').textContent =
+            `✅ Course complete! Final speed: ${spd.toFixed(1)} m/s`;
+          document.getElementById('challenge-result').style.color = '#16a34a';
+          evalPrediction(true);
+        }
+      }
+    }
+  }
+
+  function evalPrediction(completed) {
+    if (prediction === null || predResult !== '') return;
+    predResult = prediction === completed ? '✅ Correct prediction!' :
+      '❌ Incorrect — ' + (completed ? 'it completed.' : 'it stalled.');
+    document.getElementById('pred-result').style.color = prediction === completed ? '#16a34a' : '#dc2626';
+    document.getElementById('pred-result').textContent = predResult;
+  }
+
+  // ═══════════════════════════════════════════════
+  // RENDERING UTILITIES
+  // ═══════════════════════════════════════════════
+  function rrPath(x, y, w, h, r) {
+    ctx.moveTo(x+r, y);
+    ctx.lineTo(x+w-r, y); ctx.quadraticCurveTo(x+w, y,   x+w, y+r);
+    ctx.lineTo(x+w, y+h-r); ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+    ctx.lineTo(x+r, y+h); ctx.quadraticCurveTo(x,   y+h, x,   y+h-r);
+    ctx.lineTo(x, y+r); ctx.quadraticCurveTo(x,   y,   x+r, y);
+    ctx.closePath();
+  }
+  function rrFill(x, y, w, h, r, color) {
+    ctx.beginPath(); rrPath(x, y, w, h, r); ctx.fillStyle = color; ctx.fill();
+  }
+
+  // ═══════════════════════════════════════════════
+  // DRAW BACKGROUND
+  // ═══════════════════════════════════════════════
+  function drawBackground() {
+    // Sky
+    const skyG = ctx.createLinearGradient(0, 0, 0, wy(0));
+    skyG.addColorStop(0,    '#1565c0');
+    skyG.addColorStop(0.35, '#42a5f5');
+    skyG.addColorStop(0.75, '#90caf9');
+    skyG.addColorStop(1,    '#e3f2fd');
+    ctx.fillStyle = skyG;
+    ctx.fillRect(0, 0, cssW, cssH);
+
+    // Distant mountains (blue-grey)
+    ctx.beginPath();
+    const bm = [[0,4.5],[1.5,5.8],[3,4.2],[5,6.5],[6.5,4.8],[8.5,7.0],[10,5.2],[12,6.2],[14,4.8],[16,5.5]];
+    ctx.moveTo(0, wy(4.5));
+    for (const [x,y] of bm) ctx.lineTo(wx(x), wy(y));
+    ctx.lineTo(wx(WORLD_W), wy(0)); ctx.lineTo(0, wy(0)); ctx.closePath();
+    ctx.fillStyle = 'rgba(100,140,200,0.55)'; ctx.fill();
+
+    // Mid hills (green)
+    ctx.beginPath();
+    const fm = [[0,2.5],[1,3.2],[2.5,2.0],[4,3.8],[6,2.2],[8,3.0],[10,2.0],[12,2.8],[14,1.8],[16,2.3]];
+    ctx.moveTo(0, wy(2.5));
+    for (const [x,y] of fm) ctx.lineTo(wx(x), wy(y));
+    ctx.lineTo(wx(WORLD_W), wy(0)); ctx.lineTo(0, wy(0)); ctx.closePath();
+    ctx.fillStyle = '#66bb6a'; ctx.fill();
+
+    // Clouds
+    drawClouds();
+  }
+
+  const CLOUD_DATA = [
+    {cx:0.12, cy:0.11, r:40},
+    {cx:0.38, cy:0.07, r:52},
+    {cx:0.62, cy:0.13, r:36},
+    {cx:0.83, cy:0.08, r:46}
+  ];
+  function drawClouds() {
+    const skyH = wy(0);
+    ctx.fillStyle = 'rgba(255,255,255,0.88)';
+    for (const c of CLOUD_DATA) {
+      const px = c.cx * cssW, py = c.cy * skyH, r = c.r;
+      ctx.beginPath();
+      ctx.arc(px,          py,        r,      0, Math.PI*2);
+      ctx.arc(px - r*0.55, py+r*0.25, r*0.7,  0, Math.PI*2);
+      ctx.arc(px + r*0.55, py+r*0.2,  r*0.75, 0, Math.PI*2);
+      ctx.fill();
+    }
+  }
+
+  function drawGround() {
+    const gY = wy(0);
+    const gG = ctx.createLinearGradient(0, gY, 0, cssH);
+    gG.addColorStop(0,   '#5d4037'); gG.addColorStop(0.15,'#4e342e'); gG.addColorStop(1,'#3e2723');
+    ctx.fillStyle = gG; ctx.fillRect(0, gY, cssW, cssH - gY);
+    // Grass strip
+    ctx.fillStyle = '#2e7d32'; ctx.fillRect(ML, gY - 4, cssW - ML + 4, 8);
+    ctx.fillStyle = '#388e3c'; ctx.fillRect(ML, gY - 3, cssW - ML + 4, 4);
+  }
+
+  function drawGrid() {
+    ctx.strokeStyle = 'rgba(0,40,120,0.10)'; ctx.lineWidth = 1;
+    ctx.setLineDash([3, 7]);
+    for (let y = 1; y <= 8; y++) {
+      ctx.beginPath(); ctx.moveTo(ML, wy(y)); ctx.lineTo(wx(WORLD_W), wy(y)); ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#546e7a'; ctx.font = '10px Inter,sans-serif'; ctx.textAlign = 'right';
+    for (let y = 0; y <= 8; y += 2) {
+      ctx.fillText(y + ' m', ML - 6, wy(y) + 4);
+    }
+  }
+
+  // ═══════════════════════════════════════════════
+  // DRAW TRACK STRUCTURE
+  // ═══════════════════════════════════════════════
+  function drawSupportPillars() {
+    if (track.length < 2) return;
+    const step = Math.max(1, Math.floor(track.length / 50));
+    const gY   = wy(0);
+    for (let i = 0; i < track.length; i += step) {
+      const pt = track[i];
+      if (pt.y < 0.4) continue;
+      const px = wx(pt.x), py = wy(pt.y), h = gY - py;
+      if (h < 6) continue;
+      // Pillar
+      const pG = ctx.createLinearGradient(px-4, 0, px+4, 0);
+      pG.addColorStop(0, '#6d4c41'); pG.addColorStop(0.4,'#a1887f'); pG.addColorStop(1,'#5d4037');
+      ctx.fillStyle = pG; ctx.fillRect(px - 3, py, 6, h);
+      // Cross bracing
+      if (h > 28) {
+        ctx.strokeStyle = 'rgba(109,76,65,0.5)'; ctx.lineWidth = 1;
+        const nb = Math.floor(h / 22);
+        for (let b = 0; b < nb; b++) {
+          const y1 = py + b*22, y2 = py + (b+1)*22;
+          ctx.beginPath(); ctx.moveTo(px-3, y1); ctx.lineTo(px+3, y2); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(px+3, y1); ctx.lineTo(px-3, y2); ctx.stroke();
+        }
+      }
+      // Footing
+      ctx.fillStyle = '#4e342e'; ctx.fillRect(px-5, gY-4, 10, 5);
+    }
+  }
+
+  function drawTrack() {
+    if (track.length < 2) return;
+    drawCrossties();
+    drawRails();
+  }
+
+  function drawCrossties() {
+    const SPACING = 0.38, HALF = 8, TW = 4;
+    ctx.lineCap = 'round';
+    for (let s = 0; s <= totalLen; s += SPACING) {
+      const pt = getPointAtS(s);
+      const px = wx(pt.x), py = wy(pt.y);
+      const ang = pt.angle;
+      // Perpendicular in canvas space
+      const pX = Math.sin(ang), pY = Math.cos(ang);
+      const tG = ctx.createLinearGradient(px - pX*HALF, py - pY*HALF, px + pX*HALF, py + pY*HALF);
+      tG.addColorStop(0,   '#5d4037');
+      tG.addColorStop(0.3, '#8d6e63');
+      tG.addColorStop(0.7, '#8d6e63');
+      tG.addColorStop(1,   '#5d4037');
+      ctx.strokeStyle = tG; ctx.lineWidth = TW;
+      ctx.beginPath();
+      ctx.moveTo(px - pX*HALF, py - pY*HALF);
+      ctx.lineTo(px + pX*HALF, py + pY*HALF);
+      ctx.stroke();
+    }
+  }
+
+  function drawRails() {
+    const RAIL_OFF = 5.5;
+    for (const side of [-1, 1]) {
+      ctx.beginPath();
+      let first = true;
+      for (let i = 0; i < track.length; i++) {
+        const pt  = track[i];
+        const pX  = Math.sin(pt.angle) * RAIL_OFF * side;
+        const pY  = Math.cos(pt.angle) * RAIL_OFF * side;
+        const rx  = wx(pt.x) + pX;
+        const ry  = wy(pt.y) + pY;
+        if (first) { ctx.moveTo(rx, ry); first = false; } else ctx.lineTo(rx, ry);
+      }
+      ctx.save();
+      ctx.shadowBlur = 5; ctx.shadowColor = 'rgba(0,0,0,0.3)'; ctx.shadowOffsetY = 2;
+      const rG = ctx.createLinearGradient(ML, 0, wx(WORLD_W), 0);
+      rG.addColorStop(0,   '#9e9e9e');
+      rG.addColorStop(0.25,'#e0e0e0');
+      rG.addColorStop(0.5, '#f5f5f5');
+      rG.addColorStop(0.75,'#e0e0e0');
+      rG.addColorStop(1,   '#9e9e9e');
+      ctx.strokeStyle = rG; ctx.lineWidth = 3.5; ctx.lineJoin = 'round'; ctx.stroke();
+      ctx.restore();
+      // Highlight sheen
+      ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+  }
+
+  function drawFinishFlag() {
+    if (track.length === 0) return;
+    const fp = track[track.length-1];
+    const fx = wx(fp.x), fy = wy(fp.y);
+    ctx.strokeStyle = '#78909c'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(fx, fy); ctx.lineTo(fx, fy-42); ctx.stroke();
+    // Checkered flag
+    ctx.save(); ctx.translate(fx, fy-42);
+    const fw = 24, fh = 16, sq = 4;
+    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, fw, fh);
+    ctx.fillStyle = '#111';
+    for (let r = 0; r < fh/sq; r++)
+      for (let c = 0; c < fw/sq; c++)
+        if ((r+c) % 2 === 0) ctx.fillRect(c*sq, r*sq, sq, sq);
+    ctx.strokeStyle = '#555'; ctx.lineWidth = 0.5; ctx.strokeRect(0, 0, fw, fh);
+    ctx.restore();
+  }
+
+  // ═══════════════════════════════════════════════
+  // DRAW CART
+  // ═══════════════════════════════════════════════
+  function drawCart() {
+    if (track.length === 0) return;
+    const pos = getPointAtS(state.s);
+    const cx  = wx(pos.x), cy = wy(pos.y);
+    const ang = pos.angle;
+
+    const m   = getM();
+    const PE  = m * G * pos.y;
+    const KE  = Math.max(0, E_initial - state.thermal - PE);
+    const spd = Math.sqrt(2 * KE / Math.max(m, 0.1));
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(-ang);
+
+    // Speed lines
+    if (state.running && spd > 4) {
+      const ity = Math.min(1, (spd - 4) / 14);
+      ctx.save(); ctx.globalAlpha = 0.18 * ity; ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.2;
+      for (let i = 0; i < 4; i++) {
+        const oy = -11 + i * 5, len = 14 + ity * 18;
+        ctx.beginPath(); ctx.moveTo(-22, oy); ctx.lineTo(-22 - len, oy); ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // Shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.18)';
+    ctx.beginPath(); ctx.ellipse(0, 10, 24, 5, 0, 0, Math.PI*2); ctx.fill();
+
+    // Axle beam
+    ctx.fillStyle = '#37474f'; ctx.fillRect(-22, 1, 44, 5);
+
+    // Wheels
+    const wheelRot = state.s * 2.5;
+    for (const wx2 of [-15, -6, 6, 15]) {
+      // Rubber tire
+      ctx.fillStyle = '#212121';
+      ctx.beginPath(); ctx.arc(wx2, 8, 7.5, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = '#424242'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(wx2, 8, 7, 0, Math.PI*2); ctx.stroke();
+      // Spokes
+      ctx.strokeStyle = '#90a4ae'; ctx.lineWidth = 1.2;
+      for (let sp = 0; sp < 4; sp++) {
+        const a = wheelRot + wx2 * 0.3 + sp * Math.PI/2;
+        ctx.beginPath();
+        ctx.moveTo(wx2, 8);
+        ctx.lineTo(wx2 + Math.cos(a)*5.5, 8 + Math.sin(a)*5.5);
+        ctx.stroke();
+      }
+      // Hub cap
+      ctx.fillStyle = '#eceff1'; ctx.beginPath(); ctx.arc(wx2, 8, 2, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#78909c'; ctx.beginPath(); ctx.arc(wx2, 8, 0.8, 0, Math.PI*2); ctx.fill();
+    }
+
+    // Cart body
+    const bodyG = ctx.createLinearGradient(-22, -22, 22, 4);
+    bodyG.addColorStop(0,   '#c62828');
+    bodyG.addColorStop(0.2, '#ef5350');
+    bodyG.addColorStop(0.5, '#f44336');
+    bodyG.addColorStop(0.8, '#e53935');
+    bodyG.addColorStop(1,   '#b71c1c');
+    ctx.shadowColor = 'rgba(0,0,0,0.4)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 3;
+    ctx.fillStyle = bodyG;
+    ctx.beginPath(); rrPath(-22, -22, 44, 24, 6); ctx.fill();
+    ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+    ctx.strokeStyle = '#b71c1c'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); rrPath(-22, -22, 44, 24, 6); ctx.stroke();
+
+    // Windows
+    const winG = ctx.createLinearGradient(0, -21, 0, -8);
+    winG.addColorStop(0, 'rgba(179,229,252,0.75)');
+    winG.addColorStop(1, 'rgba(100,181,246,0.45)');
+    ctx.fillStyle = winG;
+    ctx.beginPath(); rrPath(-19, -20, 14, 12, 2); ctx.fill();
+    ctx.beginPath(); rrPath(5,   -20, 14, 12, 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 0.8;
+    ctx.beginPath(); rrPath(-19,-20,14,12,2); ctx.stroke();
+    ctx.beginPath(); rrPath(5,  -20,14,12,2); ctx.stroke();
+
+    // Passengers
+    drawPassenger(-12, -12);
+    drawPassenger( 12, -12);
+
+    // Top highlight sheen
+    ctx.strokeStyle = 'rgba(255,180,180,0.55)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(-20, -21); ctx.lineTo(20, -21); ctx.stroke();
+
+    ctx.restore();
+
+    // Height dashed line
+    if (state.running || state.finished) {
+      const gY = wy(0);
+      ctx.save();
+      ctx.setLineDash([4,5]); ctx.strokeStyle = 'rgba(25,118,210,0.55)'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx, gY); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#1565c0'; ctx.font = 'bold 10px Inter,sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText(pos.y.toFixed(1) + ' m', cx + 5, (cy + gY)/2 + 4);
+      ctx.restore();
+    }
+  }
+
+  function drawPassenger(x, y) {
+    // Head
+    ctx.fillStyle = '#ffcc80';
+    ctx.beginPath(); ctx.arc(x, y-4, 3, 0, Math.PI*2); ctx.fill();
+    // Eyes (tiny)
+    ctx.fillStyle = '#37474f';
+    ctx.beginPath(); ctx.arc(x-1, y-5, 0.6, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x+1, y-5, 0.6, 0, Math.PI*2); ctx.fill();
+    // Body
+    ctx.strokeStyle = 'rgba(55,71,79,0.8)'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(x, y-1); ctx.lineTo(x, y+3); ctx.stroke();
+    // Arms raised (excited)
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x-3, y-3); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x+3, y-3); ctx.stroke();
+  }
+
+  // ═══════════════════════════════════════════════
+  // DRAW CONTROL POINTS (build mode)
+  // ═══════════════════════════════════════════════
+  function drawControlPoints() {
+    if (!buildMode) return;
+    const sorted = [...controlPoints].sort((a,b) => a.x - b.x);
+    for (let i = 0; i < controlPoints.length; i++) {
+      const pt = controlPoints[i];
+      const px = wx(pt.x), py = wy(pt.y);
+      const isFirst = pt === sorted[0];
+      const isLast  = pt === sorted[sorted.length-1];
+      const isHov   = i === hovIdx;
+      const isDrag  = i === dragIdx;
+      // Glow
+      if (isHov || isDrag) {
+        ctx.shadowBlur = 14;
+        ctx.shadowColor = isDrag ? 'rgba(255,80,0,0.8)' : 'rgba(255,220,0,0.7)';
+      }
+      // Outer ring
+      ctx.beginPath(); ctx.arc(px, py, 12, 0, Math.PI*2);
+      ctx.fillStyle = isDrag ? '#ff6f00' : isHov ? '#fdd835' : (isFirst||isLast) ? '#43a047' : '#fbc02d';
+      ctx.fill();
+      // White inner
+      ctx.beginPath(); ctx.arc(px, py, 6, 0, Math.PI*2);
+      ctx.fillStyle = '#fff'; ctx.fill();
+      // Number
+      ctx.fillStyle = '#333'; ctx.font = 'bold 7px Inter,sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText(i+1, px, py + 2.5);
+      ctx.shadowBlur = 0;
+      // Tooltip when dragging
+      if (isDrag) {
+        const lbl = `x=${pt.x.toFixed(1)}  h=${pt.y.toFixed(1)} m`;
+        ctx.font = '10px Inter,sans-serif';
+        const tw = ctx.measureText(lbl).width + 14;
+        const tx = Math.min(px + 16, cssW - tw - 6);
+        rrFill(tx, py - 22, tw, 18, 4, 'rgba(0,0,0,0.72)');
+        ctx.fillStyle = '#fff'; ctx.textAlign = 'left';
+        ctx.fillText(lbl, tx + 7, py - 8);
+      }
+    }
+    // Banner
+    rrFill(ML + 6, 8, 190, 26, 6, 'rgba(245,124,0,0.92)');
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 11px Inter,sans-serif'; ctx.textAlign = 'left';
+    ctx.fillText('🔧 BUILD MODE  —  drag yellow dots', ML + 14, 25);
+  }
+
+  // ═══════════════════════════════════════════════
+  // READOUTS
+  // ═══════════════════════════════════════════════
+  const BAR_GRADS = {
+    'ke-bar':  'linear-gradient(to top,#e53935,#ef9a9a)',
+    'pe-bar':  'linear-gradient(to top,#2e7d32,#81c784)',
+    'th-bar':  'linear-gradient(to top,#b71c1c,#ef5350)',
+    'tot-bar': 'linear-gradient(to top,#1565c0,#64b5f6)'
+  };
+  function updateReadouts() {
+    if (track.length === 0) return;
+    const pos  = getPointAtS(state.s);
+    const m    = getM();
+    const PE   = m * G * pos.y;
+    const KE   = Math.max(0, E_initial - state.thermal - PE);
+    const spd  = Math.sqrt(2 * KE / Math.max(m, 0.1));
+    const tot  = KE + PE + state.thermal;
+    const maxE = Math.max(E_initial, 1);
+    document.getElementById('r-speed').textContent  = spd.toFixed(2) + ' m/s';
+    document.getElementById('r-height').textContent = pos.y.toFixed(2) + ' m';
+    document.getElementById('r-ke').textContent     = Math.round(KE) + ' J';
+    document.getElementById('r-pe').textContent     = Math.round(PE) + ' J';
+    document.getElementById('r-th').textContent     = Math.round(state.thermal) + ' J';
+    document.getElementById('r-tot').textContent    = Math.round(tot) + ' J';
+    function bar(fId, vId, val) {
+      const el = document.getElementById(fId);
+      el.style.height     = Math.min(100, (val/maxE)*100) + '%';
+      el.style.background = BAR_GRADS[fId];
+      document.getElementById(vId).textContent = Math.round(val) + ' J';
+    }
+    bar('ke-bar','ke-val',KE); bar('pe-bar','pe-val',PE);
+    bar('th-bar','th-val',state.thermal); bar('tot-bar','tot-val',tot);
+  }
+
+  // ═══════════════════════════════════════════════
+  // MAIN DRAW FRAME
+  // ═══════════════════════════════════════════════
+  function drawFrame() {
+    ctx.clearRect(0, 0, cssW, cssH);
+    drawBackground();
+    drawGrid();
+    drawGround();
+    drawSupportPillars();
+    drawTrack();
+    drawFinishFlag();
+    drawCart();
+    drawControlPoints();
+    updateReadouts();
+  }
+
+  // ═══════════════════════════════════════════════
+  // ANIMATION LOOP
+  // ═══════════════════════════════════════════════
+  function loop(ts) {
+    if (!state.running) { animId = null; return; }
+    if (!lastTime) lastTime = ts;
+    const dt = Math.min((ts - lastTime) / 1000, 0.05);
+    lastTime = ts;
+    physicsStep(dt);
+    drawFrame();
+    if (state.running) animId = requestAnimationFrame(loop);
+    else animId = null;
+  }
+
+  // ═══════════════════════════════════════════════
+  // CONTROLS
+  // ═══════════════════════════════════════════════
+  function initState() {
+    rebuildTrack();
+    state.s = 0; state.dir = 1; state.thermal = 0;
+    state.running = false; state.finished = false;
+    const startH = track.length > 0 ? track[0].y : 1;
+    E_initial = getM() * G * startH + 0.5 * getM() * 0.01;
+    predResult = '';
+    document.getElementById('pred-result').textContent = '';
+    document.getElementById('challenge-result').textContent = '';
+  }
+
+  function startSim() {
+    if (state.running || buildMode) return;
+    if (state.finished) { initState(); drawFrame(); }
+    state.running = true; lastTime = null;
+    setStatus('Simulation running…', 's-info');
+    animId = requestAnimationFrame(loop);
+  }
+
+  function pauseSim() {
+    state.running = false;
+    if (animId) { cancelAnimationFrame(animId); animId = null; }
+    setStatus('Paused. Press ▶ Start to continue.', 's-info');
+    drawFrame();
+  }
+
+  function resetSim() {
+    pauseSim(); initState(); drawFrame();
+    setStatus('Ready. Press ▶ Start to begin.', 's-info');
+  }
+
+  function selectTrack(mode) {
+    trackMode = mode;
+    document.getElementById('btn-easy').classList.toggle('active',      mode === 'easy');
+    document.getElementById('btn-challenge').classList.toggle('active', mode === 'challenge');
+    controlPoints = getPreset(mode);
+    if (buildMode) toggleBuildMode();
+    resetSim();
+  }
+
+  function toggleBuildMode() {
+    buildMode = !buildMode;
+    const btn   = document.getElementById('btn-build');
+    const hint  = document.getElementById('build-hint');
+    const bctrl = document.getElementById('build-controls');
+    if (buildMode) {
+      pauseSim();
+      btn.textContent = '✅ Exit Build';
+      btn.className   = 'btn-full btn-build-active';
+      hint.classList.add('visible');
+      bctrl.style.display = 'block';
+      canvas.classList.add('build-mode');
+      setStatus('Build Mode: drag yellow dots to reshape the track.', 's-warn');
+    } else {
+      btn.textContent = '🔧 Build Track';
+      btn.className   = 'btn-full btn-build';
+      hint.classList.remove('visible');
+      bctrl.style.display = 'none';
+      canvas.classList.remove('build-mode');
+      initState(); drawFrame();
+      setStatus('Track built! Press ▶ Start to simulate.', 's-success');
+    }
+    drawFrame();
+  }
+
+  function addControlPoint() {
+    const sorted = [...controlPoints].sort((a,b) => a.x - b.x);
+    let maxD = 0, insIdx = 0;
+    for (let i = 0; i < sorted.length - 1; i++) {
+      const d = Math.hypot(sorted[i+1].x - sorted[i].x, sorted[i+1].y - sorted[i].y);
+      if (d > maxD) { maxD = d; insIdx = i; }
+    }
+    controlPoints.push({
+      x: (sorted[insIdx].x + sorted[insIdx+1].x) / 2,
+      y: Math.max(0.2, (sorted[insIdx].y + sorted[insIdx+1].y) / 2)
+    });
+    rebuildTrack(); drawFrame();
+  }
+
+  function removeControlPoint() {
+    if (controlPoints.length <= 3) return;
+    const sorted = [...controlPoints].sort((a,b) => a.x - b.x);
+    const target = sorted[sorted.length - 2]; // second-to-last by x
+    const idx    = controlPoints.indexOf(target);
+    if (idx > -1) controlPoints.splice(idx, 1);
+    rebuildTrack(); drawFrame();
+  }
+
+  function predict(val) {
+    prediction = val; predResult = '';
+    document.getElementById('pred-result').textContent =
+      'Prediction: ' + (val ? '"Yes"' : '"No"') + ' — press ▶ Start!';
+    document.getElementById('pred-result').style.color = 'var(--text-muted)';
+  }
+
+  function setStatus(msg, cls) {
+    const el = document.getElementById('status');
+    el.textContent = msg; el.className = 'status-bar ' + cls;
+  }
+
+  // ═══════════════════════════════════════════════
+  // MOUSE / TOUCH DRAG
+  // ═══════════════════════════════════════════════
+  const CP_HIT = 15;
+
+  function getMousePos(e) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      cx: (e.clientX - rect.left) * (cssW / rect.width),
+      cy: (e.clientY - rect.top)  * (cssH / rect.height)
+    };
+  }
+
+  function hitTest(cx, cy) {
+    let best = -1, bestD = CP_HIT * CP_HIT;
+    for (let i = 0; i < controlPoints.length; i++) {
+      const d2 = (cx - wx(controlPoints[i].x))**2 + (cy - wy(controlPoints[i].y))**2;
+      if (d2 < bestD) { bestD = d2; best = i; }
+    }
+    return best;
+  }
+
+  function applyDrag(cx, cy) {
+    if (dragIdx < 0) return;
+    const sorted   = [...controlPoints].sort((a,b) => a.x - b.x);
+    const isFirst  = controlPoints[dragIdx] === sorted[0];
+    const isLast   = controlPoints[dragIdx] === sorted[sorted.length-1];
+    let wx2 = isFirst ? 0 : isLast ? WORLD_W : Math.max(0, Math.min(WORLD_W, cxToWorld(cx)));
+    let wy2 = Math.max(0.1, Math.min(WORLD_H - 0.3, cyToWorld(cy)));
+    controlPoints[dragIdx].x = wx2;
+    controlPoints[dragIdx].y = wy2;
+    rebuildTrack(); drawFrame();
+  }
+
+  canvas.addEventListener('mousedown', e => {
+    if (!buildMode) return;
+    const {cx, cy} = getMousePos(e);
+    dragIdx = hitTest(cx, cy);
+  });
+  canvas.addEventListener('mousemove', e => {
+    const {cx, cy} = getMousePos(e);
+    if (buildMode) {
+      const newHov = hitTest(cx, cy);
+      if (dragIdx >= 0) { applyDrag(cx, cy); }
+      else if (newHov !== hovIdx) { hovIdx = newHov; drawFrame(); }
+    }
+  });
+  canvas.addEventListener('mouseup',    () => { dragIdx = -1; });
+  canvas.addEventListener('mouseleave', () => { dragIdx = -1; hovIdx = -1; if (buildMode) drawFrame(); });
+
+  function getTouchPos(e) {
+    e.preventDefault();
+    const t = e.touches[0] || e.changedTouches[0];
+    const rect = canvas.getBoundingClientRect();
+    return {
+      cx: (t.clientX - rect.left) * (cssW / rect.width),
+      cy: (t.clientY - rect.top)  * (cssH / rect.height)
+    };
+  }
+  canvas.addEventListener('touchstart', e => {
+    if (!buildMode) return;
+    const {cx, cy} = getTouchPos(e);
+    dragIdx = hitTest(cx, cy);
+  }, {passive:false});
+  canvas.addEventListener('touchmove', e => {
+    if (!buildMode || dragIdx < 0) return;
+    applyDrag(...Object.values(getTouchPos(e)));
+  }, {passive:false});
+  canvas.addEventListener('touchend', () => { dragIdx = -1; }, {passive:false});
+
+  // ═══════════════════════════════════════════════
+  // SLIDERS
+  // ═══════════════════════════════════════════════
+  document.getElementById('mass').addEventListener('input', e => {
+    document.getElementById('mass-val').textContent = e.target.value + ' kg';
+    if (!state.running && track.length > 0) {
+      E_initial = getM() * G * track[0].y + 0.5 * getM() * 0.01;
+      drawFrame();
+    }
+  });
+  document.getElementById('friction').addEventListener('input', e => {
+    document.getElementById('friction-val').textContent = parseFloat(e.target.value).toFixed(2);
+  });
+  window.addEventListener('resize', () => { resizeCanvas(); drawFrame(); });
+
+  // ═══════════════════════════════════════════════
+  // INIT
+  // ═══════════════════════════════════════════════
+  resizeCanvas();
+  initState();
+  drawFrame();
+  </script>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2026 Physics Fun. All rights reserved.</p>
+      <p>The content, simulations, graphics, and source code on this website are the intellectual property of Physics Fun. This material is provided for personal educational use only. No part of this website may be copied, modified, redistributed, or used to create derivative works without explicit written permission.</p>
+    </div>
+  </footer>
+</body>
+</html>
