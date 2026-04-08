@@ -356,6 +356,7 @@ main > nav a:hover {
   border-color: var(--accent);
   box-shadow: 0 2px 8px rgba(37,99,235,0.1);
   text-decoration: none;
+  color: var(--primary);
 }
 
 /* Desmos calculator */
