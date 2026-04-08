@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang = "en">
+<head>
+    <meta charset="UTF-8">
+    <meta name = "viewport" content="width=device-width, initial-scale=1" />
+    <title>Power, Energy, and Work — Physics Fun</title>
+
+    <link rel="stylesheet" href="css/style.css"/>
+<style>
+/* ── Callout boxes ──────────────────────────────────────────────── */
+.callout {
+  border-radius: 8px;
+  padding: 11px 15px;
+  margin: 0.9rem 0;
+  font-size: 0.88rem;
+  line-height: 1.65;
+}
+.callout-title {
+  font-weight: 700;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  margin-bottom: 4px;
+  display: block;
+}
+.callout-insight { background: #eff6ff; border-left: 4px solid #2563eb; }
+.callout-insight .callout-title { color: #1d4ed8; }
+.callout-mistake  { background: #fff7ed; border-left: 4px solid #f97316; }
+.callout-mistake  .callout-title { color: #c2410c; }
+.callout-analogy  { background: #f0fdf4; border-left: 4px solid #16a34a; }
+.callout-analogy  .callout-title { color: #15803d; }
+
+/* ── Energy explorer simulator card ────────────────────────────── */
+.sim-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 16px rgba(30,58,95,0.09);
+  margin: 1.25rem 0;
+}
+.sim-header {
+  background: var(--primary);
+  color: #fff;
+  padding: 12px 18px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+}
+.sim-header span {
+  display: block;
+  font-size: 0.74rem;
+  font-weight: 400;
+  opacity: 0.72;
+  margin-top: 2px;
+}
+.sim-canvas-wrap {
+  padding: 14px 16px 10px;
+  background: #f8fafc;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: center;
+}
+#energy-canvas { display: block; max-width: 100%; border-radius: 6px; }
+.sim-controls { padding: 14px 18px 10px; border-bottom: 1px solid var(--border); }
+.sim-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 9px;
+}
+.sim-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--primary);
+  min-width: 28px;
+  font-family: Georgia, serif;
+  font-style: italic;
+}
+.sim-row input[type=range] { flex: 1; accent-color: var(--accent); cursor: pointer; }
+.sim-val {
+  font-size: 0.82rem;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  min-width: 110px;
+  text-align: right;
+}
+.sim-result {
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  background: #fff;
+}
+.sim-result-eq { font-size: 0.85rem; color: var(--text-muted); }
+.sim-result-val {
+  font-size: 1.3rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+</style>
+    <script>
+        window.MathJax = {
+        tex: { inlineMath: [['\\(', '\\)']] }
+        };
+
+        
+        function toggleText() {
+            let text = document.getElementById("practice");
+            let link = event.target;
+
+            if (text.style.display === "none") {
+                text.style.display = "inline";
+                link.textContent = "Click to hide";
+            } else {
+                text.style.display = "none";
+                link.textContent = "Pracitce";
+            }
+
+            event.preventDefault();
+        }
+        function toggleWETDerivation(event) {
+            let text = document.getElementById("wet-derivation");
+            let link = event.target;
+            if (text.style.display === "none") {
+                text.style.display = "inline";
+                link.textContent = "Hide Derivation";
+            } else {
+                text.style.display = "none";
+                link.textContent = "Deriving the Work-Energy Theorem";
+            }
+            event.preventDefault();
+        }
+         function toggleAnswerKey() {
+            let text = document.getElementById("answer-key");
+            let link = event.target;
+
+            if (text.style.display === "none") {
+                text.style.display = "inline";
+                link.textContent = "Hide Answer Key";
+            } else {
+                text.style.display = "none";
+                link.textContent = "Show Answer Key";
+            }
+
+            event.preventDefault();
+        }
+
+        function togglePracticeAnswerKey(event) {
+            let div = document.getElementById("practice-answer-key");
+            let btn = event.target;
+            if (div.style.display === "none") {
+                div.style.display = "block";
+                btn.textContent = "Hide Answer Key";
+            } else {
+                div.style.display = "none";
+                btn.textContent = "Answer Key";
+            }
+            event.preventDefault();
+        }
+
+
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<div id="desmos-container" style="display:none;">
+    <div class="draggable-calculator">
+        <div class="drag-handle">Drag Calculator</div>
+        <div id="calculator" style="width:600px; height:400px;"></div>
+    </div>
+</div>
+
+<script src="https://www.desmos.com/api/v1.11/calculator.js?apiKey=1a36ee8eec4c471e97c71548300ded67"></script>
+
+<script>
+let calculatorCreated = false;
+let calculator;
+
+function toggleDesmos() {
+    const container = document.getElementById("desmos-container");
+    const button = document.getElementById("desmos-toggle");
+
+    if (container.style.display === "none") {
+        container.style.display = "block";
+        button.textContent = "Hide Calculator";
+        // Center in the current viewport
+        const drag = document.querySelector('.draggable-calculator');
+        drag.style.left = Math.max(0, (window.innerWidth  - 620) / 2) + 'px';
+        drag.style.top  = Math.max(0, (window.innerHeight - 440) / 2) + 'px';
+        if (!calculatorCreated) {
+            const elt = document.getElementById("calculator");
+            calculator = Desmos.GraphingCalculator(elt);
+            calculatorCreated = true;
+        }
+    } else {
+        container.style.display = "none";
+        button.textContent = "Show Calculator";
+    }
+}
+
+// Dragging functionality for the calculator
+let isDragging = false;
+let dragOffsetX, dragOffsetY;
+
+document.addEventListener('DOMContentLoaded', function() {
+    const dragHandle = document.querySelector('.drag-handle');
+    const draggable = document.querySelector('.draggable-calculator');
+
+    if (dragHandle && draggable) {
+        dragHandle.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            const rect = draggable.getBoundingClientRect();
+            dragOffsetX = e.clientX - rect.left;
+            dragOffsetY = e.clientY - rect.top;
+            draggable.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (isDragging) {
+                const newX = e.clientX - dragOffsetX;
+                const newY = e.clientY - dragOffsetY;
+                draggable.style.left = newX + 'px';
+                draggable.style.top = newY + 'px';
+            }
+        });
+
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+            draggable.style.cursor = 'move';
+        });
+    }
+});
+</script>
+
+</head>
+<body>
+        
+    <header class = "site-header">
+        <div class = "container">
+          <h1 class = "site-title">Power, Energy, and Work</h1>
+           <nav>
+               <a href = "index.html">Home</a>
+               <a href = "topics.html">Topics</a>
+               <a href = "games.html">Games</a>
+               <button id="desmos-toggle" onclick="toggleDesmos()">Show Calculator</button>
+            </nav>
+        </div>
+    </header>
+<main>
+<h2>Work</h2>
+<p>Work is the measure of energy transferred when a force moves an object through a displacement. Only the component of force <strong>parallel</strong> to the displacement does work — a perpendicular force contributes nothing. Work is a scalar, but its sign matters:</p>
+<ul>
+    <li>Work is <strong>positive (+)</strong> when force and displacement point in the <strong>same</strong> direction — energy is added to the object.</li>
+    <li>Work is <strong>negative (−)</strong> when force and displacement point in <strong>opposite</strong> directions — energy is removed from the object.</li>
+</ul>
+
+<p class="eq">\( W = F_{\parallel}d = Fd\cos\theta \)</p>
+<p>Where:</p>
+    <ul>
+        <li>\(W\) = work (measured in Joules = \(N \cdot m\). You do 1 joule of work when you exert 1 N on an object in the direction as it moves 1 m.) </li>
+        <li>\(F_{\parallel}\) = applied force parallel to displacement</li>
+        <li>\(d\) = the displacement of the object due to the force</li>
+        <li>\(cos{\theta}\) = the cos of the angle \(\theta\) made by the applied force vector and the displacement vector.</li>
+    </ul>
+<div class="callout callout-insight">
+  <span class="callout-title">💡 Why cos θ?</span>
+  The \(\cos\theta\) term extracts the component of force along the direction of motion. At \(\theta = 0°\): \(\cos 0° = 1\) — full force contributes. At \(\theta = 90°\): \(\cos 90° = 0\) — zero work done, no matter how large the force. This is why a waiter carrying a tray horizontally across a room does <em>no</em> work on the tray — the lifting force is perpendicular to the motion.
+</div>
+<div class="callout callout-mistake">
+  <span class="callout-title">⚠ Common Mistake</span>
+  Forgetting that no displacement = no work. A person holding a 50 kg box perfectly still exerts a large force but does zero work — because \(d = 0\). Work requires both force <em>and</em> displacement.
+</div>
+
+<strong><a href="#" onclick="toggleText()" class="toggle-link">Practice:</a></strong>
+
+<span id="practice" style="display:none;">
+<ol>
+    <li>Is it possible to do work on an object that remains at rest?</li>
+    <br>
+    <li>
+        A kid pulls a block 4 meters across the floor with a force of 9 Newtons at an angle of 27.3 degrees above the horizontal. If the kid pulls 
+        the block at a constant velocity, what is the work done by friction.
+    </li>
+    <br>
+    <li>
+        What can be said about the work being done by tension on a ball being swung around in circle tied on the end of a string?
+    </li>
+    <br>
+</ol>
+<div style="text-align:center; margin: 2rem 0;">
+    <strong><a href="#" onclick="toggleAnswerKey()" class="toggle-link">Answer Key:</a></strong>
+</div>
+
+<span id="answer-key" style="display:none;">
+    <div>
+
+        <h3 style="margin-top:0;">Multiple Choice Answer Key</h3>
+
+        <p><strong>Q1 Answer - No</strong><br>
+            If there is no displacement of an object than there cannot be and work done.</p>
+            
+        <p><strong>Q2 Answer - (-32 J)</strong><br>
+            We know the block is moving a constant speed, meaning that \(F_{net} = 0\). Since \(W = Fd\), when \(F_{net} = 0\), \(W_{net} = 0\). <br>Now, we calculate the force applied on the block using the
+            equation above 
+            <p class="centered-text">\( W = F\cdot d\cdot cos{ \theta}\)</p>
+            <ul>
+             <li>\(F = 9N (applied force)\)</li>
+             <li>\(d = 4m (displacement)\)</li>
+             <li>\(\theta = 27.3° (angle above horizontal)\)</li>
+            </ul>
+            <p class="centered-text">\(W = 9 \cdot 4\cdot cos{(27.3)} \approx 32 J \)</p>
+            <p> For the \(W_{net}\) to equal zero, the work done by friction needs to exactly oppose the work applied by the force:</p>
+            <p class="centered-text"> \(W_{net} = -W_{F}\)</p>
+            <p>Therefore the work done by friction is equal to -32 Joules.</p>
+            </p>
+            
+        <p><strong>Q3 Answer - </strong></p>The work being done by tension is zero. The tension is the centripetal force on the ball, and that is perpendicular to the 
+                displacement of the ball, meaning that no work is being done by tension is equal to zero.
+    </div>      
+</span>
+
+</span>
+
+<h2>Force vs Displacement Graphs</h2>
+<p>The area under a Force vs. Displacement graph equals the work done. Area above the x-axis is positive work; area below is negative work.</p>
+<div class="callout callout-insight">
+  <span class="callout-title">💡 Why area = work</span>
+  Work = F × d. On an F vs. d graph, the "height" of the curve is force and the "width" is displacement — so the area is force × displacement = work. This holds even when the force varies, because you're summing up tiny slices of \(F \cdot \Delta d\).
+</div>
+<div style="text-align:center; margin: 1.5rem 0;">
+    <img src="Images/force-vs-displacement.svg" alt="Force vs Displacement graph showing positive and negative work areas" style="max-width:580px; width:100%; border-radius:8px; box-shadow:0 2px 12px rgba(30,58,95,0.10);">
+</div>
+<h2>Energy</h2>
+<p>The two main energies that you will focus on in AP physics are <strong>Kinetic Energy</strong> and <strong>Potential energy</strong></p>
+<h2>Kinetic Energy</h2>
+<p>Kinetic energy of the measure of the energy an object has when it is in motion</p>
+<p class="eq">\( KE = \frac{1}{2}mv^2 \)</p>
+<p>Where:</p>
+<ul>
+    <li>\( KE \) is the kinetic energy (Joules)</li>
+    <li>\( m \) is the mass of the object (kg)</li>
+    <li>\( v \) is the velocity of the object (m/s)</li>
+</ul>
+<p>If a net force acts on an object, it accelerates — and its KE changes. The Work-Energy Theorem (next section) makes this connection precise.</p>
+<div class="callout callout-insight">
+  <span class="callout-title">💡 KE scales with v², not v</span>
+  Doubling an object's speed <em>quadruples</em> its kinetic energy. This is why high-speed collisions are so much more destructive — a car at 60 mph has 4× the KE of one at 30 mph, not just 2×. It also means that coming to a stop from 60 mph requires 4× the braking work.
+</div>
+
+<h2>Work-Energy Theorem</h2>
+<p>The Work-Energy Theorem states that the <strong>net work done on an object equals the change in its kinetic energy</strong>. This is one of the most powerful tools in mechanics because it connects forces (through work) directly to the motion of an object (through kinetic energy), letting you solve for unknowns without needing to know the exact time or every force in detail.</p>
+<p class="eq">\( W_{\text{net}} = \Delta KE = \frac{1}{2}mv_f^2 - \frac{1}{2}mv_i^2 \)</p>
+<p>Where:</p>
+<ul>
+    <li>\( W_{\text{net}} \) is the net work done on the object (Joules)</li>
+    <li>\( \Delta KE \) is the change in kinetic energy (Joules)</li>
+    <li>\( v_f \) is the final velocity (m/s)</li>
+    <li>\( v_i \) is the initial velocity (m/s)</li>
+    <li>\( m \) is the mass (kg)</li>
+</ul>
+<div class="callout callout-analogy">
+  <span class="callout-title">🔗 Why this matters</span>
+  The Work-Energy Theorem lets you skip tracking every force at every instant. Instead of applying Newton's 2nd Law step by step, you only need the net result: if you know initial and final speeds, you know the net work done — and vice versa. It's especially useful when time is unknown or multiple forces act simultaneously.
+</div>
+<div class="callout callout-mistake">
+  <span class="callout-title">⚠ Common Mistake</span>
+  Using <em>any</em> single force's work instead of the <em>net</em> work. The theorem requires \(W_\text{net}\) — the sum of work done by <em>all</em> forces. If friction does −20 J and you push with +50 J, the net work is +30 J, and that's what changes the KE.
+</div>
+
+<strong><a href="#" onclick="toggleWETDerivation(event)" class="toggle-link">Deriving the Work-Energy Theorem</a></strong>
+
+<span id="wet-derivation" style="display:none;">
+<div class="boxed-text">
+    <h3>Deriving the Work-Energy Theorem</h3>
+    <p>We start with Newton's Second Law and the definition of work, then use kinematics to connect them.</p>
+
+    <p><strong>Step 1 — Start with Newton's Second Law:</strong></p>
+    <p class="centered-text">\( F_{\text{net}} = ma \)</p>
+
+    <p><strong>Step 2 — Write the definition of work done by a net force over displacement \(d\):</strong></p>
+    <p class="centered-text">\( W_{\text{net}} = F_{\text{net}} \cdot d = ma \cdot d \)</p>
+
+    <p><strong>Step 3 — Use the kinematic equation \( v_f^2 = v_i^2 + 2ad \) to express \(ad\):</strong></p>
+    <p class="centered-text">\( ad = \frac{v_f^2 - v_i^2}{2} \)</p>
+
+    <p><strong>Step 4 — Substitute back in:</strong></p>
+    <p class="centered-text">\( W_{\text{net}} = m \cdot \frac{v_f^2 - v_i^2}{2} \)</p>
+
+    <p><strong>Step 5 — Distribute and simplify:</strong></p>
+    <p class="centered-text">\[ W_{\text{net}} = \frac{1}{2}mv_f^2 - \frac{1}{2}mv_i^2 = \Delta KE \]</p>
+
+    <p>This shows that the net work done on an object is exactly equal to the change in its kinetic energy.</p>
+</div>
+</span>
+<h2>Potential Energy</h2>
+<p>Potential energy has a couple categories to it, but for now we are going to talk about <strong>Gravitation Potential Energy - U<sub>g</sub> or PE</strong></p>
+<p class="eq">\( U_g = PE = mgh \)</p>
+<p>Where:</p>
+<ul>
+    <li>\( U_g \) is the gravitational potential energy (Joules)</li>
+    <li>\( m \) is the mass of the object (kg)</li>
+    <li>\( g \) is the acceleration due to gravity (9.8 m/s²)</li>
+    <li>\( h \) is the height of the object above the reference point (m)</li>
+</ul>
+<p>Gravitational PE is stored energy based on position. The higher an object is, the more energy is stored in the gravitational field — ready to be released as kinetic energy when it falls.</p>
+<div class="callout callout-analogy">
+  <span class="callout-title">🌍 Energy stored in the field, not the object</span>
+  Lifting an object stores energy — not in the object itself, but in the object-Earth <em>system</em>. The energy is "waiting" in the gravitational field, ready to convert to KE the moment the object is released. The higher you lift it, the more energy is stored.
+</div>
+
+<h2>Conservation of Energy: PE → KE</h2>
+<p>When an object falls or slides down a ramp (with no friction), its gravitational potential energy is entirely converted into kinetic energy. The total mechanical energy of the system stays constant — this is called <strong>Conservation of Energy</strong>.</p>
+<p class="eq">\( U_i + KE_i = U_f + KE_f \)</p>
+<p>Where:</p>
+<ul>
+    <li>\( U_i \) is the initial potential energy (Joules)</li>
+    <li>\( KE_i \) is the initial kinetic energy (Joules)</li>
+    <li>\( U_f \) is the final potential energy (Joules)</li>
+    <li>\( KE_f \) is the final kinetic energy (Joules)</li>
+</ul>
+<p>At the top, the object has maximum \( U_g \) and zero \( KE \) (if it starts from rest). As it falls, \( U_g \) decreases and \( KE \) increases by the same amount, so at the bottom:</p>
+<p class="centered-text">\( U_{gi} = KE_f \)</p>
+<p class="centered-text">\( mgh = \frac{1}{2}mv^2 \)</p>
+<p>Notice the mass \( m \) appears on both sides — it cancels out, meaning the final speed does <strong>not</strong> depend on the mass of the object:</p>
+<p class="centered-text">\( gh = \frac{1}{2}v^2 \)</p>
+<p>Solving for velocity:</p>
+<p class="eq">\( v = \sqrt{2gh} \)</p>
+<p>Where:</p>
+<ul>
+    <li>\( v \) is the speed at the bottom (m/s)</li>
+    <li>\( g \) is the acceleration due to gravity (9.8 m/s²)</li>
+    <li>\( h \) is the height the object fell from (m)</li>
+</ul>
+<p>This equation is extremely useful. Any time an object starts from rest at some height and falls or slides down (frictionless), plug in the height to find the speed at the bottom — no forces or time needed.</p>
+
+
+<div class="sim-card">
+  <div class="sim-header">
+    Energy Conservation Explorer
+    <span>Drag the height slider to watch PE convert to KE in real time &nbsp;(m = 2 kg, g = 9.8 m/s²)</span>
+  </div>
+  <div class="sim-canvas-wrap">
+    <canvas id="energy-canvas" width="380" height="200"></canvas>
+  </div>
+  <div class="sim-controls">
+    <div class="sim-row">
+      <span class="sim-label">H</span>
+      <input type="range" id="ex-H" min="1" max="20" step="0.5" value="8" oninput="drawEnergyExplorer()"/>
+      <span class="sim-val">Max height: <span id="ex-H-val">8.0</span> m</span>
+    </div>
+    <div class="sim-row">
+      <span class="sim-label">h</span>
+      <input type="range" id="ex-pos" min="0" max="100" value="100" oninput="drawEnergyExplorer()"/>
+      <span class="sim-val">Current height: <span id="ex-h-val">8.0</span> m</span>
+    </div>
+  </div>
+  <div class="sim-result">
+    <span class="sim-result-eq">PE =</span>
+    <span class="sim-result-val" style="color:var(--primary);"><span id="ex-PE">156.8</span> J</span>
+    <span class="sim-result-eq" style="margin-left:8px;">KE =</span>
+    <span class="sim-result-val" style="color:#16a34a;"><span id="ex-KE">0.0</span> J</span>
+    <span class="sim-result-eq" style="margin-left:8px;">v =</span>
+    <span class="sim-result-val" style="color:#7c3aed; font-size:1.1rem;"><span id="ex-v">0.00</span> m/s</span>
+  </div>
+</div>
+
+<h2>Energy Bar Graphs</h2>
+<p>An <strong>energy bar graph</strong> is a visual tool used in AP Physics to track how energy is distributed across different forms (kinetic, gravitational PE, thermal, etc.) at two different points in time — typically an initial and a final state. Each bar's height represents the amount of energy in that form, and the <strong>total height of all bars must be equal between states</strong> if no external work is done. This is simply conservation of energy made visual.</p>
+
+<p>The general energy accounting equation is:</p>
+<p class="eq">\( E_i + W_{\text{ext}} = E_f \)</p>
+<p>Where:</p>
+<ul>
+    <li>\( E_i \) is the total mechanical energy in the initial state (Joules)</li>
+    <li>\( W_{\text{ext}} \) is any work done by external (non-conservative) forces, such as friction or an applied push (Joules)</li>
+    <li>\( E_f \) is the total mechanical energy in the final state (Joules)</li>
+</ul>
+<p>Expanded, this becomes:</p>
+<p class="centered-text">\( KE_i + U_i + W_{\text{ext}} = KE_f + U_f + \Delta E_{\text{th}} \)</p>
+<p>When there is no friction and no external work (\( W_{\text{ext}} = 0 \)), energy is fully conserved and simply changes form between KE and PE — the total stays constant. When friction is present, some mechanical energy converts to thermal energy (\( \Delta E_{\text{th}} \)), but the total energy in the system still stays the same.</p>
+
+<h3>How to Read an Energy Bar Graph</h3>
+<ul>
+    <li>Each <strong>bar</strong> represents one form of energy (KE, \(U_g\), thermal, etc.)</li>
+    <li>The <strong>height</strong> of a bar = the amount of that energy at that state</li>
+    <li>A <strong>dashed empty bar</strong> means that energy type is zero at that state</li>
+    <li>The <strong>sum of all bar heights must be equal</strong> between the initial and final state (energy conservation)</li>
+    <li>If bars shift from PE to KE, energy transferred — the total did not change</li>
+</ul>
+
+<h3>Example</h3>
+<p>A 2 kg block is released from rest at the top of a ramp of height h = 5 m (g = 10 m/s²). Friction does −20 J of work on the block as it slides down. The energy bar graph below shows the initial and final energy states.</p>
+<div style="text-align:center; margin: 1.5rem 0;">
+    <img src="Images/energy-bar-graph.svg" alt="AP-style energy bar graph showing PE converting to KE and thermal energy" style="max-width:570px; width:100%; border-radius:6px; box-shadow:0 2px 12px rgba(30,58,95,0.10);">
+</div>
+<p>Initially, all 100 J is stored as gravitational PE (\(U_g = mgh = 2 \times 10 \times 5 = 100\) J) with zero KE and zero thermal energy. As the block slides down, friction converts 20 J into thermal energy and the remaining 80 J becomes kinetic energy at the bottom. The dashed bars indicate an energy form is zero at that state. Notice the <strong>total energy is still 100 J</strong> in both states — energy was not lost, it just changed form.</p>
+
+
+<h2>Power</h2>
+<p><strong>Power</strong> is the rate at which work is done — it tells you how <em>quickly</em> energy is transferred, not how much. The unit of power is the <strong>Watt (W)</strong>, where \(1\,\text{W} = 1\,\text{J/s}\).</p>
+
+<p class="eq">\( P = \frac{W}{t} = \frac{\Delta E}{t} \)</p>
+<p>Where:</p>
+<ul>
+    <li>\( P \) — average power (Watts)</li>
+    <li>\( W \) — net work done (Joules)</li>
+    <li>\( t \) — elapsed time (seconds)</li>
+</ul>
+
+<p>When a constant force acts on a moving object, power can also be written as:</p>
+<p class="eq">\( P = Fv \)</p>
+<p>Where:</p>
+<ul>
+    <li>\( F \) — force applied in the direction of motion (N)</li>
+    <li>\( v \) — speed of the object (m/s)</li>
+</ul>
+<p>This form is useful for engines or motors — if you know the force applied and the speed maintained, you can find power output directly.</p>
+<div class="callout callout-insight">
+  <span class="callout-title">💡 Why P = Fv makes sense</span>
+  Since \(W = Fd\) and \(P = W/t\), then \(P = Fd/t = F \cdot (d/t) = Fv\). A car engine pushing with 2,000 N at 20 m/s produces 40,000 W = 40 kW. The same force at 40 m/s requires 80 kW — twice the power to maintain twice the speed with the same force.
+</div>
+<div class="callout callout-analogy">
+  <span class="callout-title">🔧 Think of it like this</span>
+  Two people carry identical boxes up a flight of stairs. One takes 10 seconds, the other takes 60 seconds. Both do exactly the same work — but the first person is 6× more powerful. Power is about <em>rate</em>, not total energy transferred.
+</div>
+<div class="callout callout-mistake">
+  <span class="callout-title">⚠ Common Mistake</span>
+  Confusing "more powerful" with "does more work." A more powerful engine doesn't necessarily do more total work — it just does work <em>faster</em>. A 100 W bulb left on for 1 hour does the same total work as a 1000 W heater run for 6 minutes.
+</div>
+
+<p>Since \( W_{\text{net}} = \Delta KE \), power can also be expressed as \( P = \frac{\Delta KE}{t} \). For example, a motor that accelerates a 10 kg object from rest to 6 m/s in 3 s delivers:</p>
+<p class="centered-text">\( P = \frac{\Delta KE}{t} = \frac{\frac{1}{2}(10)(6^2)}{3} = \frac{180}{3} = 60\,\text{W} \)</p>
+
+
+<h2>Summary</h2>
+<p>The central idea of this entire unit is that <strong>energy cannot be created or destroyed — it can only change form or transfer between objects.</strong> Everything else builds on that.</p>
+<div style="text-align:center; margin: 1.5rem 0;">
+    <img src="Images/energy-types-tree.svg" alt="Tree diagram showing types of energy: mechanical and non-mechanical, with potential and kinetic branches" style="max-width:680px; width:100%; border-radius:8px; box-shadow:0 2px 12px rgba(30,58,95,0.10);">
+</div>
+<ul>
+    <li><strong>Energy is the ability to do work.</strong> If an object has energy — whether it's moving, elevated, or compressed — it has the capacity to exert a force over a displacement and transfer that energy to something else.</li>
+    <li><strong>Work is how energy enters or leaves a system.</strong> When a force acts on an object over a displacement, it transfers energy to or from that object. Positive work adds energy; negative work removes it.</li>
+    <li><strong>Kinetic energy is energy of motion.</strong> Any moving object has KE. When net work is done on an object, its KE changes — that connection is the Work-Energy Theorem.</li>
+    <li><strong>Gravitational PE is stored energy based on position.</strong> The higher an object is, the more energy is stored in the gravitational field. That stored energy is released as the object falls.</li>
+    <li><strong>Mechanical energy is the sum of KE and PE.</strong> \( E_{\text{mech}} = KE + U_g \). In a frictionless system, mechanical energy is conserved — it can shift between kinetic and potential, but the total never changes.</li>
+    <li><strong>In a closed system, KE and PE trade off.</strong> As an object falls or speeds up, PE converts to KE. As it rises or slows down, KE converts back to PE. The total stays constant.</li>
+    <li><strong>Friction transfers mechanical energy into thermal energy.</strong> The system doesn't lose total energy — it just becomes heat that can no longer do useful mechanical work. This is why friction is called a non-conservative force.</li>
+    <li><strong>Energy bar graphs make the transfer visible.</strong> Each bar is a snapshot of how much energy is in each form. The total across all bars must be equal at every point in time.</li>
+    <li><strong>Power describes how fast energy is transferred.</strong> The same amount of work done in less time means more power. A more powerful engine doesn't necessarily do more work — it just does it faster.</li>
+</ul>
+<div class="boxed-text" style="position:relative;">
+    <span style="position:absolute; top:14px; right:18px; font-size:0.78rem; color:var(--text-muted); line-height:1.7; text-align:right;">
+        <strong style="color:var(--primary);">Key</strong><br>
+        \( i \) = initial &nbsp;·&nbsp; \( f \) = final<br>
+        \( g \) = gravity &nbsp;·&nbsp; \( h \) = height<br>
+        \( W_{\text{ext}} \) = work by external force<br>
+        \( \Delta E_{\text{th}} \) = thermal energy gained<br>
+        \( E_{\text{mech}} \) = mechanical energy
+    </span>
+    <strong>All Your Equations:</strong>
+    <ul>
+        <li>\( W = F_{\parallel}d = Fd\cos\theta \)</li>
+        <li>\( KE = \frac{1}{2}mv^2 \)</li>
+        <li>\( W_{\text{net}} = \Delta KE = \frac{1}{2}mv_f^2 - \frac{1}{2}mv_i^2 \)</li>
+        <li>\( U_g = mgh \)</li>
+        <li>\( E_{\text{mech}} = KE + U_g \)</li>
+        <li>\( U_i + KE_i = U_f + KE_f \)</li>
+        <li>\( v = \sqrt{2gh} \)</li>
+        <li>\( E_i + W_{\text{ext}} = E_f \)</li>
+        <li>\( P = \frac{W}{t} = \frac{\Delta E}{t} \)</li>
+        <li>\( P = Fv \)</li>
+    </ul>
+</div>
+<h2>Practice Problems</h2>
+<ol>
+    <li>You are pushing a heavy box up a ramp with friction at a constant speed. The box...<br>
+        A)gains no energy at all
+        <br>
+        B) gains potential energy 
+        <br>
+        C)gains only kinetic energy 
+        <br>
+        D) is losing kinetic energy and gaining potential energy
+    </li>
+<br>
+    <li>A kid starts at the top of a slide that is 10 meters tall and slides down to the bottom of it. 5% of his initial gravitational potential energy 
+    is lost due to friction. What is his speed at the bottom of the ramp?<br>
+    A)\(9.5g\)
+    <br>
+    B)\(\sqrt{9.5g}\)
+    <br>
+    C)\(\frac{20}{g}\)
+    <br>
+    D)\(\sqrt{19g}\)
+
+    </li>
+<br>
+    <li>A crate is accelerated vertically by a crane motor at a constant acceleration. It reaches a vertical speed of 4 m/s in 2 seconds. What is the power output of the crane motor?
+        A) 8M
+        <br>
+        B) 32M
+        <br>
+        C) 24M
+        <br>
+        D) 60M
+    </li>
+<br>
+    <li> Biker one has four times the kinetic energy as biker two. Which of these statements about the bikers is true?<br>
+    A) Biker 1 has twice the velocity as biker 2.
+    <br>
+    B) Biker 1 has twice the mass as biker 2.
+    <br>
+    C) Biker 1 has 1/2 the mass as biker 2.
+    <br>
+    D)Biker 1 has 4 times the velocity as biker 2
+    </li>
+<br>
+    <li>A skate rides down a half pipe from the top of the ramp. Where on the ramp does he have the greates speed?<br>
+        A) The bottom of the ramp
+        <br>
+        B) The top of the ramp.
+        <br>
+        C) 1/4 down the ramp.
+        <br>
+        D) Halfway down the ramp
+
+    </li>
+<br>
+    <li> A bmx rider has a speed of 15 m/s as he leaves a jump. At the highest point in his trajectory in the air, he has a speed of 13 m/s. Ignoring air resistance,
+        determine the height above the ramp at the highest point in his trajectory.
+    </li>
+<br>
+    <li> A 80 kg skier has an initial speed of 12 m/s and skis up a 2.5 meter high hill that is at a slope of 30° and is flat on the top. What is the skiers speed at the top of the slope
+        given that the friction of snow 0.05.
+
+    </li>
+<br>
+    <li>A block slides down from the top of a half pipe as shows in the image. The block of mass m is released from 10 m and the curves on the ramp have no friction, but the flat at the bottom does. The
+        coefficient of friction at the bottom of the ramp if 0.3 and is 4 meters long.<br>
+        A. What direction is the block of mass m traveling when it comes to a stop?
+        <br>
+        B. How far from point y is the block when it comes to a complete stop?
+    </li>
+    <br>
+    <li>
+        A 3 kg block slides down a frictionless ramp of height 3.0 m. It then travels along a rough horizontal surface for 4.0 m before coming to rest against a spring (\( k = 600\ \text{N/m} \)), compressing the spring 0.20 m. What is the coefficient of kinetic friction between the block and the horizontal surface? (\( g = 10\ \text{m/s}^2 \))
+        <ol type="A">
+            <li>0.45</li>
+            <li>0.55</li>
+            <li>0.65</li>
+            <li>0.75</li>
+        </ol>
+    </li>
+    <br>
+    <li>
+        A car engine maintains a constant power output \( P \) as it accelerates from rest on a level, frictionless road. Which of the following correctly describes how the net force on the car changes as its speed increases?
+        <ol type="A">
+            <li>The net force remains constant because the power output is constant.</li>
+            <li>The net force increases because the car is continuously gaining kinetic energy.</li>
+            <li>The net force decreases because at constant power, force must decrease as speed increases.</li>
+            <li>The net force is zero because the car is accelerating smoothly.</li>
+        </ol>
+    </li>
+    <br>
+    <li>
+        <strong>Free Response</strong><br><br>
+        A 2 kg block is pressed against a spring (\( k = 800\ \text{N/m} \)) on a frictionless horizontal surface, compressing it 0.25 m. The block is released and slides along the frictionless surface until it reaches the base of a ramp inclined at 30° above horizontal. The ramp has a coefficient of kinetic friction \( \mu_k = 0.15 \). (\( g = 10\ \text{m/s}^2 \), \( \sin 30° = 0.50 \), \( \cos 30° = 0.866 \))
+        <ol type="A">
+            <li>Calculate the elastic potential energy stored in the compressed spring.</li>
+            <br>
+            <li>Calculate the speed of the block at the base of the ramp.</li>
+            <br>
+            <li>Calculate how far up the ramp (measured along the slope) the block travels before stopping.</li>
+            <br>
+            <li>After stopping on the ramp, does the block slide back down? Justify your answer. If it does, calculate its speed when it returns to the base of the ramp.</li>
+        </ol>
+    </li>
+    <br>
+    <li>
+        <strong>Free Response</strong><br><br>
+        A 1000 kg car maintains a constant power output of 30,000 W as it travels at a constant speed up a straight road inclined at 30° above horizontal. The coefficient of kinetic friction between the tires and the road is 0.10. (\( g = 10\ \text{m/s}^2 \), \( \sin 30° = 0.50 \), \( \cos 30° = 0.866 \))
+        <ol type="A">
+            <li>Calculate the magnitude of the net driving force the engine must exert along the road for the car to move at constant speed. Show your force balance.</li>
+            <br>
+            <li>Calculate the constant speed of the car.</li>
+            <br>
+            <li>Calculate the time it takes the car to travel 200 m up the road at this constant speed.</li>
+            <br>
+            <li>Calculate the total energy output of the engine during this 200 m trip.</li>
+            <br>
+            <li>Of the engine's total energy output during this trip, determine what fraction is stored as gravitational PE and what fraction is dissipated by friction. Show that these two fractions account for the total energy output.</li>
+        </ol>
+    </li>
+</ol>
+
+<br>
+<div style="text-align:center; margin: 2rem 0;">
+    <strong><a href="#" onclick="togglePracticeAnswerKey(event)" class="toggle-link">Answer Key</a></strong>
+</div>
+
+<div id="practice-answer-key" style="display:none;">
+<div class="boxed-text">
+    <h3 style="margin-top:0;">Answer Key — Practice Problems</h3>
+
+    <p><strong>Q1 — B (gains potential energy)</strong><br>
+    The key phrase is "constant speed" — that tells you immediately that \( \Delta KE = 0 \), meaning the net work done on the box is zero (Work-Energy Theorem). But work <em>is</em> being done; it just all goes somewhere other than KE. Your push does positive work, and that energy splits between two places: gravitational PE (the box is rising) and thermal energy lost to friction. So the box is gaining potential energy the whole way up, even though its speed never changes. Answer A is wrong because energy is definitely being transferred — it's just not going into KE.</p>
+
+    <p><strong>Q2 — D (\( \sqrt{19g} \))</strong><br>
+    If 5% of the PE is lost to friction, then 95% successfully converts to KE at the bottom. Set that equal to the kinetic energy:<br>
+    \( 0.95\,mgh = \frac{1}{2}mv^2 \)<br>
+    Notice that mass \( m \) appears on both sides and cancels out — the final speed doesn't depend on the kid's weight. Solving:<br>
+    \( v^2 = 2(0.95)(g)(10) = 19g \Rightarrow v = \sqrt{19g} \)<br>
+    A common mistake is forgetting to keep \( g \) as a variable in the answer, or accidentally writing \( \sqrt{9.5g} \) (that would be only half the height or half the efficiency).</p>
+
+    <p><strong>Q3 — C (24M)</strong><br>
+    The crate accelerates upward, so two things are fighting the crane: gravity pulling the crate down, and inertia resisting the acceleration. By Newton's 2nd Law applied vertically:<br>
+    \( F_{\text{crane}} - Mg = Ma \Rightarrow F_{\text{crane}} = M(g + a) = M(9.8 + 2) = 11.8M\ \text{N} \)<br>
+    We can't use \( P = Fv \) directly because the velocity is changing throughout. Instead, use \( P = W/t \). The crate travels \( d = \frac{1}{2}at^2 = \frac{1}{2}(2)(2^2) = 4\ \text{m} \) in 2 s:<br>
+    \( P = \frac{F \cdot d}{t} = \frac{11.8M \times 4}{2} = 23.6M \approx \mathbf{24M} \)</p>
+
+    <p><strong>Q4 — A (Biker 1 has twice the velocity)</strong><br>
+    This question is testing whether you know that KE scales with \( v^2 \), not \( v \). Assuming both bikers have the same mass \( m \):<br>
+    \( \frac{1}{2}mv_1^2 = 4 \cdot \frac{1}{2}mv_2^2 \Rightarrow v_1^2 = 4v_2^2 \Rightarrow v_1 = 2v_2 \)<br>
+    Because KE goes as \( v^2 \), you only need to double the velocity to quadruple the KE — not quadruple the velocity. Answer D (\( 4v \)) would give 16× the KE. This square relationship is one of the most commonly confused facts about kinetic energy.</p>
+
+    <p><strong>Q5 — A (bottom of the ramp)</strong><br>
+    Energy conservation: as the skater descends, every meter of height lost converts directly into kinetic energy. The lowest point on the ramp is where the skater has given up the most PE and accumulated the most KE — so speed is maximum at the bottom. Going back up the other side, that KE starts converting back into PE and the skater slows down. The skater is fastest at the bottom every single time they pass through it.</p>
+
+    <p><strong>Q6 — h ≈ 2.86 m</strong><br>
+    With no air resistance, mechanical energy is conserved throughout the jump. The rider's total energy (KE + PE) at launch equals the total at the highest point. At the highest point, the rider still has 13 m/s — that's the horizontal component of velocity, which never changes (no air resistance, no horizontal force). Only the vertical velocity has gone to zero. So the lost KE became gravitational PE:<br>
+    \( \frac{1}{2}mv_0^2 = \frac{1}{2}mv^2 + mgh \)<br>
+    \( h = \frac{v_0^2 - v^2}{2g} = \frac{225 - 169}{19.6} = \frac{56}{19.6} \approx \mathbf{2.86\ \text{m}} \)</p>
+
+    <p><strong>Q7 — v ≈ 9.5 m/s</strong><br>
+    Two things are stealing energy from the skier on the way up: gaining gravitational PE and losing energy to friction. First find the ramp length since friction depends on distance traveled along the slope, not just height: \( L = h/\sin 30° = 2.5/0.5 = 5\ \text{m} \). Note that friction uses \( \cos\theta \) (for the normal force component) while PE uses \( \sin\theta \) (for the height component) — mixing these up is the most common error here.<br>
+    \( \frac{1}{2}mv_f^2 = \frac{1}{2}mv_0^2 - mgh - \mu mg\cos\theta \cdot L \)<br>
+    Dividing through by \( m \):<br>
+    \( \frac{1}{2}v_f^2 = 72 - 24.5 - 2.12 = 45.38 \Rightarrow v_f = \sqrt{90.76} \approx \mathbf{9.53\ \text{m/s}} \)</p>
+
+    <p><strong>Q8 — A: traveling toward y &nbsp;|&nbsp; B: ≈ 2.67 m from y</strong><br>
+    The strategy: track energy after each full crossing of the flat. The curved ramps are frictionless, so the block loses energy only when crossing the flat — exactly \( \mu mgd = 0.3(m)(10)(4) = 12m\ \text{J} \) per pass. Each time the block completes a crossing it bounces up the opposite ramp, then comes back for another pass.<br>
+    Pass 1 (→, x to y): 100m − 12m = 88m &nbsp;|&nbsp; Pass 2 (←): 76m &nbsp;|&nbsp; Pass 3 (→): 64m &nbsp;|&nbsp; Pass 4 (←): 52m<br>
+    Pass 5 (→): 40m &nbsp;|&nbsp; Pass 6 (←): 28m &nbsp;|&nbsp; Pass 7 (→): 16m &nbsp;|&nbsp; Pass 8 (←, y to x): 4m<br>
+    After pass 8 the block arrives back at x with only 4m J. It starts pass 9 heading toward y, but it would need 12m J to complete the crossing — it doesn't have enough. It stops somewhere on the flat.<br>
+    \( \mu mg \cdot d = 4m \Rightarrow (0.3)(10)\,d = 4 \Rightarrow d = \frac{4}{3}\ \text{m from x} \)<br>
+    Distance from y: \( 4 - \frac{4}{3} = \frac{8}{3} \approx \mathbf{2.67\ \text{m}} \)</p>
+
+    <p><strong>Q9 — C (0.65)</strong><br>
+    Use energy conservation from top of ramp to max spring compression. All initial PE must go into spring PE plus heat from friction:<br>
+    \( mgh = \frac{1}{2}kx^2 + \mu mg d \)<br>
+    \( (3)(10)(3.0) = \frac{1}{2}(600)(0.20)^2 + \mu(3)(10)(4.0) \)<br>
+    \( 90 = 12 + 120\mu \)<br>
+    \( \mu = \frac{78}{120} = \mathbf{0.65} \)</p>
+
+    <p><strong>Q10 — C</strong><br>
+    Rearrange \( P = Fv \) to get \( F = P/v \). At constant power, force and velocity are inversely related — as one goes up, the other must come down. Early on, the car is moving slowly, so it can exert a large force and accelerate quickly. As it speeds up, the same power output forces a smaller and smaller driving force, which means less acceleration. The car never stops speeding up (on a frictionless road it would keep accelerating indefinitely), but it does so more and more gradually. This is why you feel a car "pull" hardest right off the line and the acceleration tapers off at higher speeds — even with the same engine power.</p>
+
+    <p><strong>Q11 — Free Response (k = 800 N/m, m = 2 kg, x = 0.25 m, θ = 30°, μ = 0.15)</strong></p>
+    <p><em>Part A — Spring PE:</em><br>
+    \( U_s = \frac{1}{2}kx^2 = \frac{1}{2}(800)(0.25)^2 = \frac{1}{2}(800)(0.0625) = \mathbf{25\ \text{J}} \)</p>
+    <p><em>Part B — Speed at base of ramp:</em><br>
+    The horizontal surface is frictionless, so all spring PE becomes KE:<br>
+    \( \frac{1}{2}mv^2 = 25\ \text{J} \Rightarrow v = \sqrt{\frac{2(25)}{2}} = \sqrt{25} = \mathbf{5.0\ \text{m/s}} \)</p>
+    <p><em>Part C — Distance up the ramp:</em><br>
+    Energy is lost to both gravitational PE and friction. Setting KE = 0 at the stopping point:<br>
+    \( \frac{1}{2}mv^2 = mgs\sin\theta + \mu_k mg\cos\theta \cdot s = mgs(\sin\theta + \mu_k\cos\theta) \)<br>
+    \( 25 = (2)(10)(s)(0.50 + 0.15 \times 0.866) = 20s(0.6299) \)<br>
+    \( s = \frac{25}{12.60} \approx \mathbf{2.0\ \text{m}} \)</p>
+    <p><em>Part D — Does the block slide back?</em><br>
+    Compare gravity component along ramp to max static friction (using \( \mu_k \) as approximation):<br>
+    \( mg\sin\theta = (2)(10)(0.50) = 10\ \text{N} \)<br>
+    \( \mu_k mg\cos\theta = (0.15)(2)(10)(0.866) = 2.6\ \text{N} \)<br>
+    Since \( 10\ \text{N} > 2.6\ \text{N} \), <strong>yes, the block slides back down.</strong><br>
+    Speed at the base after sliding back \( s = 2.0\ \text{m} \):<br>
+    \( KE = mgs(\sin\theta - \mu_k\cos\theta) = (2)(10)(2.0)(0.50 - 0.1299) = 40(0.3701) = 14.8\ \text{J} \)<br>
+    \( v = \sqrt{\frac{2(14.8)}{2}} = \sqrt{14.8} \approx \mathbf{3.8\ \text{m/s}} \)</p>
+
+    <p><strong>Q12 — Free Response (m = 1000 kg, P = 30,000 W, θ = 30°, μ = 0.10)</strong></p>
+    <p><em>Part A — Driving force at constant speed (net force = 0):</em><br>
+    \( F_{\text{engine}} = mg\sin\theta + \mu_k mg\cos\theta \)<br>
+    \( F_{\text{engine}} = (1000)(10)(0.50) + (0.10)(1000)(10)(0.866) \)<br>
+    \( F_{\text{engine}} = 5000 + 866 = \mathbf{5866\ \text{N}} \)</p>
+    <p><em>Part B — Constant speed:</em><br>
+    \( P = Fv \Rightarrow v = \frac{P}{F} = \frac{30{,}000}{5866} \approx \mathbf{5.11\ \text{m/s}} \)</p>
+    <p><em>Part C — Time for 200 m:</em><br>
+    \( t = \frac{d}{v} = \frac{200}{5.11} \approx \mathbf{39.1\ \text{s}} \)</p>
+    <p><em>Part D — Total engine energy output:</em><br>
+    \( W = F \cdot d = 5866 \times 200 = \mathbf{1{,}173{,}200\ \text{J}} \approx 1.17\ \text{MJ} \)<br>
+    (Equivalently: \( W = Pt = 30{,}000 \times 39.1 = 1{,}173{,}000\ \text{J} \). The small difference is rounding.)</p>
+    <p><em>Part E — Energy distribution:</em><br>
+    Height gained: \( h = 200\sin 30° = 100\ \text{m} \)<br>
+    \( \Delta PE = mgh = (1000)(10)(100) = 1{,}000{,}000\ \text{J} \quad \Rightarrow \frac{1{,}000{,}000}{1{,}173{,}200} \approx \mathbf{85.2\%} \)<br>
+    \( W_{\text{friction}} = \mu mg\cos\theta \cdot d = (0.10)(1000)(10)(0.866)(200) = 173{,}200\ \text{J} \quad \Rightarrow \frac{173{,}200}{1{,}173{,}200} \approx \mathbf{14.8\%} \)<br>
+    Check: \( 1{,}000{,}000 + 173{,}200 = 1{,}173{,}200\ \text{J} \) ✓ — all engine energy accounted for.</p>
+</div>
+</div>
+
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  function drawText(ctx, str, x, y, opts) {
+    ctx.save();
+    ctx.font         = (opts.w || 'normal') + ' ' + (opts.size || 13) + 'px Inter, Arial, sans-serif';
+    ctx.fillStyle    = opts.color || '#1e293b';
+    ctx.textAlign    = opts.align || 'left';
+    ctx.textBaseline = opts.base  || 'middle';
+    ctx.fillText(str, x, y);
+    ctx.restore();
+  }
+
+  window.drawEnergyExplorer = function () {
+    const canvas = document.getElementById('energy-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0, 0, W, H);
+
+    const H_init = parseFloat(document.getElementById('ex-H').value);
+    const pos    = parseFloat(document.getElementById('ex-pos').value); // 0–100%
+    const m = 2, g = 9.8;
+
+    const h      = (pos / 100) * H_init;
+    const totalE = m * g * H_init;
+    const PE     = m * g * h;
+    const KE     = totalE - PE;
+    const v      = KE > 0 ? Math.sqrt(2 * KE / m) : 0;
+
+    // Update labels
+    document.getElementById('ex-H-val').textContent = H_init.toFixed(1);
+    document.getElementById('ex-h-val').textContent = h.toFixed(1);
+    document.getElementById('ex-PE').textContent    = PE.toFixed(1);
+    document.getElementById('ex-KE').textContent    = KE.toFixed(1);
+    document.getElementById('ex-v').textContent     = v.toFixed(2);
+
+    // ── Layout ─────────────────────────────────────────────────────
+    const maxBarH = 140;    // max bar pixel height
+    const barW    = 70;     // bar pixel width
+    const barTopY = 28;     // y of top of bar area
+    const barBotY = barTopY + maxBarH;
+    const bar1CX  = 110;    // PE bar center x
+    const bar2CX  = 270;    // KE bar center x
+
+    // ── Background bars (represents total energy) ──────────────────
+    ctx.fillStyle = '#e2e8f0';
+    ctx.fillRect(bar1CX - barW / 2, barTopY, barW, maxBarH);
+    ctx.fillRect(bar2CX - barW / 2, barTopY, barW, maxBarH);
+
+    // ── PE bar (navy) ──────────────────────────────────────────────
+    const peFrac = totalE > 0 ? PE / totalE : 0;
+    const peH    = peFrac * maxBarH;
+    ctx.fillStyle = '#1e3a5f';
+    ctx.fillRect(bar1CX - barW / 2, barBotY - peH, barW, peH);
+
+    // ── KE bar (green) ─────────────────────────────────────────────
+    const keFrac = totalE > 0 ? KE / totalE : 0;
+    const keH    = keFrac * maxBarH;
+    ctx.fillStyle = '#16a34a';
+    ctx.fillRect(bar2CX - barW / 2, barBotY - keH, barW, keH);
+
+    // ── Total energy dashed line ───────────────────────────────────
+    ctx.save();
+    ctx.setLineDash([5, 4]);
+    ctx.strokeStyle = '#94a3b8';
+    ctx.lineWidth   = 1;
+    ctx.beginPath();
+    ctx.moveTo(bar1CX - barW / 2 - 12, barTopY);
+    ctx.lineTo(bar2CX + barW / 2 + 12, barTopY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+
+    // ── Transfer arrow (shown when energy is split) ────────────────
+    if (pos > 3 && pos < 97) {
+      const arrowY = barTopY + maxBarH / 2;
+      ctx.save();
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth   = 1.5;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(bar1CX + barW / 2 + 6, arrowY);
+      ctx.lineTo(bar2CX - barW / 2 - 6, arrowY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      // Arrowhead
+      const ax = bar2CX - barW / 2 - 6;
+      ctx.beginPath();
+      ctx.moveTo(ax, arrowY);
+      ctx.lineTo(ax - 9, arrowY - 5);
+      ctx.lineTo(ax - 9, arrowY + 5);
+      ctx.closePath();
+      ctx.fillStyle = '#94a3b8';
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // ── Bar labels (title above, value below) ──────────────────────
+    drawText(ctx, 'PE', bar1CX, barTopY - 12, { w: '700', size: 13, color: '#1e3a5f', align: 'center', base: 'middle' });
+    drawText(ctx, 'KE', bar2CX, barTopY - 12, { w: '700', size: 13, color: '#16a34a', align: 'center', base: 'middle' });
+
+    drawText(ctx, PE.toFixed(0) + ' J', bar1CX, barBotY + 14, { w: '600', size: 11, color: '#1e3a5f', align: 'center', base: 'middle' });
+    drawText(ctx, KE.toFixed(0) + ' J', bar2CX, barBotY + 14, { w: '600', size: 11, color: '#16a34a', align: 'center', base: 'middle' });
+
+    // ── Total label ────────────────────────────────────────────────
+    drawText(ctx, 'Total: ' + totalE.toFixed(0) + ' J', bar2CX + barW / 2 + 14, barTopY,
+      { size: 10, color: '#64748b', align: 'left', base: 'middle' });
+
+    // ── Height annotation ──────────────────────────────────────────
+    drawText(ctx, 'h = ' + h.toFixed(1) + ' m', bar1CX, barBotY + 28,
+      { size: 10, color: '#64748b', align: 'center', base: 'middle' });
+  };
+
+  // Init on load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', drawEnergyExplorer);
+  } else {
+    drawEnergyExplorer();
+  }
+
+}());
+</script>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2026 Physics Fun. All rights reserved.</p>
+      <p>The content, simulations, graphics, and source code on this website are the intellectual property of Physics Fun. This material is provided for personal educational use only. No part of this website may be copied, modified, redistributed, or used to create derivative works without explicit written permission.</p>
+    </div>
+  </footer>
+</body>
+</html>

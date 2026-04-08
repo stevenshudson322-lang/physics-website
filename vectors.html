@@ -6,7 +6,17 @@
     <title>Vectors - Physics Fun</title>
 
     <link rel="stylesheet" href="css/style.css" />
+    <style>
+/* page-level overrides — base styles live in css/style.css */
+    </style>
+    <script>
+        window.MathJax = {
+        tex: { inlineMath: [['\\(', '\\)']] }
+        };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
         
+
 </head>
 <body>
   <header class = "site-header">
@@ -24,17 +34,121 @@
 
     <p><strong>UNIT Vectors</strong></p>
 
-    <p>Vectors are an simple a frequent part of physics, especially when drawing free body diagrams, though they will also so up 
-    in other units like rotational motion and Electromagnetism.</p>
+    <h2>Vector Quantities</h2>
 
-    <p>Vectors are very simple yet very important. To help with this practice problems specifically about vectors and adding vectors 
-    will be provided below. Now, enough talk of that; lets actually learn what a vector is.</p>
+    <p>A vector is a physical quantity that has both <strong>magnitude</strong> and <strong>direction</strong>. For example, if someone says an object is moving at 10 m/s, that only tells us 
+      how fast it is moving. However, if they say the object is moving 10 m/s to the right, we now know both the magnitude and the direction, making it a 
+      vector quantity.</p>
+    
+    <p>Vectors are extremely important in physics because many physical quantities depend on direction. Examples of vector quantities include:</p>
+    <ul>
+      <li>Displacement</li>
+      <li>Velocity</li>
+      <li>Acceleration</li>
+      <li>Force</li>
+      <li>Momentum</li>
+    </ul>
+    <p>These are different than scalar quanttites because their direction affects how they interact and combine.</p>
 
-    <h2><strong>What A Vector Is: (Vector = how much + which way)</strong></h2>
+    <p>_________________________________________________________________________________________________________</p>
 
-    <p>A vector is a quantity that has both a direction and magnitude. This means that a vector has a direction to it, 
-    up and to the right being positive, and down and to the left being negative. Having a magnitude just measures the quantity of the vector. This 
-    magnitude would be something like a force having a magnitude of 5 newtons or a object having a vleocity of 40 m/s. This may be a touch 
-    confusing so think of this example: Imaging you are pushing a toy car it matters how hard you push it, and what direction you push it. 
-    A vector is how hard you push it and what direction you push it. Even if you push it just as hard, puhsing to the left will be different 
-    from puhing to the rigth.</p>
+    <h2>Scalar Quantaties</h2>
+    <p>A <strong>scalar</strong> quantity only has a magnitude. Examples of scalr quantities include:</p>
+    <ul>
+      <li>Time</li>
+      <li>Speed</li>
+      <li>Mass</li>
+      <li>Energy</li>
+      <li>Temperature</li>
+    </ul>
+    <p>For example, saying an object has a mass of 5 kg or a temperature of 20°C fully describes the quantity without needing a direction.
+        Vectors, however, must always include direction. Saying a force is 20 N is incomplete. Instead, it must be described as something like 
+        20 N upward or 20 N to the left.
+    </p>
+
+<div class="callout callout-insight">
+  <span class="callout-title">💡 Vectors Always Need Direction</span>
+  Saying a force is 20 N is incomplete in physics — you need 20 N <em>upward</em> or 20 N <em>to the left</em>. Without direction, you cannot determine how the force affects motion. This is what separates vector quantities from scalars.
+</div>
+
+    <h2>Representing Vectors</h2>
+
+    <p>Vectors are typically represented by an arrow. These arrows have two import parts:</p>
+    <ul>
+      <li><strong>length of the arrow</strong> → represents the magnitude of the vector</li>
+      <li><strong>direction of the arrow</strong> → represents the direction of the vector</li>
+    </ul>
+    <p>Longer arrows represents larger magnitudes, while shorter arrows represent smaller magnitudes. The direction just means the direction of the vector</p>
+
+    <p>_________________________________________________________________________________________________________</p>
+
+    <h2>Components of Vectors</h2>
+    <p> Someimte vectors are at an angle, so it is helpfull to break them down into the <strong>vertical</strong> and <strong>horizontal</strong> components. <br> The components tell how much a vectors points in each direction.<p>
+
+    <p>For example, a vector <strong>V</strong> at an angle θ can be broken into two parts. <strong>V<sub>x</sub></strong> and <strong>V<sub>y</sub></strong>:</p>
+    
+      <p class="centered-text"><strong>V<sub>x</sub></strong> = <strong>V</strong> cos(θ) </p>
+      <p class="centered-text"><strong>V<sub>y</sub></strong> = <strong>V</strong> sin(θ) </p>
+
+    <p>Where: 
+      <ul>
+        <li><strong>V</strong> is the magnitude of the vector</li>
+        <li>θ is the angle the vector makes with the horizontal axis</li>
+        <li><strong>V<sub>x</sub></strong> is the horizontal component of the vector</li>
+        <li><strong>V<sub>y</sub></strong> is the vertical component of the vector</li>
+
+      </ul>
+
+<div class="callout callout-mistake">
+  <span class="callout-title">⚠ Common Mistake</span>
+  V<sub>x</sub> = V cos(θ) and V<sub>y</sub> = V sin(θ) only when θ is measured from the <em>horizontal</em>. If the angle is given from the vertical, sin and cos swap. Always check which axis your angle is referenced from before plugging in.
+</div>
+
+      <h2>Vector Addition</h2>
+
+      <p>In physics, vectors must be added differently than regular numbers because direction matters. If two vectors 
+        point in the same direction, their magnitudes add normally. However, if they point in different directions, 
+        their directions must be taken into account when determining the final result.
+      </p>
+
+The final combined vector is called the <strong>resultant vector</strong>.
+<p class="centered-text">\( \vec{R} = \vec{A} + \vec{B} \)</p>
+<p>Where \( \vec{R} \) represents the resultant vector.</p>
+<br>
+<p>_________________________________________________________________________________________________________</p>
+      <h3> If two vectors are pointed in the same direction, there magnitudes can simply be added. </h3>
+        
+      <p><strong>Examples:</strong></p>
+      <ul>
+        <li><strong>\(\vec{A}\)</strong> = 5 N to the right</li>
+        <li><strong>\(\vec{B}\)</strong> = 3 N to the right</li>
+      </ul>
+      <p class="centered-text"> \( \vec{R} = 5N +3N = 8N \)</p>
+
+      <p> Result: 8 N to the right</p>
+<p>_________________________________________________________________________________________________________</p>
+      <br>
+
+      <h3> If two vectors are pointed in the opposite direction, there magnitudes subtract</h3>
+        
+      <p><strong>Examples:</strong></p>
+      <ul>
+        <li><strong>\(\vec{A}\)</strong> = 10 N to the right</li>
+        <li><strong>\(\vec{B}\)</strong> = 3 N to the left </li>
+      </ul>
+      <p class="centered-text"> \( \vec{R} = 10N - 3N = 7N \)</p>
+
+      <p> Result: 7 N to the right( the direction of the larger vectore )</p>
+
+
+    
+
+    </main>
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2026 Physics Fun. All rights reserved.</p>
+      <p>The content, simulations, graphics, and source code on this website are the intellectual property of Physics Fun. This material is provided for personal educational use only. No part of this website may be copied, modified, redistributed, or used to create derivative works without explicit written permission.</p>
+    </div>
+  </footer>
+</body>
+</html>

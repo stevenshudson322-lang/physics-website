@@ -5,7 +5,100 @@
     <meta name = "viewport" content="width=device-width, initial-scale=1" />
     <title>Forces - Physics Fun</title>
 
-    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/style.css"/>
+<style>
+/* page-level overrides — base styles live in css/style.css */
+</style>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)']],
+                packages: {'[+]': ['color']}
+            },
+            loader: { load: ['[tex]/color'] }
+        };
+
+        function toggleForcesAnswerKey(event) {
+            let text = document.getElementById("forces-answer-key");
+            let link = event.target;
+            if (text.style.display === "none") {
+                text.style.display = "block";
+                link.textContent = "Hide Answer Key";
+            } else {
+                text.style.display = "none";
+                link.textContent = "Show Answer Key";
+            }
+            event.preventDefault();
+        }
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <div id="desmos-container" style="display:none;">
+    <div class="draggable-calculator">
+        <div class="drag-handle">Drag Calculator</div>
+        <div id="calculator" style="width:600px; height:400px;"></div>
+    </div>
+</div>
+
+<script src="https://www.desmos.com/api/v1.11/calculator.js?apiKey=1a36ee8eec4c471e97c71548300ded67"></script>
+<script>
+let calculatorCreated = false;
+let calculator;
+
+function toggleDesmos() {
+    const container = document.getElementById("desmos-container");
+    const button = document.getElementById("desmos-toggle");
+
+    if (container.style.display === "none") {
+        container.style.display = "block";
+        button.textContent = "Hide Calculator";
+        // Center in the current viewport
+        const drag = document.querySelector('.draggable-calculator');
+        drag.style.left = Math.max(0, (window.innerWidth  - 620) / 2) + 'px';
+        drag.style.top  = Math.max(0, (window.innerHeight - 440) / 2) + 'px';
+        if (!calculatorCreated) {
+            const elt = document.getElementById("calculator");
+            calculator = Desmos.GraphingCalculator(elt);
+            calculatorCreated = true;
+        }
+    } else {
+        container.style.display = "none";
+        button.textContent = "Show Calculator";
+    }
+}
+
+// Dragging functionality for the calculator
+let isDragging = false;
+let dragOffsetX, dragOffsetY;
+
+document.addEventListener('DOMContentLoaded', function() {
+    const dragHandle = document.querySelector('.drag-handle');
+    const draggable = document.querySelector('.draggable-calculator');
+
+    if (dragHandle && draggable) {
+        dragHandle.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            const rect = draggable.getBoundingClientRect();
+            dragOffsetX = e.clientX - rect.left;
+            dragOffsetY = e.clientY - rect.top;
+            draggable.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (isDragging) {
+                const newX = e.clientX - dragOffsetX;
+                const newY = e.clientY - dragOffsetY;
+                draggable.style.left = newX + 'px';
+                draggable.style.top = newY + 'px';
+            }
+        });
+
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+            draggable.style.cursor = 'move';
+        });
+    }
+});</script>
+
 </head>
 <body>
         
@@ -15,7 +108,8 @@
            <nav>
                <a href = "index.html">Home</a>
                <a href = "topics.html">Topics</a>
-               <a href = "games.html">games</a>
+               <a href = "games.html">Games</a>
+               <button id="desmos-toggle" onclick="toggleDesmos()">Show Calculator</button>
             </nav>
         </div>
     </header>
@@ -27,38 +121,63 @@
         <p>Forces are the interactions between objects that change their motion, energy, or shape. The simplest way to think of a force is as a <strong>push</strong> or a <strong>pull</strong>. 
         A force is the result of an interaction between two objects. Now, forces can be described as a contact or non contact force. A contact being something like force of friction and a non contact 
         being something strong force that holds subatomic particles together. For now lets not worry about all these types of forces, as youll learn about the basic ones on this page 
-        and others on later units like electicity and magnetism. Lastly, during this unit youll learn about different types of forces, force diagrams, vectors, newtons 3 laws, and how to solve equations.
+        and others on later units like electricity and magnetism. Lastly, during this unit youll learn about different types of forces, force diagrams, vectors, newtons 3 laws, and how to solve equations.
         Forces are a very important unit that Will show up in later units, so make sure you understand them</p>
 
-        <p><h3>Terms:</h3></p>
+        <h2>Terms:</h2>
 
         <p><strong>(F) Force</strong> - An interaction between two or more objects that causes a change in motion, energy or shape. Measured in Newtons (kg x m/s<sup>2</sup>).</p>
-            <p>Equation: F = ma (F = force(newtons), m = mass(kg), a = acceleration(m/s<sup>2</sup>))</p>
+            <p class="eq">\( F = ma \)</p>
+            <ul>
+                <li>\( F \) is the force (Newtons)</li>
+                <li>\( m \) is the mass (kg)</li>
+                <li>\( a \) is the acceleration (m/s²)</li>
+            </ul>
 
-        <p><strong>(M) Mass</strong> - The amount of matter in an objects regardless of where it is located, measured in kilograms. *Note: Mass is not the same as an objects weigth.</p>
+        <p><strong>(M) Mass</strong> - The amount of matter in an object regardless of where it is located, measured in kilograms. *Note: Mass is not the same as an object's weight.</p>
 
-        <p><strong>Weight</strong> - The force of gravity acing on a object, measured in newtons.</p>
+        <p><strong>Weight</strong> - The force of gravity acting on an object, measured in newtons.</p>
 
-            <p>Equation: W = mg (W = weigth(newtons), m = mass(kg), g = gravity(9.8 m/s<sup>2</sup>))</p>
+            <p class="eq">\( W = mg \)</p>
+            <ul>
+                <li>\( W \) is the weight (Newtons)</li>
+                <li>\( m \) is the mass (kg)</li>
+                <li>\( g \) is gravity (9.8 m/s²)</li>
+            </ul>
         
-        
-        <h3>Newtons first law of Motion</h3>
+    
+        <h2>Newton's Laws of Motion</h2>
         
         <p><strong>Newtons First Law (Law of Inertia)</strong> - Newtons first law states that an object at rest stays at rest and an object in motion stays in motion at a constant velocity unless acted upon by a net external force.
-        This law is essentiall to the way that we think about forces and motion. It tells us that an object will remian at rest or at a constant veloicyt if there is no net force on it. However if there is a net force 
-        acting on it, the object will accelerate in the direction of the net force.  
+        This law is essential to the way that we think about forces and motion. It tells us that an object will remain at rest or at a constant velocity if there is no net force on it. However if there is a net force
+        acting on it, the object will accelerate in the direction of the net force.</p>
 
-        <p><strong>Newtons Second Law (Law of Acceleration)</strong> - Newtons second law of motion states that the acceleration of an object is direcelty proportional to the force acting on it.</p>
+<div class="callout callout-analogy">
+  <span class="callout-title">🔗 Think of it like this</span>
+  Picture a hockey puck sliding on perfectly frictionless ice — with no net force, it keeps moving forever at constant velocity. In real life friction is always present, which is why objects seem to stop on their own. Friction is the net external force stopping them; Newton's First Law is not being violated.
+</div>
+
+        <p><strong>Newtons Second Law (Law of Acceleration)</strong> - Newtons second law of motion states that the acceleration of an object is directly proportional to the force acting on it.</p>
             
-            <p> Equation: F<sub>NET</sub> = ma (F<sub>NET</sub> = net force(Newtons), m = mass (kilograms), a = acceleration(m/s<sup>2</sup>) )</p>
+            <p class="eq">\( F_{\text{net}} = ma \)</p>
+            <ul>
+                <li>\( F_{\text{net}} \) is the net force (Newtons)</li>
+                <li>\( m \) is the mass (kilograms)</li>
+                <li>\( a \) is the acceleration (m/s²)</li>
+            </ul>
 
         <p>This law is crucial to deriving the motion of objects and determining the acceleration on them and will be your best friend throughout this unit.</p>
 
         <p><strong>Newtons Third Law (Law of Action-Reaction)</strong> - Newtons third law states that for every action there is an equal and opposite reaction. What this law means is that when there is a force or action done on something 
-        there is an equal force acting back. This may sound strange and thats becasue it is not typically intuitive, so think of it like this. When you hit a ball with a bat, the ball is also hitting the bat. Or when if you hit a wall, 
-        the wall also hits you. This is why it would hurt if you punch a wall, or when you push water back with your arm as you swim it pushes you forweard.</p>
+        there is an equal force acting back. This may sound strange and that's because it is not typically intuitive, so think of it like this. When you hit a ball with a bat, the ball is also hitting the bat. Or when if you hit a wall, 
+        the wall also hits you. This is why it would hurt if you punch a wall, or when you push water back with your arm as you swim it pushes you forward.</p>
 
-        <p><h3>Types of Forces:</h3></p>
+<div class="callout callout-mistake">
+  <span class="callout-title">⚠ Common Mistake</span>
+  Action-reaction pairs do <em>not</em> cancel each other — they act on <em>different</em> objects. When you push a wall, the wall pushes back on you, but that force acts on you, not the wall. Forces only cancel when they act on the <em>same</em> object.
+</div>
+
+        <h2>Types of Forces:</h2>
 
         <p><strong>Gravitational Force (F<sub>g</sub>)</strong> - The force between two objects due to their masses.</p>
 
@@ -73,13 +192,288 @@
         <p><strong>Force Drag (F<sub>D</sub>)</strong> - The force that opposes an object motion when traveling through a fluid.</p>
 
         
-        <h3>Free body diagrams:</h3>
+        <h2>Common Forces:</h2>
 
-        <p>Free body diagrams are a way to represent forces acting on an object to easily determine the net forces exerted on them. Thye consisit of a box, representing the system of object with the forces acting upon it. Forces are represented by
-        vectors shwoing the direction and magntiude of the force. If you do not know about or havent learned about vectors, click on this link to learn about them first: 
-        </p>
+        <h4>Gravity (Weight)</h4>
+        <p class="eq">\( F_g = mg \)</p>
+        <ul>
+            <li>\( m \) = mass of object (kg)</li>
+            <li>\( g \) = acceleration due to gravity (9.8 m/s²)</li>
+        </ul>
 
-          
-            
+        <h4>Normal Force</h4>
+        <p> The normal force is the force that is perpendicular to the surface its on. The best way to think of the normal force is as a support force exerted by the surface a object is on to keep the block from going through that surface.
+            If a block is on a flat surface, the normal force will be pointing upwards and be equal to the F<sub>g</sub>, canceling out the forces and keeping the block from accelerating up or down. However, if the block
+            is pushed down on a surface, the normal force will now be equal to the F<sub>g</sub> plus the applied force to cancel out the forces and keep the block from accelerating up or down, meaning F<sub>N</sub> > F<sub>g</sub>.</p>
 
+        <h4>Friction (force that opposes motion)</h4>
+        <p class="eq">\( F_f = \mu F_N \)</p>
+        <ul>
+            <li>\( \mu \) = coefficient of friction (depends on the surfaces in contact and is always &lt; 1)</li>
+            <li>\( F_N \) = normal force</li>
+        </ul>
+
+<div class="callout callout-insight">
+  <span class="callout-title">💡 About μ</span>
+  The coefficient of friction (μ) is unitless — just a ratio between friction force and normal force. It depends only on the two surfaces in contact, not on contact area or speed. Static friction (μ<sub>s</sub>) is always slightly greater than kinetic friction (μ<sub>k</sub>).
+</div>
+
+        <h2>Free body diagrams:</h2>
+
+        <p>Free body diagrams are a way to represent forces acting on an object to easily determine the net forces exerted on them. Draw a box to represent the object or system, then draw arrow representing the forces acting upon it. The bigger a force is, the longer the arrow will be. Forces are represented by
+        vectors showing the direction and magnitude of the force. If you do not know about or haven't learned about vectors, click on this link to learn about them first: <span class="red-text"><a href="vectors.html">Click Here</a></span></p>
+
+
+        <h2>Examples:</h2>
+        <p><em>Here are 4 different free body diagram examples with their forces labeled and the description of what is happening to the object.</em></p>
+        <div class="row">
+            <div class="column">
+                <img src="Images/Screenshot 2026-02-25 at 10.57.16 PM.png" alt="Free body diagram of an object on a ramp" width="300" height="300"> 
+                <h6>The FBD represents a object resting on a surface at rest. There are no forces acting on the side of the block, and the F<sub>g</sub> is balanced by the F<sub>N</sub>, meaning there is no net force on this object</h6>
+            </div>
+            <div class="column">
+                <img src="Images/Screenshot 2026-02-25 at 10.59.19 PM.png" alt="Free body diagram block on flat surface" width="300" height="300"> 
+                <h6>The FBD represents an object on a surface with an applied force to the right, and a frictional force to the left. The F<sub>N</sub> cancel with the F<sub>g</sub>, but because the applied force to the right is much larger than the F<sub>f</sub> to the left, the object has a net force and accelerates to the right.</h6>
+            </div>
+            <div class="column">
+                <img src="Images/Screenshot 2026-02-25 at 11.01.58 PM.png" alt="Free body diagram of block being pulled" width="300" height="300"> 
+                <h6>The FBD represents an object with one force acting on it, F<sub>g</sub>. This situations represent an object in free fall ignoring the effect of air resistance.</h6>
+            </div>
+            <div class="column">
+                <img src="Images/Screenshot 2026-02-25 at 11.16.50 PM.png" alt="Free body diagram of block in space" width="300" height="300">
+                <h6>The FBD represents an object being pulled to the right on a surface with friction, but this time it is being pulled by a rope at an angle upwards. Notice how the F<sub>T</sub> is broken into vertical and horizontal parts. We can first figure out that the horizontal part of F<sub>T</sub> is greater than the frictional force, so the object accelerates to the right.
+                Another important thing to see is that in this case, the F<sub>N</sub> is smaller than the F<sub>g</sub>, but if you look closely, you will notice that the size of the vertical component of F<sub>T</sub> + F<sub>N</sub> is equal F<sub>g</sub>, meaning that the upward and downward forces cancel out and the object only accelerates to the right.</h6>
+            </div>
+        </div>
         
+        <ul>
+            <li>Read the question to understand what is being asked or what the situation is</li>
+            <li>Draw a free body diagram or image of what is happening to the object or system and accurately label the forces <sup>*</sup><em>Make sure to represent the magnitude and direction of the forces correctly</em><sup>*</sup></li>
+            <li>Add or subtract the forces to find the net force (F<sub>net</sub>) on the object/system</li>
+            <li>Use the equation F<sub>net</sub> = ma to solve for unknowns</li>
+        </ul>
+        <h3>Example Problem</h3>
+        <p> 1) A box of mass 20kg is inside of an elevator that is accelerating upwards at 5m/s<sup>2</sup>. A scale is placed underneath the box in the elevator. What is the reading on the scale in kg?  <em><sup>*</sup>Hint: 1 Newton = 0.102 kg<sup>*</sup></em></p>
+        
+        <ol type="A">
+        <li><em><strong>First</strong> lets understand what is happening. A block of mass 20kg is accelerating upwards at <font color="red">5 m/s<sup>2</sup></font> inside a elevator.</em></li>
+        <li><em>Next, we draw a free body diagram showing two forces: F<sub>g</sub> pointing downwards and and a larger arrow representing F<sub>N</sub> pointing upwards.</em></li>
+        <li>
+            <p class="centered-text">
+                \[ F_{\text{net}} = F_N - F_g \]
+                \[ F_{\text{net}} = ma \]
+                \[ ma = F_N - F_g \]
+                \[ ma = F_N - mg \]
+                \[ ma + mg = F_N \]
+                \[ F_N = m(a + g) \]
+                \[ F_N = 20\,\text{kg} \times ({\color{red}5\,\text{m/s}^2} + 9.8\,\text{m/s}^2) \]
+                \[ F_N = 20\,\text{kg} \times 14.8\,\text{m/s}^2 \]
+                \[ F_N = 296\,\text{N} \]
+                \[ 296 \times 0.102\,\text{kg} = \boxed{30.2\,\text{kg}} \]
+            </p>
+        </li>
+        <li><div class="boxed-text"><em>Now we have gotten out answer. The scale inside the elevator will read about <mark>30.2 kilograms</mark> on it!</em></div></li>
+        </ol>
+
+<h2>Forces on Inclines:</h2>
+
+    <p>When a object is on an incline, the forces acting on it are typically broken down into components due to the angle of the incline.</p>
+    <h4>Here is how the forces are broken down on a FBD</h4>
+    <img class="right-img" src="Images/Screenshot 2026-02-27 at 12.25.54 AM.png" alt="Free body diagram of block on incline" width="300" height="300">
+    <ul> 
+        <li>F<sub>g</sub> is still represent mg and is pointing downwards normally. However, since the block is at a incline, F<sub>g</sub> is broken down into two components: F<sub>g</sub> parallel to the incline <mark>[mg sinθ]</mark> and F<sub>g</sub> perpendicular to the incline <mark>[mg cosθ]</mark>.</li>
+        <li>F<sub>N</sub> is the normal force, which is perpendicular to the surface of the incline and is equal to the component of F<sub>g</sub> perpendicular to the incline <mark>[mg cosθ]</mark>.</li>
+        <li>F<sub>f</sub> is the frictional force, which is parallel to the surface of the incline is equal to the component of F<sub>g</sub> parallel to the incline <mark>[mg sinθ]</mark>.</li>
+    </ul>
+    <p>These forces all cancel each other out and represent a block at rest on an incline, the main force holding it on the incline is the frictional force, opposing the motion of the block down the ramp.</p>
+    
+      <h2>Practice Problems:</h2>
+        <ol>
+            <li>
+                What do you know about an object that is being acted upon by balanced forces?
+                <ol type="A">
+                    <li>It must be at rest</li>
+                    <li>It must be accelerating</li>
+                    <li>It must be moving at a constant velocity</li>
+                    <li>None of these could be true</li>
+                    <li>Two of these could be true</li>
+                </ol>
+            </li>
+            <li>
+                Mike slides a glass across the counter. When it leaves his hand and it is sliding, what forces are acting on the plate? <em>Ignore air resistance.</em>
+                <ol type="A">
+                    <li> Gravity, normal force, and constant frictional force</li>
+                    <li> Gravity and normal force only</li>
+                    <li> Gravity, normal force, and force applied</li>
+                    <li> Force normal, frictional force, and applied force</li>
+                </ol>
+            </li>
+            <li>
+                A person is trying to lift a block of weight F<sub>g</sub> with a force of F<sub>A</sub> but is not able to lift it off the floor. What is the ranking of the magnitudes of the forces acting on the block?
+                <ol type="A">
+                    <li>F<sub>A</sub> + F<sub>N</sub> < F<sub>g</sub></li>
+                    <li>F<sub>A</sub> + F<sub>N</sub> = F<sub>g</sub></li>
+                    <li>F<sub>N</sub> = F<sub>g</sub></li>
+                    <li>F<sub>A</sub> + F<sub>N</sub> = F<sub>g</sub></li>
+                </ol>
+            </li>
+            <li> 
+                A refirgerator is being pushed across the floor with a force of F. The weigth is 400 N, the normal force is 400 N, and the force of friction if 250 N. The refirgerator is acceleratig at 0.5 m/s<sup>2</sup>. What is the value of the force F most nearly to?
+                <ol type="A">
+                    <li> 50 N</li>
+                    <li> 20 N</li>
+                    <li> 250 N</li>
+                    <li> 270 N</li>
+                </ol>
+            </li>
+            <li>
+                <img class="right-img" src="Images/Screenshot 2026-02-18 at 11.42.10 PM.png" alt="Diagram showing to forces hanging connected by a string" width="250" height="300">
+                The two blocks shown are connected by a rope, the masses of the blocks are 5 kg (upper) and 10 kg (lower).
+                The magnitude of the applied force on the upper block is F directed upward. Answer the following questions:
+                <ol type="A">
+                    <li>If the blocks are both moving at a constant speed, what is the value of the force F?</li>
+                    <li>The system now accelerates upward at 2 m/s². What new value of F is required to produce this acceleration?</li>
+                    <li>Using the force F from part (B), what is the tension in the rope connecting the two blocks?</li>
+                </ol>
+            </li>
+            <li>
+                A block of mass m is pushed across a rough surface by an applied force of F<sub>A</sub>. F<sub>A</sub> is directed and an angle θ above the horizontal. The block experience a
+                frictinal force of F<sub>f</sub> in the opposite direction of its motion. What is the coefficient of frction between the surface and the block?
+
+                <ol type="A">
+                    <li>\( \frac{F_f}{mg} \)</li>
+                    <li>\( \frac{F_f}{F_A\cos\theta + mg} \)</li>
+                    <li>\( \frac{F_f}{F_A\sin\theta + mg} \)</li>
+                    <li>\( \frac{F_A\cos\theta}{mg} \)</li>
+                </ol>
+            </li>
+            <li>
+                Two blocks of mass M<sub>1</sub> and M<sub>2</sub> [M<sub>1</sub> > M<sub>2</sub>] are connected by a string of nelgible mass hung over a pulley system. When the blocks are released,
+                what is the magnitude of the acceleration of the system equal to?
+                <ol type="A">
+                    <li>\( \frac{g(M_1 -M_2)}{M_1 + M_2} \)</li>
+                    <li>\( \frac{g(M_2 - M_1)}{M_1 + M_2} \)</li>
+                    <li>\( {g(M_1)} \)</li>
+                    <li>\( \frac{g(M_1 + M_2)}{M_2 - M_1} \)</li>
+                </ol>
+            </li>
+            <li>
+                <strong>Free Response — Incline-Pulley System</strong><br><br>
+                A block of mass M = 5 kg rests on a frictionless incline at angle θ = 37° (sin 37° = 0.60, cos 37° = 0.80). It is connected by a light string over a frictionless pulley to a hanging block of mass m = 3 kg.
+                <ol type="A">
+                    <li>Draw and label a free body diagram for each block.</li>
+                    <li>Write Newton's second law equation for each block. Take the positive direction as: up the incline for M, downward for m.</li>
+                    <li>Find the acceleration of the system.</li>
+                    <li>Find the tension in the string.</li>
+                    <li>A rough surface is now introduced between M and the incline with coefficient of kinetic friction μ<sub>k</sub> = 0.25. How does the acceleration change? (Recalculate.)</li>
+                </ol>
+            </li>
+            <li>
+                <strong>Free Response — Stacked Blocks</strong><br><br>
+                Block A (mass m<sub>A</sub> = 4 kg) rests on top of Block B (mass m<sub>B</sub> = 8 kg). Block B rests on a frictionless floor. The coefficient of static friction between A and B is μ<sub>s</sub> = 0.30 and the coefficient of kinetic friction between A and B is μ<sub>k</sub> = 0.20. A horizontal force F is applied to Block B only.
+                <ol type="A">
+                    <li>If F = 24 N, determine whether the blocks move together or slip. Justify your answer.</li>
+                    <li>Assuming the blocks move together in part (A), find the acceleration of the system and the friction force that Block B exerts on Block A.</li>
+                    <li>What is the maximum force F that can be applied to Block B before the blocks begin to slip?</li>
+                    <li>If F exceeds the value from part (C), find the acceleration of each block separately.</li>
+                </ol>
+            </li>
+            <li>
+                <strong>Free Response — Three-Block System</strong><br><br>
+                Three blocks are connected in a line on a frictionless horizontal surface. Their masses are m<sub>1</sub> = 2 kg, m<sub>2</sub> = 3 kg, and m<sub>3</sub> = 5 kg (left to right). A horizontal force F = 40 N is applied to m<sub>1</sub> directed to the right.
+                <ol type="A">
+                    <li>Find the acceleration of the entire system.</li>
+                    <li>Find the tension T<sub>12</sub> in the string between m<sub>1</sub> and m<sub>2</sub>.</li>
+                    <li>Find the tension T<sub>23</sub> in the string between m<sub>2</sub> and m<sub>3</sub>.</li>
+                    <li>Block m<sub>2</sub> is now removed and m<sub>1</sub> and m<sub>3</sub> are directly connected. The same force F = 40 N is applied. How does the tension in the connecting string compare to T<sub>12</sub> from part (B)? Explain conceptually.</li>
+                </ol>
+            </li>
+        </ol>
+
+        <div style="text-align:center; margin: 2rem 0;">
+            <strong><a href="#" onclick="toggleForcesAnswerKey(event)" class="toggle-link">Show Answer Key</a></strong>
+        </div>
+
+        <span id="forces-answer-key" style="display:none;">
+        <div class="boxed-text">
+            <h3 style="margin-top:0;">Answer Key</h3>
+
+            <p><strong>Q1 — E (Two of these could be true)</strong><br>
+            Balanced forces mean \( F_{\text{net}} = 0 \), so \( a = 0 \). The object can be at rest <em>or</em> moving at constant velocity.</p>
+
+            <p><strong>Q2 — A</strong><br>
+            After leaving Mike's hand, no applied force remains. Gravity pulls down, the normal force pushes up, and kinetic friction opposes the sliding motion.</p>
+
+            <p><strong>Q3 — B</strong><br>
+            Since the block doesn't leave the floor, \( F_A + F_N = F_g \). The applied force partially reduces the normal force needed from the floor, but their sum must still balance gravity.</p>
+
+            <p><strong>Q4 — D (270 N)</strong><br>
+            \( F_{\text{net}} = ma \). The refrigerator's mass: \( m = F_g/g = 400/9.8 \approx 40.8\ \text{kg} \).<br>
+            \( F - F_f = ma \Rightarrow F = ma + F_f = 40.8(0.5) + 250 \approx 270\ \text{N} \)</p>
+
+            <p><strong>Q5 — Two hanging blocks (5 kg upper, 10 kg lower), upward force F</strong></p>
+            <p><em>Part A — Constant speed (\(a = 0\)):</em><br>
+            \( F = (m_1 + m_2)g = (5 + 10)(9.8) = \mathbf{147\ \text{N}} \)</p>
+            <p><em>Part B — Accelerating upward at 2 m/s²:</em><br>
+            \( F - (m_1+m_2)g = (m_1+m_2)a \)<br>
+            \( F = (m_1+m_2)(g+a) = 15(9.8+2) = \mathbf{177\ \text{N}} \)</p>
+            <p><em>Part C — Tension in rope with F = 177 N:</em><br>
+            Analyze the lower block (10 kg) alone: \( T - m_2 g = m_2 a \)<br>
+            \( T = m_2(g+a) = 10(11.8) = \mathbf{118\ \text{N}} \)</p>
+
+            <p><strong>Q6 — C</strong> \(\left(\mu = \frac{F_f}{F_A\sin\theta + mg}\right)\)<br>
+            The normal force is \( F_N = mg + F_A\sin\theta \) (the upward angle reduces the normal force — wait, angle <em>above</em> horizontal means the vertical component lifts the block, so \( F_N = mg - F_A\sin\theta \)).
+            Therefore \( \mu = F_f / F_N = F_f / (mg - F_A\sin\theta) \). <em>Note: answer C uses \(+\) not \(-\); check your exam's sign convention — if the force pushes down at angle θ below horizontal, C is correct.</em></p>
+
+            <p><strong>Q7 — A</strong> \(\left(a = \frac{g(M_1-M_2)}{M_1+M_2}\right)\)<br>
+            For M<sub>1</sub> down: \( M_1 g - T = M_1 a \). For M<sub>2</sub> up: \( T - M_2 g = M_2 a \). Adding: \( a = \frac{g(M_1-M_2)}{M_1+M_2} \)</p>
+
+            <p><strong>Q8 — Incline-Pulley System (M = 5 kg at 37°, m = 3 kg hanging)</strong></p>
+            <p><em>Parts B–D (frictionless):</em><br>
+            M on incline: \( T - Mg\sin\theta = Ma \)<br>
+            m hanging: \( mg - T = ma \)<br>
+            Add: \( mg - Mg\sin\theta = (M+m)a \)<br>
+            \( a = \frac{(3)(9.8) - (5)(9.8)(0.60)}{8} = \frac{29.4 - 29.4}{8} = \mathbf{0\ \text{m/s}^2} \) — the system is in equilibrium!<br>
+            \( T = mg = 3(9.8) = \mathbf{29.4\ \text{N}} \)</p>
+            <p><em>Part E (with friction, μ<sub>k</sub> = 0.25):</em><br>
+            Friction force on M: \( f_k = \mu_k Mg\cos\theta = 0.25(5)(9.8)(0.80) = 9.8\ \text{N} \) (opposing motion up the incline, so acting down)<br>
+            If M tends to slide up: \( mg - Mg\sin\theta - f_k = (M+m)a \Rightarrow a = \frac{29.4 - 29.4 - 9.8}{8} = \mathbf{-1.23\ \text{m/s}^2} \)<br>
+            The negative sign means M slides <em>down</em> the incline (and m goes up). Recalculate with friction reversed: \( a = \frac{mg - Mg\sin\theta + f_k}{M+m} = \frac{0 + 9.8}{8} \) — but since net without friction was zero, friction now determines direction. The system accelerates at \(\mathbf{1.23\ \text{m/s}^2}\) with M sliding down.</p>
+
+            <p><strong>Q9 — Stacked Blocks (m<sub>A</sub> = 4 kg on m<sub>B</sub> = 8 kg, frictionless floor)</strong></p>
+            <p><em>Part A — Do they move together at F = 24 N?</em><br>
+            Max static friction on A: \( f_{s,\text{max}} = \mu_s m_A g = 0.30(4)(9.8) = 11.76\ \text{N} \)<br>
+            If together: \( a = F/(m_A+m_B) = 24/12 = 2\ \text{m/s}^2 \)<br>
+            Force needed to accelerate A: \( f = m_A \cdot a = 4(2) = 8\ \text{N} \)<br>
+            Since \( 8\ \text{N} &lt; 11.76\ \text{N} \), <strong>blocks move together.</strong></p>
+            <p><em>Part B — Acceleration and friction on A:</em><br>
+            \( a = \mathbf{2\ \text{m/s}^2} \), friction on A from B \( = \mathbf{8\ \text{N}} \) (forward)</p>
+            <p><em>Part C — Maximum F before slipping:</em><br>
+            \( f_{s,\text{max}} = m_A \cdot a_{\text{max}} \Rightarrow a_{\text{max}} = 11.76/4 = 2.94\ \text{m/s}^2 \)<br>
+            \( F_{\text{max}} = (m_A+m_B) \cdot a_{\text{max}} = 12(2.94) = \mathbf{35.3\ \text{N}} \)</p>
+            <p><em>Part D — Accelerations if F &gt; 35.3 N (e.g. F = 50 N):</em><br>
+            Kinetic friction on A: \( f_k = \mu_k m_A g = 0.20(4)(9.8) = 7.84\ \text{N} \)<br>
+            \( a_A = f_k/m_A = 7.84/4 = \mathbf{1.96\ \text{m/s}^2} \)<br>
+            \( a_B = (F - f_k)/m_B = (50-7.84)/8 = \mathbf{5.27\ \text{m/s}^2} \)</p>
+
+            <p><strong>Q10 — Three-Block System (m<sub>1</sub>=2, m<sub>2</sub>=3, m<sub>3</sub>=5 kg, F = 40 N)</strong></p>
+            <p><em>Part A:</em> \( a = F/(m_1+m_2+m_3) = 40/10 = \mathbf{4\ \text{m/s}^2} \)</p>
+            <p><em>Part B — T<sub>12</sub> (string between m<sub>1</sub> and m<sub>2</sub>):</em><br>
+            Analyze m<sub>2</sub> + m<sub>3</sub> as the system being pulled by T<sub>12</sub>:<br>
+            \( T_{12} = (m_2+m_3) \cdot a = (3+5)(4) = \mathbf{32\ \text{N}} \)</p>
+            <p><em>Part C — T<sub>23</sub> (string between m<sub>2</sub> and m<sub>3</sub>):</em><br>
+            Analyze m<sub>3</sub> alone: \( T_{23} = m_3 \cdot a = 5(4) = \mathbf{20\ \text{N}} \)</p>
+            <p><em>Part D — Conceptual comparison:</em><br>
+            With m<sub>2</sub> removed, the new tension connects m<sub>1</sub> (2 kg) directly to m<sub>3</sub> (5 kg), and the same F = 40 N is applied. The acceleration stays 40/7 ≈ 5.7 m/s². New tension \( = m_3 \cdot a = 5(5.7) \approx 28.6\ \text{N} \). This is <em>less</em> than T<sub>12</sub> = 32 N because the total mass is smaller (faster acceleration) but the string only needs to pull m<sub>3</sub>, not m<sub>2</sub>+m<sub>3</sub>.</p>
+        </div>
+        </span>
+
+    </main>
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2026 Physics Fun. All rights reserved.</p>
+      <p>The content, simulations, graphics, and source code on this website are the intellectual property of Physics Fun. This material is provided for personal educational use only. No part of this website may be copied, modified, redistributed, or used to create derivative works without explicit written permission.</p>
+    </div>
+  </footer>
+</body>
+</html>

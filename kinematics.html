@@ -6,9 +6,83 @@
     <title>Kinematics - Physics Fun</title>
 
     <link rel="stylesheet" href="css/style.css" />
+    <script>
+        window.MathJax = {
+        tex: { inlineMath: [['\\(', '\\)']] }
+        };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <div id="desmos-container" style="display:none;">
+    <div class="draggable-calculator">
+        <div class="drag-handle">Drag Calculator</div>
+        <div id="calculator" style="width:600px; height:400px;"></div>
+    </div>
+</div>
+
+<script src="https://www.desmos.com/api/v1.11/calculator.js?apiKey=1a36ee8eec4c471e97c71548300ded67"></script>
+
+<script>
+let calculatorCreated = false;
+let calculator;
+
+function toggleDesmos() {
+    const container = document.getElementById("desmos-container");
+    const button = document.getElementById("desmos-toggle");
+
+    if (container.style.display === "none") {
+        container.style.display = "block";
+        button.textContent = "Hide Calculator";
+        // Center in the current viewport
+        const drag = document.querySelector('.draggable-calculator');
+        drag.style.left = Math.max(0, (window.innerWidth  - 620) / 2) + 'px';
+        drag.style.top  = Math.max(0, (window.innerHeight - 440) / 2) + 'px';
+        if (!calculatorCreated) {
+            const elt = document.getElementById("calculator");
+            calculator = Desmos.GraphingCalculator(elt);
+            calculatorCreated = true;
+        }
+    } else {
+        container.style.display = "none";
+        button.textContent = "Show Calculator";
+    }
+}
+
+// Dragging functionality for the calculator
+let isDragging = false;
+let dragOffsetX, dragOffsetY;
+
+document.addEventListener('DOMContentLoaded', function() {
+    const dragHandle = document.querySelector('.drag-handle');
+    const draggable = document.querySelector('.draggable-calculator');
+
+    if (dragHandle && draggable) {
+        dragHandle.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            const rect = draggable.getBoundingClientRect();
+            dragOffsetX = e.clientX - rect.left;
+            dragOffsetY = e.clientY - rect.top;
+            draggable.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (isDragging) {
+                const newX = e.clientX - dragOffsetX;
+                const newY = e.clientY - dragOffsetY;
+                draggable.style.left = newX + 'px';
+                draggable.style.top = newY + 'px';
+            }
+        });
+
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+            draggable.style.cursor = 'move';
+        });
+    }
+});
+</script>
+
 </head>
 <body>
-    <!--site header for the page-->
   <header class="site-header">
     <div class="container">
       <h1 class = "site-title">Kinematics</h1>
@@ -16,6 +90,7 @@
             <a href="index.html">Home</a>
             <a href="topics.html">Topics</a>
             <a href="games.html">Games</a>
+            <button id="desmos-toggle" onclick="toggleDesmos()">Show Calculator</button>
         </nav>
      </div>
   </header>
@@ -30,7 +105,7 @@
         will also learn how to read and determine unknown variables from graphs: position vs. time, velocity vs. time, and acceleration vs. time. Lastly, you will learn about objects 
         in projectile motion and free fall.</p>
 
-    <p><h3>Terms:</h3></p>
+    <h3>Terms:</h3>
 
     <p><strong>(d) Distance</strong> — distance is a scalar quantity that measures the total length of an object's path regardless of the starting and end points. Distance is measured in meters, and 
         CANNOT be negative because it is scalar.</p>
@@ -39,39 +114,59 @@
     <p><strong>(∆x) Displacement</strong> — displacement is a vector quantity (meaning it has both magnitude and direction) that measures the difference between the initial and final location of an 
         object. Displacement is measured in meters and can be negative because it's a vector quantity.</p>
 
-            <p>Equation: ∆x=x-x₀ (∆x = displacement, x = final position, x₀ = initial position)</p>
+            <p class="centered-text">\[ \Delta x = x - x_0 \]</p>
+            <p>where \(\Delta x\) = displacement, \(x\) = final position, \(x_0\) = initial position</p>
 
 
     <p><strong>(s) Speed</strong> — speed is a scalar quantity and is the rate at which an object changes its position. It is the rate of distance per time. Speed is measured in meters per second (m/s), 
         and CANNOT be negative because it is scalar.</p>
 
-            <p>Equation: s=d/∆t (s= speed, d = distance, ∆t = time interval/change in time)</p>
+            <p class="centered-text">\[ s = \frac{d}{\Delta t} \]</p>
+            <p>where \(s\) = speed, \(d\) = distance, \(\Delta t\) = time interval</p>
 
 
     <p><strong>(v) Velocity</strong> — velocity is a vector quantity, which is the rate position changes with time. The difference between speed and velocity is that velocity is displacement over time, 
         not distance. Displacement is measured in meters per second and can be negative because it is a vector quantity.</p>
 
-            <p>Equation: v=∆x/∆t (v= velocity, ∆x= displacement, ∆t= time interval/change in time)</p>
+            <p class="centered-text">\[ v = \frac{\Delta x}{\Delta t} \]</p>
+            <p>where \(v\) = velocity, \(\Delta x\) = displacement, \(\Delta t\) = time interval</p>
 
+<div class="callout callout-insight">
+  <span class="callout-title">💡 Speed vs Velocity</span>
+  Speed and velocity are often confused. Speed is scalar — just how fast. Velocity is vector — how fast <em>and</em> in which direction. An object moving in a circle at constant speed has a constantly <em>changing</em> velocity because its direction keeps changing.
+</div>
 
     <p><strong>(a) Acceleration</strong> — acceleration is a vector quantity and is the rate at which velocity changes with time. Acceleration measures how quickly an object's speed or velocity is 
         changing over time. It tells you how rapidly velocity changes and in what direction. Acceleration is measured in meters per second squared and can be negative because it is 
         a vector quantity.</p>
 
-            <p>Equation: a=∆v/∆t or a=(v<sub>x</sub>-v₀)/∆t (a= acceleration, ∆v= change in velocity, ∆t= time interval/change in time, v<sub>x</sub> = final velocity, v₀= initial velocity)</p>
+            <p class="centered-text">\[ a = \frac{\Delta v}{\Delta t} = \frac{v_x - v_0}{\Delta t} \]</p>
+            <p>where \(a\) = acceleration, \(\Delta v\) = change in velocity, \(\Delta t\) = time interval, \(v_x\) = final velocity, \(v_0\) = initial velocity</p>
 
 
 
     <h3>The Three Kinematic Equations:</h3>
-        <ol>
-            <li>v<sub>x</sub> = v<sub>xo</sub> + a<sub>x</sub>t: (v<sub>x</sub> = final horizontal velocity, v<sub>xo</sub> = initial horizontal velocity, a<sub>x</sub>= horizontal acceleration, t= time)</li>
-
-            <li>x = x<sub>o</sub> + v<sub>x</sub>t+½a<sub>x</sub>t2: (x= final position, x<sub>o</sub>= initial position, v<sub>x</sub>= final horizontal velocity, a<sub>x</sub>= horizontal acceleration, t= time)</li>
-
-            <li>v<sub>x</sub><sup>2</sup> = v<sub>xo</sub><sup>2</sup> + 2a<sub>x</sub>(x-x<sub>o</sub>): (v<sub>x</sub>= final horizontal velocity, v<sub>xo</sub>= initial horizontal velocity, a<sub>x</sub > = horizontal acceleration, x= final position, x<sub>o</sub>= initial position)</li>
+        <ol class="equation-list">
+            <li>
+                \[ v_x = v_{x0} + a_x t \]
+                <p>where \(v_x\) = final velocity, \(v_{x0}\) = initial velocity, \(a_x\) = acceleration, \(t\) = time</p>
+            </li>
+            <li>
+                \[ x = x_0 + v_{x0}\,t + \tfrac{1}{2}a_x t^2 \]
+                <p>where \(x\) = final position, \(x_0\) = initial position, \(v_{x0}\) = initial velocity, \(a_x\) = acceleration, \(t\) = time</p>
+            </li>
+            <li>
+                \[ v_x^2 = v_{x0}^2 + 2a_x(x - x_0) \]
+                <p>where \(v_x\) = final velocity, \(v_{x0}\) = initial velocity, \(a_x\) = acceleration, \(x\) = final position, \(x_0\) = initial position</p>
+            </li>
         </ol>
 
-    <h3>Graphs:<h3>
+<div class="callout callout-mistake">
+  <span class="callout-title">⚠ Picking the Right Equation</span>
+  Don't guess which equation to use — list your known and unknown variables first. Each kinematic equation is missing exactly one variable. Pick the equation that does <em>not</em> contain your unknown.
+</div>
+
+    <h3>Graphs:</h3>
         <p>Graphs are an important tool in physics used to organize and analyze data while providing a visual relationship between two quantities. Graphs tend to show the relationship 
         between a dependent variable (y-axis) and an independent variable (x-axis). The three important graphs learned in kinematics are position vs. time, velocity vs. time, and 
         acceleration vs. time.</p>
@@ -85,7 +180,7 @@
             negatively, there is negative acceleration because the slope is negatively increasing.</p>
 
 
-        <img src="images/screenshot-2025-11-24-17-25-11.png" alt="graphs showing position vs time and their correspondence to velocity" height="200" width="400">
+        <img src="Images/Screenshot 2025-11-24 at 5.25.18 PM.png" alt="graphs showing position vs time and their correspondence to velocity" height="200" width="400">
 
 
         <h4>Velocity vs. Time (v vs. time)</h4>
@@ -99,7 +194,7 @@
             x-axis (seconds). Therefore, when these two multiply, you are left with ms/s, where the seconds cancel and you are left with just meters.</p>
 
 
-        <img src="images/screenshot-2025-11-24-17-25-18.png" alt="image shows velocity vs time graphs and their correlation to acceleration" height="200" width="400">
+        <img src="Images/Screenshot 2025-11-24 at 5.21.19 PM.png" alt="image shows velocity vs time graphs and their correlation to acceleration" height="200" width="400">
 
 
 
@@ -115,13 +210,13 @@
 
 
 
-        <img src="images/screenshot-2025-11-24-17-25-24.png" alt="image shows acceleration vs time graphs and their area" height="200" width="400">
+        <img src="Images/Screenshot 2025-11-24 at 5.25.24 PM.png" alt="image shows acceleration vs time graphs and their area" height="200" width="400">
 
 
 
-        *Important to Know These Relationships About Acceleration and Velocity 
+        <p><em>*Important to Know These Relationships About Acceleration and Velocity</em></p>
 
-        <img src="images/screenshot-2025-11-24-17-21-19.png" alt="table showing the relationship between velocity and acceleration depending on their direction" height="200" width="300">
+        <img src="Images/Screenshot 2025-11-24 at 5.21.19 PM.png" alt="table showing the relationship between velocity and acceleration depending on their direction" height="200" width="300">
 
 
 
@@ -136,23 +231,49 @@
     precisely why an object launched at an angle, such as our cannonball scenario, will have a trajectory shaped as a parabola. The constant horizontal velocity moves the ball forward at a 
     steady rate, while gravity causes the vertical velocity to decrease on the way up, reach zero at the peak, then accelerate downwards</p>
 
+<div class="callout callout-insight">
+  <span class="callout-title">💡 X and Y Motion are Independent</span>
+  Horizontal and vertical motion never affect each other. Horizontal velocity stays constant (no horizontal force when ignoring air resistance), while gravity acts only vertically. Solve each direction separately — the only quantity linking them is <em>time</em>.
+</div>
+
     <h4>Horizontal (x) Equations:</h4>
-        <ol>
-            <li>a<sub>x</sub> = 0:  ( a<sub>x</sub>= horizontal acceleration)</li>
-            <li>v<sub>x</sub> = v<sub>xo</sub>:( v<sub>x</sub>= final horizontal velocity, v<sub>xo</sub>= initial horizontal velocity)</li>
-            <li>x = x<sub>o</sub> + v<sub>xo</sub>t: (x= final horizontal position, x<sub>o</sub>= initial horizontal position, v<sub>xo</sub>=initial horizontal velocity [will remain constant because it is projectile motion], t=time)</li>
+        <ol class="equation-list">
+            <li>
+                \[ a_x = 0 \]
+                <p>where \(a_x\) = horizontal acceleration</p>
+            </li>
+            <li>
+                \[ v_x = v_{x0} \]
+                <p>where \(v_x\) = final horizontal velocity, \(v_{x0}\) = initial horizontal velocity (remains constant)</p>
+            </li>
+            <li>
+                \[ x = x_0 + v_{x0}\,t \]
+                <p>where \(x\) = final horizontal position, \(x_0\) = initial horizontal position, \(v_{x0}\) = initial horizontal velocity, \(t\) = time</p>
+            </li>
         </ol>
     <h4>Vertical (y) Equations:</h4>
-        <ol>
-            <li>a<sub>y</sub>=g=-9.8 m/s2: (a<sub>y</sub>= vertical acceleration, g= gravity)</li>
-            <li>v<sub>y</sub>= v<sub>yo</sub> + gt: (v<sub>y</sub>= final vertical velocity, v<sub>yo</sub>= initial vertical velocity, g= gravity, t= time)</li>
-            <li>y = y<sub>o</sub> + v<sub>yo</sub>t + ½gt2: (y= final vertical position, y<sub>o</sub>= initial vertical position, t= time, g= gravity)</li>
-            <li>v<sub>y</sub>2 = v<sub>yo</sub>2 + 2g(y-y<sub>o</sub>): (v<sub>y</sub>= final vertical velocity, v<sub>yo</sub>= initial vertical velocity, g= gravity, y= final vertical position, y<sub>o</sub> = initial vertical position)</li>
+        <ol class="equation-list">
+            <li>
+                \[ a_y = g = -9.8\ \text{m/s}^2 \]
+                <p>where \(a_y\) = vertical acceleration, \(g\) = gravity</p>
+            </li>
+            <li>
+                \[ v_y = v_{y0} + g\,t \]
+                <p>where \(v_y\) = final vertical velocity, \(v_{y0}\) = initial vertical velocity, \(g\) = gravity, \(t\) = time</p>
+            </li>
+            <li>
+                \[ y = y_0 + v_{y0}\,t + \tfrac{1}{2}g\,t^2 \]
+                <p>where \(y\) = final vertical position, \(y_0\) = initial vertical position, \(t\) = time, \(g\) = gravity</p>
+            </li>
+            <li>
+                \[ v_y^2 = v_{y0}^2 + 2g(y - y_0) \]
+                <p>where \(v_y\) = final vertical velocity, \(v_{y0}\) = initial vertical velocity, \(g\) = gravity, \(y\) = final vertical position, \(y_0\) = initial vertical position</p>
+            </li>
         </ol>
 
     <h4>Projectile Motion Split Into Components:</h4>
 
-        <img src="images/screenshot-2025-11-24-17-25-31.png" alt="image shows velocity at at an angle split into components" height="200" width="400">
+        <img src="Images/Screenshot 2025-11-24 at 5.25.31 PM.png" alt="image shows velocity at at an angle split into components" height="200" width="400">
 
 
     <h3>Free fall:</h3>
@@ -163,6 +284,12 @@
     <p>Fun fact: if a car and a feather were dropped from the same height in a vacuum with no air resistance, they would both fall at the same rate and with the same acceleration of g.
     This is because the only force acting on both objects would be gravity, which causes all objects to accelerate at the same rate in free fall regardless of their mass.</p>
   </main>
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; 2026 Physics Fun. All rights reserved.</p>
+      <p>The content, simulations, graphics, and source code on this website are the intellectual property of Physics Fun. This material is provided for personal educational use only. No part of this website may be copied, modified, redistributed, or used to create derivative works without explicit written permission.</p>
+    </div>
+  </footer>
 </body>
 </html>
 

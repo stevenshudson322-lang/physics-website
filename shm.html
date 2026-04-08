@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang = "en">
+<head>
+    <meta charset="UTF-8">
+    <meta name = "viewport" content="width=device-width, initial-scale=1" />
+    <title>Simple Harmonic Motion - Physics Fun</title>
+
+    <link rel="stylesheet" href="css/style.css"/>
+<style>
+/* page-level overrides — base styles live in css/style.css */
+</style>
+    <script>
+        window.MathJax = {
+        tex: { inlineMath: [['\\(', '\\)']] }
+        };
+
+        function toggleAnswerKey(event) {
+            let div = document.getElementById("answer-key");
+            let btn = event.target;
+            if (div.style.display === "none") {
+                div.style.display = "block";
+                btn.textContent = "Hide Answer Key";
+            } else {
+                div.style.display = "none";
+                btn.textContent = "Answer Key";
+            }
+            event.preventDefault();
+        }
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<div id="desmos-container" style="display:none;">
+    <div class="draggable-calculator">
+        <div class="drag-handle">Drag Calculator</div>
+        <div id="calculator" style="width:600px; height:400px;"></div>
+    </div>
+</div>
+
+<script src="https://www.desmos.com/api/v1.11/calculator.js?apiKey=1a36ee8eec4c471e97c71548300ded67"></script>
+
+<script>
+let calculatorCreated = false;
+let calculator;
+
+function toggleDesmos() {
+    const container = document.getElementById("desmos-container");
+    const button = document.getElementById("desmos-toggle");
+
+    if (container.style.display === "none") {
+        container.style.display = "block";
+        button.textContent = "Hide Calculator";
+        const drag = document.querySelector('.draggable-calculator');
+        drag.style.left = Math.max(0, (window.innerWidth  - 620) / 2) + 'px';
+        drag.style.top  = Math.max(0, (window.innerHeight - 440) / 2) + 'px';
+        if (!calculatorCreated) {
+            const elt = document.getElementById("calculator");
+            calculator = Desmos.GraphingCalculator(elt);
+            calculatorCreated = true;
+        }
+    } else {
+        container.style.display = "none";
+        button.textContent = "Show Calculator";
+    }
+}
+
+let isDragging = false;
+let dragOffsetX, dragOffsetY;
+
+document.addEventListener('DOMContentLoaded', function() {
+    const dragHandle = document.querySelector('.drag-handle');
+    const draggable = document.querySelector('.draggable-calculator');
+
+    if (dragHandle && draggable) {
+        dragHandle.addEventListener('mousedown', function(e) {
+            isDragging = true;
+            const rect = draggable.getBoundingClientRect();
+            dragOffsetX = e.clientX - rect.left;
+            dragOffsetY = e.clientY - rect.top;
+            draggable.style.cursor = 'grabbing';
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (isDragging) {
+                const newX = e.clientX - dragOffsetX;
+                const newY = e.clientY - dragOffsetY;
+                draggable.style.left = newX + 'px';
+                draggable.style.top = newY + 'px';
+            }
+        });
+
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+            draggable.style.cursor = 'move';
+        });
+    }
+});
+</script>
+
+
+</head>
+<body>
+
+    <header class = "site-header">
+        <div class = "container">
+          <h1 class = "site-title">Simple Harmonic Motion</h1>
+           <nav>
+               <a href = "index.html">Home</a>
+               <a href = "topics.html">Topics</a>
+               <a href = "games.html">games</a>
+               <button id="desmos-toggle" onclick="toggleDesmos()">Show Calculator</button>
+            </nav>
+        </div>
+    </header>
+<main>
+
+<h2>What is Simple Harmonic Motion?</h2>
+<p><strong>Simple Harmonic Motion (SHM)</strong> is a special type of oscillation where the restoring force is directly proportional to displacement and always directed back toward equilibrium:</p>
+<p class="eq">\( F_{\text{net}} = -kx \)</p>
+<p>The key idea: the further the object is from equilibrium, the harder it gets pulled back — and that linear relationship is what makes the motion sinusoidal. Springs and pendulums (for small angles) both follow this pattern.</p>
+
+<div class="callout callout-insight">
+  <span class="callout-title">💡 What the Negative Sign Means</span>
+  The negative sign in F = −kx is not just a convention — it tells you the force always points <em>opposite</em> to the displacement. Displace right (positive x) → force points left (negative F). This is the definition of a restoring force, and it is what produces oscillation.
+</div>
+
+<h2>Vocabulary of SHM</h2>
+<p>Before doing any calculation, you need these terms locked in:</p>
+<ul>
+    <li><strong>Equilibrium position</strong> — where the net force is zero; the object naturally rests here.</li>
+    <li><strong>Displacement (\( x \))</strong> — how far the object currently is from equilibrium. Positive or negative depending on direction.</li>
+    <li><strong>Amplitude (\( A \))</strong> — the maximum displacement from equilibrium. The object turns around at \( x = +A \) and \( x = -A \).</li>
+    <li><strong>Period (\( T \))</strong> — time for one complete cycle (seconds). One full trip: equilibrium → +A → equilibrium → −A → equilibrium.</li>
+    <li><strong>Frequency (\( f \))</strong> — number of complete cycles per second (Hz). \( f = 1/T \).</li>
+    <li><strong>Angular frequency (\( \omega \))</strong> — \( \omega = 2\pi f = 2\pi/T \) (rad/s). Connects circular motion to oscillation.</li>
+    <li><strong>Phase</strong> — where in the cycle the object starts. Starting at rest at \( x = A \) versus starting at equilibrium moving right are different phases of the same motion.</li>
+</ul>
+
+<h2>Position, Velocity, and Acceleration in SHM</h2>
+<p>The position of an object in SHM traces a cosine (or sine) curve over time:</p>
+<p class="eq">\( x(t) = A\cos(\omega t) \)</p>
+<p>Taking derivatives gives velocity and acceleration at any moment:</p>
+<p class="eq">\( v(t) = -A\omega\sin(\omega t) \)</p>
+<p class="eq">\( a(t) = -A\omega^2\cos(\omega t) = -\omega^2 x \)</p>
+<p>Three critical relationships to know:</p>
+<ul>
+    <li><strong>Position and acceleration are always opposite in sign.</strong> When the object is displaced to the right (\( x > 0 \)), acceleration points left (\( a < 0 \)). This is what "restoring" means.</li>
+    <li><strong>Velocity is 90° out of phase with position.</strong> When position is at a maximum (the turning point), velocity is zero. When position is zero (equilibrium), velocity is maximum.</li>
+    <li><strong>Acceleration is maximum at the turning points</strong> (where force is greatest) and zero at equilibrium (where force is zero).</li>
+</ul>
+
+<table style="border-collapse:collapse; width:100%; margin: 1rem 0;">
+    <thead>
+        <tr style="background:var(--primary); color:#fff;">
+            <th style="padding:10px 14px; text-align:left;">Position</th>
+            <th style="padding:10px 14px; text-align:left;">Velocity</th>
+            <th style="padding:10px 14px; text-align:left;">Acceleration</th>
+            <th style="padding:10px 14px; text-align:left;">Spring PE</th>
+            <th style="padding:10px 14px; text-align:left;">KE</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr style="background:#f8fafc;">
+            <td style="padding:9px 14px; border-bottom:1px solid var(--border);">\( x = +A \) (right turn)</td>
+            <td style="padding:9px 14px; border-bottom:1px solid var(--border);">0</td>
+            <td style="padding:9px 14px; border-bottom:1px solid var(--border);">max (left)</td>
+            <td style="padding:9px 14px; border-bottom:1px solid var(--border);">max</td>
+            <td style="padding:9px 14px; border-bottom:1px solid var(--border);">0</td>
+        </tr>
+        <tr>
+            <td style="padding:9px 14px; border-bottom:1px solid var(--border);">\( x = 0 \) (equilibrium)</td>
+            <td style="padding:9px 14px; border-bottom:1px solid var(--border);">max</td>
+            <td style="padding:9px 14px; border-bottom:1px solid var(--border);">0</td>
+            <td style="padding:9px 14px; border-bottom:1px solid var(--border);">0</td>
+            <td style="padding:9px 14px; border-bottom:1px solid var(--border);">max</td>
+        </tr>
+        <tr style="background:#f8fafc;">
+            <td style="padding:9px 14px;">\( x = -A \) (left turn)</td>
+            <td style="padding:9px 14px;">0</td>
+            <td style="padding:9px 14px;">max (right)</td>
+            <td style="padding:9px 14px;">max</td>
+            <td style="padding:9px 14px;">0</td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>The Pendulum</h2>
+<p>A simple pendulum — a mass on a string swinging through small angles — also undergoes SHM. The restoring force is the component of gravity pulling the bob back toward the bottom:</p>
+<p class="eq">\( F_{\text{restoring}} = -mg\sin\theta \approx -mg\theta \quad \text{(for small angles)} \)</p>
+<p>The small-angle approximation (\( \theta < 15° \)) is what makes pendulum motion qualify as SHM — at large angles, the motion becomes non-sinusoidal.</p>
+<p>The period of a simple pendulum is:</p>
+<p class="eq">\( T = 2\pi\sqrt{\frac{L}{g}} \)</p>
+<p>Where:</p>
+<ul>
+    <li>\( T \) — period (s)</li>
+    <li>\( L \) — length of the pendulum from pivot to center of mass (m)</li>
+    <li>\( g \) — gravitational field strength (m/s²)</li>
+</ul>
+<p>What this formula tells you (all heavily tested on AP exams):</p>
+<ul>
+    <li><strong>Mass does not affect the period.</strong> A heavier bob swings at the same rate as a lighter one on the same string. Galileo's observation.</li>
+    <li><strong>Longer pendulum → longer period.</strong> Quadruple the length to double the period.</li>
+    <li><strong>Stronger gravity → shorter period.</strong> Take the same pendulum to Jupiter (stronger \( g \)) and it swings faster.</li>
+    <li><strong>Amplitude does not affect the period</strong> — as long as the angle stays small.</li>
+</ul>
+
+<div class="callout callout-mistake">
+  <span class="callout-title">⚠ Common Mistake</span>
+  Mass does <em>not</em> affect a pendulum's period — only its length and g do. Conversely, mass <em>does</em> affect a spring-mass period. These get swapped on exams constantly. If asked what happens to a pendulum with a heavier bob, the answer is: nothing changes.
+</div>
+
+<h2>Spring-Mass vs. Pendulum Comparison</h2>
+<table style="border-collapse:collapse; width:100%; margin: 1rem 0;">
+    <thead>
+        <tr style="background:var(--primary); color:#fff;">
+            <th style="padding:10px 14px; text-align:left;"></th>
+            <th style="padding:10px 14px; text-align:left;">Spring-Mass</th>
+            <th style="padding:10px 14px; text-align:left;">Simple Pendulum</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr style="background:#f8fafc;">
+            <td style="padding:9px 14px; border-bottom:1px solid var(--border); font-weight:600;">Period formula</td>
+            <td style="padding:9px 14px; border-bottom:1px solid var(--border);">\( T = 2\pi\sqrt{m/k} \)</td>
+            <td style="padding:9px 14px; border-bottom:1px solid var(--border);">\( T = 2\pi\sqrt{L/g} \)</td>
+        </tr>
+        <tr>
+            <td style="padding:9px 14px; border-bottom:1px solid var(--border); font-weight:600;">Restoring force</td>
+            <td style="padding:9px 14px; border-bottom:1px solid var(--border);">Spring: \( F = -kx \)</td>
+            <td style="padding:9px 14px; border-bottom:1px solid var(--border);">Gravity component: \( F \approx -mg\theta \)</td>
+        </tr>
+        <tr style="background:#f8fafc;">
+            <td style="padding:9px 14px; border-bottom:1px solid var(--border); font-weight:600;">More mass →</td>
+            <td style="padding:9px 14px; border-bottom:1px solid var(--border);">Longer period</td>
+            <td style="padding:9px 14px; border-bottom:1px solid var(--border);">No change</td>
+        </tr>
+        <tr>
+            <td style="padding:9px 14px; border-bottom:1px solid var(--border); font-weight:600;">Stronger \( g \) →</td>
+            <td style="padding:9px 14px; border-bottom:1px solid var(--border);">No change (horizontal spring)</td>
+            <td style="padding:9px 14px; border-bottom:1px solid var(--border);">Shorter period</td>
+        </tr>
+        <tr style="background:#f8fafc;">
+            <td style="padding:9px 14px; border-bottom:1px solid var(--border); font-weight:600;">More amplitude →</td>
+            <td style="padding:9px 14px; border-bottom:1px solid var(--border);">No change in period</td>
+            <td style="padding:9px 14px; border-bottom:1px solid var(--border);">No change in period (small angles)</td>
+        </tr>
+        <tr>
+            <td style="padding:9px 14px; font-weight:600;">Stiffer/shorter →</td>
+            <td style="padding:9px 14px;">Shorter period (higher \( k \))</td>
+            <td style="padding:9px 14px;">Shorter period (shorter \( L \))</td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>Energy in SHM</h2>
+<p>In any SHM system with no friction, total mechanical energy is conserved. The energy sloshes back and forth between kinetic and potential — but the total never changes:</p>
+<p class="eq">\( E_{\text{total}} = KE + PE = \text{constant} \)</p>
+<p>For a spring-mass system:</p>
+<p class="eq">\( E = \frac{1}{2}mv^2 + \frac{1}{2}kx^2 = \frac{1}{2}kA^2 \)</p>
+<p>For a pendulum, the potential energy is gravitational (\( U = mgh \)), where \( h \) is the height of the bob above its lowest point. The energy still trades the same way — all PE at the top of the swing, all KE at the bottom.</p>
+<p>The <strong>total energy scales with amplitude squared</strong>. Double the amplitude and you store four times as much energy — in both springs and pendulums.</p>
+
+<h2>Worked Example</h2>
+<p>A pendulum of length 0.64 m is pulled to an angle of 8° and released from rest on Earth (\( g = 9.8\ \text{m/s}^2 \)).</p>
+<ol type="A">
+    <li><strong>Period:</strong><br>
+    \( T = 2\pi\sqrt{\frac{0.64}{9.8}} = 2\pi\sqrt{0.0653} = 2\pi(0.2556) \approx \mathbf{1.61\ \text{s}} \)</li>
+    <br>
+    <li><strong>Frequency:</strong><br>
+    \( f = \frac{1}{T} = \frac{1}{1.61} \approx \mathbf{0.62\ \text{Hz}} \)</li>
+    <br>
+    <li><strong>If taken to a planet where \( g = 39.2\ \text{m/s}^2 \) (4× Earth):</strong><br>
+    \( T' = 2\pi\sqrt{\frac{0.64}{39.2}} = 2\pi\sqrt{0.01633} = 2\pi(0.1278) \approx \mathbf{0.803\ \text{s}} \)<br>
+    The period is halved — as expected when \( g \) quadruples: \( T \propto 1/\sqrt{g} \), so \( T' = T/\sqrt{4} = T/2 \).</li>
+</ol>
+
+<h2>Practice Problems</h2>
+<ol>
+    <li>
+        A pendulum has period \( T \) on Earth. It is taken to a planet where \( g \) is 4 times greater. What is the new period?
+        <ol type="A">
+            <li>\( 4T \)</li>
+            <li>\( 2T \)</li>
+            <li>\( T/2 \)</li>
+            <li>\( T/4 \)</li>
+        </ol>
+    </li>
+    <br>
+    <li>
+        A pendulum bob is replaced with one four times heavier, but the string length stays the same. How does the period change?
+        <ol type="A">
+            <li>Period doubles</li>
+            <li>Period quadruples</li>
+            <li>Period is halved</li>
+            <li>Period does not change</li>
+        </ol>
+    </li>
+    <br>
+    <li>
+        In SHM, at which position is the magnitude of acceleration the greatest?
+        <ol type="A">
+            <li>At the equilibrium position</li>
+            <li>Halfway between equilibrium and amplitude</li>
+            <li>At the amplitude (turning point)</li>
+            <li>Acceleration is constant throughout</li>
+        </ol>
+    </li>
+    <br>
+    <li>
+        A mass on a spring undergoes SHM with amplitude \( A \). The total mechanical energy is \( E \). The amplitude is then increased to \( 2A \). What is the new total energy?
+        <ol type="A">
+            <li>\( E \)</li>
+            <li>\( 2E \)</li>
+            <li>\( 4E \)</li>
+            <li>\( \sqrt{2}\,E \)</li>
+        </ol>
+    </li>
+    <br>
+    <li>
+        <strong>Free Response</strong><br><br>
+        A simple pendulum consists of a 0.5 kg bob on a string of length 1.0 m. It is released from rest at a small angle.
+        <ol type="A">
+            <li>Calculate the period of the pendulum on Earth (\( g = 9.8\ \text{m/s}^2 \)).</li>
+            <br>
+            <li>The pendulum is brought to the Moon where \( g_{\text{moon}} = 1.6\ \text{m/s}^2 \). Calculate the new period.</li>
+            <br>
+            <li>Without calculation, explain whether the period would change if the bob were replaced with one of mass 2.0 kg, with all other conditions the same.</li>
+            <br>
+            <li>The bob on Earth is now pulled to twice the original angle (still small). Describe how the period and maximum speed each change. Justify your answers.</li>
+        </ol>
+    </li>
+</ol>
+
+<br>
+<div style="text-align:center; margin: 2rem 0;">
+    <strong><a href="#" onclick="toggleAnswerKey(event)" class="toggle-link">Answer Key</a></strong>
+</div>
+
+<div id="answer-key" style="display:none;">
+<div class="boxed-text">
+    <h3 style="margin-top:0;">Answer Key</h3>
+
+    <p><strong>Q1 — C (T/2)</strong><br>
+    \( T = 2\pi\sqrt{L/g} \). If \( g \) is 4× larger: \( T' = 2\pi\sqrt{L/4g} = \frac{1}{2}\cdot 2\pi\sqrt{L/g} = T/2 \).</p>
+
+    <p><strong>Q2 — D (Period does not change)</strong><br>
+    The pendulum period \( T = 2\pi\sqrt{L/g} \) contains no mass term. Changing the bob's mass has no effect on the period.</p>
+
+    <p><strong>Q3 — C (at the amplitude)</strong><br>
+    Acceleration \( a = -\omega^2 x \). The magnitude is largest where \( |x| \) is largest — at the turning points \( x = \pm A \). At equilibrium \( x = 0 \), so \( a = 0 \).</p>
+
+    <p><strong>Q4 — C (4E)</strong><br>
+    \( E = \frac{1}{2}kA^2 \). Doubling amplitude: \( E' = \frac{1}{2}k(2A)^2 = 4 \cdot \frac{1}{2}kA^2 = 4E \). Energy scales with amplitude squared.</p>
+
+    <p><strong>Q5 — Free Response (L = 1.0 m, m = 0.5 kg)</strong></p>
+    <p><em>Part A — Period on Earth:</em><br>
+    \( T = 2\pi\sqrt{\frac{1.0}{9.8}} = 2\pi(0.3194) \approx \mathbf{2.01\ \text{s}} \)</p>
+    <p><em>Part B — Period on Moon:</em><br>
+    \( T = 2\pi\sqrt{\frac{1.0}{1.6}} = 2\pi(0.7906) \approx \mathbf{4.97\ \text{s}} \)<br>
+    Weaker gravity → slower oscillation → longer period.</p>
+    <p><em>Part C — Effect of doubling mass:</em><br>
+    The period does not change. Mass does not appear in the pendulum period formula \( T = 2\pi\sqrt{L/g} \). Both the restoring force and the inertia scale with mass in exactly the same way, so they cancel out.</p>
+    <p><em>Part D — Effect of doubling the angle:</em><br>
+    <strong>Period does not change</strong> — as long as both angles are small, the period is independent of amplitude. The same \( T = 2\pi\sqrt{L/g} \) applies.<br>
+    <strong>Maximum speed increases</strong> — the bob starts higher, so it has more gravitational PE to convert to KE at the bottom. Since total energy scales with amplitude, and all of it becomes KE at the bottom, the maximum speed increases. Specifically, \( v_{\text{max}} \propto A \), so doubling the amplitude doubles the maximum speed.</p>
+</div>
+</div>
+
+<h2>Summary</h2>
+<p>SHM is oscillatory motion driven by a restoring force proportional to displacement. The two classic systems — springs and pendulums — follow the same sinusoidal pattern but depend on different physical quantities.</p>
+<ul>
+    <li><strong>The defining feature of SHM is \( F \propto -x \).</strong> Any system with this property oscillates sinusoidally.</li>
+    <li><strong>Position, velocity, and acceleration are all sinusoidal — and 90° out of phase with each other.</strong> When position is at a max, velocity is zero. When velocity is at a max, acceleration is zero.</li>
+    <li><strong>Acceleration is always directed toward equilibrium</strong> and is largest at the turning points.</li>
+    <li><strong>Pendulum period depends only on length and gravity.</strong> Not mass. Not amplitude (small angles).</li>
+    <li><strong>Spring period depends only on mass and spring constant.</strong> Not amplitude.</li>
+    <li><strong>Total energy scales with amplitude squared.</strong> Double the amplitude → 4× the energy → \( \sqrt{2} \times \) the max speed (wait — no: \( v_{\text{max}} \propto A \), so double amplitude → double max speed).</li>
+    <li><strong>In both systems, amplitude does not affect the period</strong> — a deeply non-obvious fact that AP exams test repeatedly.</li>
+</ul>
+
+<div class="boxed-text" style="position:relative;">
+    <span style="position:absolute; top:14px; right:18px; font-size:0.78rem; color:var(--text-muted); line-height:1.7; text-align:right;">
+        <strong style="color:var(--primary);">Key</strong><br>
+        \( A \) = amplitude &nbsp;·&nbsp; \( \omega = 2\pi f \)<br>
+        \( T \) = period (s) &nbsp;·&nbsp; \( f \) = frequency (Hz)<br>
+        \( L \) = pendulum length &nbsp;·&nbsp; \( g \) = gravity
+    </span>
+    <strong>All Your Equations:</strong>
+    <ul>
+        <li>\( T = 2\pi\sqrt{m/k} \) &nbsp;(spring-mass)</li>
+        <li>\( T = 2\pi\sqrt{L/g} \) &nbsp;(pendulum)</li>
+        <li>\( f = 1/T \qquad \omega = 2\pi f \)</li>
+        <li>\( x(t) = A\cos(\omega t) \)</li>
+        <li>\( v(t) = -A\omega\sin(\omega t) \)</li>
+        <li>\( a(t) = -A\omega^2\cos(\omega t) = -\omega^2 x \)</li>
+        <li>\( v_{\text{max}} = A\omega \)</li>
+        <li>\( a_{\text{max}} = A\omega^2 \)</li>
+        <li>\( E = \frac{1}{2}kA^2 \) &nbsp;(spring) &nbsp;·&nbsp; \( E \propto A^2 \) always</li>
+    </ul>
+</div>
+
+</main>
+</body>
+</html>

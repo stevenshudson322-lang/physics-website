@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Radians - Physics Fun</title>
+
+    <link rel="stylesheet" href="css/style.css"/>
+    <style>
+    /* ── Radian Explorer ──────────────────────────────────────────── */
+
+    .radian-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      align-items: start;
+      margin: 1.5rem 0 2.5rem;
+    }
+
+    @media (max-width: 700px) {
+      .radian-layout { grid-template-columns: 1fr; }
+    }
+
+    /* ── Card shell ──────────────────────────────────────────────── */
+
+    .explorer-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 4px 28px rgba(30,58,95,0.11);
+      overflow: hidden;
+    }
+
+    .explorer-header {
+      background: var(--primary);
+      padding: 16px 20px 14px;
+    }
+
+    .explorer-header h3 {
+      color: #fff;
+      margin: 0 0 3px;
+      font-size: 0.97rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .explorer-header p {
+      color: rgba(255,255,255,0.68);
+      margin: 0;
+      font-size: 0.77rem;
+      line-height: 1.45;
+    }
+
+    /* ── SVG area ────────────────────────────────────────────────── */
+
+    .explorer-svg-wrap {
+      padding: 18px 18px 14px;
+      display: flex;
+      justify-content: center;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--border);
+    }
+
+    #radian-svg {
+      width: 100%;
+      max-width: 288px;
+      height: auto;
+      display: block;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+
+    .explorer-display {
+      padding: 14px 18px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .angle-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+
+    .display-row {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .angle-value {
+      font-size: 2.1rem;
+      font-weight: 700;
+      color: var(--primary);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.01em;
+    }
+
+    .angle-unit {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .angle-degrees {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .status-msg {
+      margin-top: 7px;
+      font-size: 0.84rem;
+      font-weight: 500;
+      color: var(--accent);
+      min-height: 1.3em;
+    }
+
+    .formula-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .formula-pill {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 0.78rem;
+      color: var(--primary);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .formula-pill strong {
+      font-weight: 600;
+    }
+
+    /* ── Control buttons ─────────────────────────────────────────── */
+
+    .explorer-controls {
+      padding: 11px 16px;
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .ctrl-btn {
+      font-size: 0.76rem;
+      padding: 5px 13px;
+      border-radius: 20px;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      transition: background 0.14s, color 0.14s, border-color 0.14s;
+    }
+
+    .ctrl-btn:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+    }
+
+    .ctrl-btn.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .ctrl-btn.active:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+    }
+
+    .ctrl-btn-reset { color: var(--text-muted); }
+    .ctrl-btn-reset:hover { color: var(--text); }
+
+    /* ── Glow pulse on special angle ─────────────────────────────── */
+    @keyframes glow-pulse {
+      0%   { r: 11px; opacity: 0.9; }
+      100% { r: 22px; opacity: 0;   }
+    }
+    .glow-animating { animation: glow-pulse 0.6s ease-out forwards; }
+    </style>
+
+    <script>
+      window.MathJax = { tex: { inlineMath: [['\\(', '\\)']] } };
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+<header class="site-header">
+    <div class="container">
+        <h1 class="site-title">Radians</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="topics.html">Topics</a>
+            <a href="games.html">games</a>
+            <button onclick="window.location.href='Rotational.html'">&#8592; Rotational Motion</button>
+        </nav>
+    </div>
+</header>
+
+<main>
+
+<h2>What is a Radian?</h2>
+
+<div class="radian-layout">
+
+  <!-- Left column -->
+  <div>
+    <p>A radian is a measurement of an angle different from typical degrees, and directly relates an angle to the radius and circumference of a circle. One radian occurs where the arclength is equal to the radius of a circle. In
+    a circle, the circumference is equal to \(2\pi r\), so the number of radians in a full circle is \(\frac{2\pi r}{r} = 2\pi\), around 6.28 radians.</p>
+
+    <p class="eq">\(\theta = \dfrac{s}{r}\)</p>
+
+    <p>Where:</p>
+    <ul>
+        <li>\(\theta\): the angle in radians</li>
+        <li>\(s\): the arclength</li>
+        <li>\(r\): the radius of the circle</li>
+    </ul>
+
+    <div class="boxed-text">
+      <strong>Key values to know:</strong>
+      <ul style="margin:0.5rem 0 0; padding-left:1.2rem;">
+        <li>\(1 \text{ rad} \approx 57.3°\) — arc length equals the radius</li>
+        <li>\(\pi \approx 3.14 \text{ rad}\) — a semicircle (180°)</li>
+        <li>\(2\pi \approx 6.28 \text{ rad}\) — a full circle (360°)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Right column -->
+  <div>
+    <div class="explorer-card">
+
+      <div class="explorer-header">
+        <h3>Interactive Radian Explorer</h3>
+        <p>Drag the point along the circle to see how arc length builds angle</p>
+      </div>
+
+      <!--
+        SVG coordinate system: y increases downward.
+        Math convention: angles are CCW from the right (3 o'clock position).
+        Conversion: svgX = CX + R·cos(θ),  svgY = CY − R·sin(θ)
+      -->
+      <div class="explorer-svg-wrap">
+        <svg id="radian-svg" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+
+          <path id="sector" fill="#dbeafe" opacity="0.5"/>
+
+          <g id="chunks"></g>
+
+          <circle cx="150" cy="150" r="110"
+                  fill="none" stroke="#e2e8f0" stroke-width="1.5"/>
+
+          <path id="main-arc"
+                fill="none" stroke="#2563eb" stroke-width="3"
+                stroke-linecap="round"/>
+
+          <line id="fixed-radius"
+                x1="150" y1="150" x2="260" y2="150"
+                stroke="#1e3a5f" stroke-width="2" stroke-linecap="round"/>
+
+          <line id="movable-radius"
+                x1="150" y1="150" x2="260" y2="150"
+                stroke="#2563eb" stroke-width="2.5"
+                stroke-linecap="round" stroke-dasharray="5 3.5"/>
+
+          <g id="markers"></g>
+
+          <circle cx="150" cy="150" r="4.5" fill="#1e3a5f"/>
+
+          <circle cx="260" cy="150" r="3.5" fill="#1e3a5f" opacity="0.3"/>
+
+          <!-- Glow ring — pulses when angle reaches a special value -->
+          <circle id="glow-ring"
+                  cx="260" cy="150" r="11"
+                  fill="none" stroke="#2563eb" stroke-width="2.5"
+                  opacity="0"/>
+
+          <circle id="drag-point"
+                  cx="260" cy="150" r="8"
+                  fill="#2563eb" stroke="#fff" stroke-width="2.5"/>
+
+          <!-- Larger invisible hit area for easier interaction -->
+          <circle id="drag-hit"
+                  cx="260" cy="150" r="22"
+                  fill="transparent" style="cursor:grab"/>
+
+        </svg>
+      </div>
+
+      <div class="explorer-display">
+        <div class="angle-label">Current Angle</div>
+        <div class="display-row">
+          <span class="angle-value"   id="disp-rad">1.00</span>
+          <span class="angle-unit">rad</span>
+          <span class="angle-degrees" id="disp-deg">(57.3°)</span>
+        </div>
+        <div class="status-msg" id="status-msg">1 radian — arc length = radius</div>
+        <div class="formula-row">
+          <div class="formula-pill">θ = s / r = <strong id="pill-theta">1.00</strong></div>
+          <div class="formula-pill">s = rθ = <strong id="pill-arc">1.00</strong> r</div>
+        </div>
+      </div>
+
+      <div class="explorer-controls">
+        <button class="ctrl-btn active"    id="btn-markers" onclick="raExp.toggleMarkers()">Markers</button>
+        <button class="ctrl-btn active"    id="btn-chunks"  onclick="raExp.toggleChunks()">Arc Chunks</button>
+        <button class="ctrl-btn ctrl-btn-reset"             onclick="raExp.reset()">Reset</button>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+<h2>Convert Between Radians and Degrees</h2>
+<p> Another helpful resource for understanding radians is when you need to convert from radians to degrees and vice versa.</p>
+<ul>
+    <li>To convert from radians to degrees, you can use the formula: \(degrees = radians \times \frac{180}{\pi}\)</li>
+    <li>To convert from degrees to radians, you can use the formula: \(radians = degrees \times \frac{\pi}{180}\)</li>
+</ul>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>© 2025 Physics Fun. All rights reserved.</p>
+  </div>
+</footer>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════
+//  Radian Explorer — plain HTML/CSS/JS, no external libraries
+// ══════════════════════════════════════════════════════════════════════
+window.raExp = (function () {
+  'use strict';
+
+  // ── Constants ───────────────────────────────────────────────────────
+  const SVG_W = 300;         // viewBox dimension
+  const CX    = 150;         // circle center x (SVG units)
+  const CY    = 150;         // circle center y (SVG units)
+  const R     = 110;         // circle radius   (SVG units)
+  const TAU   = 2 * Math.PI;
+
+  // Angles that trigger a snap + glow effect
+  const SNAP_TARGETS = [0, 1, 2, 3, 4, 5, 6, Math.PI / 2, Math.PI, 3 * Math.PI / 2, TAU];
+  const SNAP_THRESH  = 0.07;  // radians — window for snapping
+
+  // Alternating chunk colors (one band per whole radian swept)
+  const CHUNK_COLS = ['#2563eb', '#1e3a5f'];
+
+  // ── State ────────────────────────────────────────────────────────────
+  let angle       = 1.0;    // current angle in radians [0, 2π]
+  let isDragging  = false;
+  let showMarkers = true;
+  let showChunks  = true;
+  let prevSpecial = false;  // used to detect rising edge for glow trigger
+
+  // ── DOM references ───────────────────────────────────────────────────
+  const svg       = document.getElementById('radian-svg');
+  const elSector  = document.getElementById('sector');
+  const elMainArc = document.getElementById('main-arc');
+  const elMovRad  = document.getElementById('movable-radius');
+  const elDragPt  = document.getElementById('drag-point');
+  const elDragHit = document.getElementById('drag-hit');
+  const elGlow    = document.getElementById('glow-ring');
+  const elChunks  = document.getElementById('chunks');
+  const elMarkers = document.getElementById('markers');
+  const elDispRad = document.getElementById('disp-rad');
+  const elDispDeg = document.getElementById('disp-deg');
+  const elStatus  = document.getElementById('status-msg');
+  const elTheta   = document.getElementById('pill-theta');
+  const elArc     = document.getElementById('pill-arc');
+  const elBtnMrk  = document.getElementById('btn-markers');
+  const elBtnChk  = document.getElementById('btn-chunks');
+
+  // ── Geometry helpers ─────────────────────────────────────────────────
+
+  /**
+   * Convert a math-convention angle (CCW from right, in radians)
+   * to {x, y} on the circle in SVG coordinates.
+   */
+  function toXY(theta) {
+    return {
+      x: CX + R * Math.cos(theta),
+      y: CY - R * Math.sin(theta)   // negate sin: SVG y increases downward
+    };
+  }
+
+  /**
+   * Build an SVG arc path string (CCW, math convention)
+   * from startAngle to endAngle. Returns '' for negligible spans.
+   */
+  function buildArcPath(startAngle, endAngle) {
+    const span = endAngle - startAngle;
+    if (span < 0.001) return '';
+
+    // Full-circle edge case: SVG arcs break when start === end,
+    // so draw two semicircles instead.
+    if (span >= TAU - 0.001) {
+      const p1 = toXY(startAngle);
+      const p2 = toXY(startAngle + Math.PI);
+      return (
+        `M ${r2(p1.x)} ${r2(p1.y)} ` +
+        `A ${R} ${R} 0 0 0 ${r2(p2.x)} ${r2(p2.y)} ` +
+        `A ${R} ${R} 0 0 0 ${r2(p1.x)} ${r2(p1.y)}`
+      );
+    }
+
+    const s  = toXY(startAngle);
+    const e  = toXY(endAngle);
+    const lg = span > Math.PI ? 1 : 0;   // large-arc-flag
+    // sweep-flag=0 → counterclockwise on screen = math-positive (CCW) direction
+    return `M ${r2(s.x)} ${r2(s.y)} A ${R} ${R} 0 ${lg} 0 ${r2(e.x)} ${r2(e.y)}`;
+  }
+
+  /**
+   * Build an SVG sector (pie-slice) path from center, sweeping 0 → theta.
+   */
+  function buildSectorPath(theta) {
+    if (theta < 0.001) return '';
+    if (theta >= TAU - 0.001) {
+      // Full disk: circle path via two arcs closing at center
+      return (
+        `M ${CX} ${CY} m ${R} 0 ` +
+        `A ${R} ${R} 0 1 0 ${r2(CX + R - 0.01)} ${r2(CY + 0.01)} Z`
+      );
+    }
+    const s  = toXY(0);
+    const e  = toXY(theta);
+    const lg = theta > Math.PI ? 1 : 0;
+    return (
+      `M ${CX} ${CY} ` +
+      `L ${r2(s.x)} ${r2(s.y)} ` +
+      `A ${R} ${R} 0 ${lg} 0 ${r2(e.x)} ${r2(e.y)} Z`
+    );
+  }
+
+  /** Snap angle to nearest target if within threshold. */
+  function snapAngle(a) {
+    for (const t of SNAP_TARGETS) {
+      if (Math.abs(a - t) < SNAP_THRESH) return t;
+    }
+    return a;
+  }
+
+  /**
+   * Extract the math-convention angle (CCW from right)
+   * from a pointer or touch event.
+   */
+  function eventToAngle(e) {
+    const rect    = svg.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    // Map screen pixels → SVG viewBox units
+    const svgX = ((clientX - rect.left) / rect.width)  * SVG_W;
+    const svgY = ((clientY - rect.top)  / rect.height) * SVG_W;
+    const dx = svgX - CX;
+    const dy = -(svgY - CY);   // flip y-axis for math convention
+    let a = Math.atan2(dy, dx);
+    if (a < 0) a += TAU;
+    return a;
+  }
+
+  /** Round to 2 decimal places (keeps SVG attribute strings short). */
+  function r2(n) { return Math.round(n * 100) / 100; }
+
+  /** Shorthand: create an SVG element with a set of attributes. */
+  function svgEl(tag, attrs) {
+    const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+    return el;
+  }
+
+  // ── Rendering ────────────────────────────────────────────────────────
+
+  /** Redraw the alternating arc-chunk bands (one band = 1 radian swept). */
+  function renderChunks() {
+    elChunks.innerHTML = '';
+    if (!showChunks) return;
+
+    let chunkStart = 0;
+    let i = 0;
+    while (chunkStart < angle - 0.002 && chunkStart < TAU - 0.002) {
+      const chunkEnd = Math.min(chunkStart + 1, angle, TAU);
+      if (chunkEnd <= chunkStart + 0.001) break;
+
+      elChunks.appendChild(svgEl('path', {
+        d:                buildArcPath(chunkStart, chunkEnd),
+        fill:             'none',
+        stroke:           CHUNK_COLS[i % 2],
+        'stroke-width':   '13',
+        'stroke-linecap': 'butt',    // no rounding = clean chunk boundaries
+        opacity:          '0.17'
+      }));
+
+      chunkStart += 1;
+      i++;
+    }
+  }
+
+  /** Redraw the tick marks and labels at key radian positions. */
+  function renderMarkers() {
+    elMarkers.innerHTML = '';
+    if (!showMarkers) return;
+
+    const MARKS = [
+      { a: 1,              label: '1'    },
+      { a: 2,              label: '2'    },
+      { a: 3,              label: '3'    },
+      { a: 4,              label: '4'    },
+      { a: 5,              label: '5'    },
+      { a: 6,              label: '6'    },
+      { a: Math.PI / 2,   label: 'π/2'  },
+      { a: Math.PI,       label: 'π'    },
+      { a: 3*Math.PI/2,   label: '3π/2' },
+      { a: TAU,           label: '2π'   },
+    ];
+
+    MARKS.forEach(({ a, label }) => {
+      const reached   = a <= angle + 0.05;
+      const onCircle  = toXY(a);
+      const tickOutR  = R + 11;
+      const labelOutR = R + 24;
+
+      // Outer tick endpoint
+      const tickEnd = {
+        x: CX + tickOutR * Math.cos(a),
+        y: CY - tickOutR * Math.sin(a)
+      };
+
+      // Label position (further out from circle)
+      const lpos = {
+        x: CX + labelOutR * Math.cos(a),
+        y: CY - labelOutR * Math.sin(a)
+      };
+
+      // Tick line
+      elMarkers.appendChild(svgEl('line', {
+        x1: r2(onCircle.x), y1: r2(onCircle.y),
+        x2: r2(tickEnd.x),  y2: r2(tickEnd.y),
+        stroke:           reached ? '#2563eb' : '#cbd5e1',
+        'stroke-width':   '1.5',
+        'stroke-linecap': 'round'
+      }));
+
+      // Label
+      const txt = svgEl('text', {
+        x:                   r2(lpos.x),
+        y:                   r2(lpos.y),
+        'text-anchor':       'middle',
+        'dominant-baseline': 'middle',
+        'font-size':         '8.5',
+        'font-family':       'Inter, Arial, sans-serif',
+        'font-weight':       reached ? '600' : '400',
+        fill:                reached ? '#2563eb' : '#94a3b8'
+      });
+      txt.textContent = label;
+      elMarkers.appendChild(txt);
+    });
+  }
+
+  /** Master render: update all SVG elements and the readout panel. */
+  function render() {
+    const pt = toXY(angle);
+
+    // Sector fill
+    elSector.setAttribute('d', buildSectorPath(angle));
+
+    // Main arc stroke
+    elMainArc.setAttribute('d', buildArcPath(0, angle));
+
+    // Movable radius and drag handles
+    elMovRad.setAttribute('x2',   r2(pt.x));
+    elMovRad.setAttribute('y2',   r2(pt.y));
+    elDragPt.setAttribute('cx',   r2(pt.x));
+    elDragPt.setAttribute('cy',   r2(pt.y));
+    elDragHit.setAttribute('cx',  r2(pt.x));
+    elDragHit.setAttribute('cy',  r2(pt.y));
+
+    // Glow: pulse once when angle arrives at a special value
+    elGlow.setAttribute('cx', r2(pt.x));
+    elGlow.setAttribute('cy', r2(pt.y));
+    const isSpecial = SNAP_TARGETS.some(t => t > 0.05 && Math.abs(angle - t) < 0.04);
+    if (isSpecial && !prevSpecial) {
+      elGlow.classList.remove('glow-animating');
+      void elGlow.offsetWidth;            // force reflow to restart animation
+      elGlow.classList.add('glow-animating');
+      elGlow.setAttribute('opacity', '1');
+    } else if (!isSpecial) {
+      elGlow.classList.remove('glow-animating');
+      elGlow.setAttribute('opacity', '0');
+    }
+    prevSpecial = isSpecial;
+
+    renderChunks();
+    renderMarkers();
+    updateDisplay();
+  }
+
+  /** Update only the text readout panel (angle value, status, formula pills). */
+  function updateDisplay() {
+    const rad = angle;
+    const deg = (rad * 180 / Math.PI).toFixed(1);
+
+    elDispRad.textContent = rad.toFixed(2);
+    elDispDeg.textContent = `(${deg}°)`;
+    elTheta.textContent   = rad.toFixed(2);
+    elArc.textContent     = rad.toFixed(2);
+
+    // Contextual status message
+    const eps = 0.04;
+    let msg = '';
+
+    if      (Math.abs(rad - 0)              < eps) msg = 'Start — zero arc length';
+    else if (Math.abs(rad - 1)              < eps) msg = '1 radian — arc length = radius';
+    else if (Math.abs(rad - 2)              < eps) msg = '2 radians — arc length = 2 × radius';
+    else if (Math.abs(rad - 3)              < eps) msg = '3 radians — arc length = 3 × radius';
+    else if (Math.abs(rad - Math.PI / 2)   < eps) msg = 'π/2 radians — quarter circle (90°)';
+    else if (Math.abs(rad - Math.PI)        < eps) msg = 'π radians — semicircle (180°)';
+    else if (Math.abs(rad - 3*Math.PI/2)   < eps) msg = '3π/2 radians — three-quarter circle (270°)';
+    else if (Math.abs(rad - TAU)            < eps) msg = '2π radians — full circle (360°)';
+    else {
+      const full = Math.floor(rad);
+      const frac = rad - full;
+      if (full > 0 && frac < 0.13) msg = `Just past ${full} radian${full > 1 ? 's' : ''}`;
+      else                          msg = `Arc length = ${rad.toFixed(2)} × radius`;
+    }
+
+    elStatus.textContent = msg;
+  }
+
+  // ── Drag handling ─────────────────────────────────────────────────────
+
+  function onDragStart(e) {
+    // Only initiate drag if pointer is near the current drag handle
+    const rect    = svg.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const pt      = toXY(angle);
+    const scaleX  = rect.width  / SVG_W;
+    const scaleY  = rect.height / SVG_W;
+
+    // Convert drag-point SVG coords → screen coords
+    const screenPx = rect.left + pt.x * scaleX;
+    const screenPy = rect.top  + pt.y * scaleY;
+    const dist = Math.hypot(clientX - screenPx, clientY - screenPy);
+
+    if (dist > 42) return;   // outside hit area, ignore
+    isDragging = true;
+    e.preventDefault();
+    elDragHit.style.cursor = 'grabbing';
+  }
+
+  function onDragMove(e) {
+    if (!isDragging) return;
+    e.preventDefault();
+    angle = snapAngle(eventToAngle(e));
+    render();
+  }
+
+  function onDragEnd() {
+    if (!isDragging) return;
+    isDragging = false;
+    elDragHit.style.cursor = 'grab';
+  }
+
+  // Mouse
+  svg.addEventListener('mousedown',  onDragStart);
+  window.addEventListener('mousemove', onDragMove);
+  window.addEventListener('mouseup',   onDragEnd);
+
+  // Touch
+  svg.addEventListener('touchstart', onDragStart, { passive: false });
+  window.addEventListener('touchmove',  onDragMove, { passive: false });
+  window.addEventListener('touchend',   onDragEnd);
+
+  // ── Public API ────────────────────────────────────────────────────────
+
+  function toggleMarkers() {
+    showMarkers = !showMarkers;
+    elBtnMrk.classList.toggle('active', showMarkers);
+    render();
+  }
+
+  function toggleChunks() {
+    showChunks = !showChunks;
+    elBtnChk.classList.toggle('active', showChunks);
+    render();
+  }
+
+  function reset() {
+    angle = 1.0;
+    render();
+  }
+
+  // ── Initialise ────────────────────────────────────────────────────────
+  render();
+
+  return { toggleMarkers, toggleChunks, reset };
+
+})();
+</script>
+
+</body>
+</html>

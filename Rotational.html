@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rotational Dynamics — Physics Fun</title>
+
+    <link rel="stylesheet" href="css/style.css"/>
+    <style>
+    /* ── Angular displacement side-by-side ────────────────────────── */
+    .concept-layout {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 1.5rem;
+      align-items: start;
+      margin-bottom: 0.5rem;
+    }
+    @media (max-width: 620px) { .concept-layout { grid-template-columns: 1fr; } }
+
+    /* ── Tables (defined once, shared by all three tables) ─────────── */
+    .rot-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.93rem;
+      margin: 1rem 0 1.5rem;
+      box-shadow: 0 2px 12px rgba(30,58,95,0.08);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .rot-table thead tr  { background: var(--primary); color: #fff; }
+    .rot-table thead th  {
+      padding: 12px 18px;
+      font-weight: 600;
+      font-size: 0.88rem;
+      letter-spacing: 0.03em;
+      text-align: center;
+    }
+    .rot-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+    .rot-table tbody tr:last-child { border-bottom: none; }
+    .rot-table tbody tr:hover { background: #f0f6ff; }
+    .rot-table tbody tr:nth-child(even) { background: #f8fafc; }
+    .rot-table tbody tr:nth-child(even):hover { background: #f0f6ff; }
+    .rot-table td { padding: 11px 18px; text-align: center; color: var(--text); }
+    /* 3-col table: linear = primary, connection = accent highlight, rotational = primary */
+    .rot-table.three-col td:nth-child(1) { color: var(--primary); font-weight: 500; }
+    .rot-table.three-col td:nth-child(2) {
+      color: var(--accent); font-weight: 600;
+      background: #eff6ff;
+      border-left: 1px solid #bfdbfe; border-right: 1px solid #bfdbfe;
+    }
+    .rot-table.three-col td:nth-child(3) { color: var(--primary); font-weight: 500; }
+    /* 2-col table: both columns same */
+    .rot-table.two-col td:nth-child(1) { color: var(--primary); font-weight: 500; }
+    .rot-table.two-col td:nth-child(2) { color: var(--primary); font-weight: 500; }
+
+    /* ── Torque simulator card ────────────────────────────────────── */
+    .sim-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 16px rgba(30,58,95,0.09);
+      margin: 1.25rem 0;
+    }
+    .sim-header {
+      background: var(--primary);
+      color: #fff;
+      padding: 12px 18px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      letter-spacing: 0.02em;
+    }
+    .sim-header span {
+      display: block;
+      font-size: 0.74rem;
+      font-weight: 400;
+      opacity: 0.72;
+      margin-top: 2px;
+    }
+    .sim-canvas-wrap {
+      padding: 14px 16px 10px;
+      background: #f8fafc;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: center;
+    }
+    #torque-canvas { display: block; max-width: 100%; border-radius: 6px; }
+    .sim-controls { padding: 14px 18px 10px; border-bottom: 1px solid var(--border); }
+    .sim-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 9px;
+    }
+    .sim-label {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--primary);
+      min-width: 52px;
+      font-family: Georgia, serif;
+      font-style: italic;
+    }
+    .sim-row input[type=range] { flex: 1; accent-color: var(--accent); cursor: pointer; }
+    .sim-val {
+      font-size: 0.82rem;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+      min-width: 60px;
+      text-align: right;
+    }
+    .sim-result {
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      background: #fff;
+    }
+    .sim-result-eq { font-size: 0.88rem; color: var(--text-muted); }
+    .sim-tau-val {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: var(--primary);
+      font-variant-numeric: tabular-nums;
+    }
+    .sim-dir { font-size: 0.9rem; font-weight: 600; min-width: 80px; }
+
+    /* ── Moment of inertia comparison cards ──────────────────────── */
+    .inertia-compare {
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+      margin: 1rem 0 0.5rem;
+    }
+    .inertia-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 18px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(30,58,95,0.07);
+      min-width: 150px;
+    }
+    .inertia-card strong { display: block; font-size: 0.9rem; color: var(--primary); margin-top: 8px; }
+    .inertia-card p { margin: 5px 0 0; font-size: 0.82rem; color: var(--text-muted); line-height: 1.4; }
+
+    /* ── Newton's 2nd law side-by-side comparison ─────────────────── */
+    .law-compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+    @media (max-width: 540px) { .law-compare { grid-template-columns: 1fr; } }
+    .law-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(30,58,95,0.07);
+    }
+    .law-card-header {
+      padding: 9px 14px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+    .law-card-header.linear  { background: #f1f5f9; color: var(--primary); }
+    .law-card-header.angular { background: var(--primary); color: #fff; }
+    .law-card-body { padding: 12px 14px; }
+    .law-card-eq { font-size: 1.15rem; text-align: center; color: var(--primary); margin: 8px 0; }
+    .law-card-body ul {
+      margin: 0;
+      padding-left: 1.1rem;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.8;
+    }
+    </style>
+
+    <script>
+      window.MathJax = { tex: { inlineMath: [['\\(', '\\)']] } };
+
+      function toggleText() {
+        let text = document.getElementById("answer");
+        let link = event.target;
+        text.style.display = text.style.display === "none" ? "inline" : "none";
+        link.textContent   = text.style.display === "none" ? "Radians" : "Click to hide";
+        event.preventDefault();
+      }
+      function toggleAnswerKey(event) {
+        let div = document.getElementById("answer-key");
+        let btn = event.target;
+        div.style.display = div.style.display === "none" ? "block" : "none";
+        btn.textContent   = div.style.display === "none" ? "Answer Key" : "Hide Answer Key";
+        event.preventDefault();
+      }
+    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<div id="desmos-container" style="display:none;">
+    <div class="draggable-calculator">
+        <div class="drag-handle">Drag Calculator</div>
+        <div id="calculator" style="width:600px; height:400px;"></div>
+    </div>
+</div>
+<script src="https://www.desmos.com/api/v1.11/calculator.js?apiKey=1a36ee8eec4c471e97c71548300ded67"></script>
+<script>
+let calculatorCreated = false, calculator;
+function toggleDesmos() {
+    const container = document.getElementById("desmos-container");
+    const button    = document.getElementById("desmos-toggle");
+    if (container.style.display === "none") {
+        container.style.display = "block";
+        button.textContent = "Hide Calculator";
+        const drag = document.querySelector('.draggable-calculator');
+        drag.style.left = Math.max(0, (window.innerWidth  - 620) / 2) + 'px';
+        drag.style.top  = Math.max(0, (window.innerHeight - 440) / 2) + 'px';
+        if (!calculatorCreated) {
+            calculator = Desmos.GraphingCalculator(document.getElementById("calculator"));
+            calculatorCreated = true;
+        }
+    } else {
+        container.style.display = "none";
+        button.textContent = "Show Calculator";
+    }
+}
+let calcDragging = false, calcDragX, calcDragY;
+document.addEventListener('DOMContentLoaded', function () {
+    const handle   = document.querySelector('.drag-handle');
+    const draggable = document.querySelector('.draggable-calculator');
+    if (!handle) return;
+    handle.addEventListener('mousedown', function (e) {
+        calcDragging = true;
+        const r = draggable.getBoundingClientRect();
+        calcDragX = e.clientX - r.left;
+        calcDragY = e.clientY - r.top;
+        draggable.style.cursor = 'grabbing';
+    });
+    document.addEventListener('mousemove', function (e) {
+        if (!calcDragging) return;
+        draggable.style.left = (e.clientX - calcDragX) + 'px';
+        draggable.style.top  = (e.clientY - calcDragY) + 'px';
+    });
+    document.addEventListener('mouseup', function () {
+        calcDragging = false;
+        if (draggable) draggable.style.cursor = 'move';
+    });
+});
+</script>
+
+</head>
+<body>
+
+<header class="site-header">
+    <div class="container">
+        <h1 class="site-title">Rotational Dynamics and Torque</h1>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="topics.html">Topics</a>
+            <a href="games.html">Games</a>
+            <button id="desmos-toggle" onclick="toggleDesmos()">Show Calculator</button>
+        </nav>
+    </div>
+</header>
+
+<main>
+
+<h2>Rotational Dynamics</h2>
+<p><strong>UNIT 7: Rotational Dynamics</strong></p>
+<p>Rotational dynamics is the study of how and why objects rotate. Every concept from linear motion — force, acceleration, momentum, energy — has a direct rotational counterpart. The math is nearly identical; only the variables change. Once you see the pattern, the entire unit clicks into place.</p>
+<ul>
+    <li><strong>Rotational Motion</strong>: an object spinning about an internal axis (Earth rotating every 24 hours).</li>
+    <li><strong>Translational Motion</strong>: the motion of a center of mass from one point to another (Earth orbiting the sun).</li>
+    <li>A <strong>revolution</strong> (translational) differs from a <strong>rotation</strong> (rotational) — though they often occur together, like a rolling wheel.</li>
+</ul>
+
+<h2>Radians</h2>
+<p>All rotational quantities are measured in <strong>radians</strong>, not degrees. Need a refresher?
+<a href="Radians.html" style="color:var(--accent);"><strong>Review Radians →</strong></a></p>
+
+<h2>Rotational Motion Terms</h2>
+<p>The three core rotational quantities mirror their linear counterparts exactly — just replace position, velocity, and acceleration with their angular equivalents.</p>
+
+<h3>Angular Displacement (\(\Delta\theta\))</h3>
+<p class="eq">\( \Delta\theta = \theta_f - \theta_i \qquad \text{[rad]} \)</p>
+
+<div class="concept-layout">
+  <div>
+    <p>The change in angular position, measured in radians. <strong>Counterclockwise = positive, clockwise = negative</strong> — the same sign convention as linear displacement.</p>
+    <div class="callout callout-mistake">
+      <span class="callout-title">⚠ Common Mistake</span>
+      Don't confuse \(\theta\) (angular position) with \(\Delta\theta\) (change in position). This is the same distinction as \(x\) vs. \(\Delta x\) in linear motion.
+    </div>
+  </div>
+  <img src="Images/angular-displacement.svg" alt="Angular displacement diagram" width="175" style="border-radius:8px; flex-shrink:0;"/>
+</div>
+
+<h3>Angular Velocity (\(\omega\))</h3>
+<p class="eq">\( \omega = \dfrac{\Delta\theta}{\Delta t} \qquad \text{[rad/s]} \)</p>
+<p>The rate of change of angular position. A higher \(\omega\) means more radians swept per second — a faster spin.</p>
+<div class="callout callout-insight">
+  <span class="callout-title">💡 Insight</span>
+  Angular and linear velocity are connected by \(v = r\omega\). A point on the rim of a wheel moves faster than a point near the center, even though both have the same \(\omega\). This is why the edge of a spinning disk feels like it's moving much faster.
+</div>
+
+<h3>Angular Acceleration (\(\alpha\))</h3>
+<p class="eq">\( \alpha = \dfrac{\Delta\omega}{\Delta t} \qquad \text{[rad/s²]} \)</p>
+<p>The rate of change of angular velocity. When you press the gas, the wheels have angular acceleration as they spin up. When you brake, \(\alpha\) is negative (slowing rotation).</p>
+
+<h2>Rotational and Translational Similarities</h2>
+<p>The equations for rotational and translational motion are structurally identical, and connected through the radius \(r\).</p>
+
+<table class="rot-table three-col">
+  <thead>
+    <tr>
+      <th>Translational (Linear)</th>
+      <th>Connection</th>
+      <th>Rotational (Angular)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Displacement &nbsp;\(\Delta x\)</td>
+      <td>\(x = r\theta\)</td>
+      <td>Angular Displacement &nbsp;\(\Delta\theta\)</td>
+    </tr>
+    <tr>
+      <td>Velocity &nbsp;\(\displaystyle v = \frac{\Delta x}{\Delta t}\)</td>
+      <td>\(v = r\omega\)</td>
+      <td>Angular Velocity &nbsp;\(\displaystyle \omega = \frac{\Delta\theta}{\Delta t}\)</td>
+    </tr>
+    <tr>
+      <td>Acceleration &nbsp;\(\displaystyle a = \frac{\Delta v}{\Delta t}\)</td>
+      <td>\(a = r\alpha\)</td>
+      <td>Angular Acceleration &nbsp;\(\displaystyle \alpha = \frac{\Delta\omega}{\Delta t}\)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Kinematic Equations</h3>
+<p>Replace \(x \to \theta\), \(v \to \omega\), \(a \to \alpha\) — every kinematic equation is structurally identical.</p>
+
+<table class="rot-table two-col">
+  <thead>
+    <tr>
+      <th>Translational (Linear)</th>
+      <th>Rotational (Angular)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>\( v = v_0 + at \)</td>
+      <td>\( \omega = \omega_0 + \alpha t \)</td>
+    </tr>
+    <tr>
+      <td>\( x = v_0 t + \tfrac{1}{2}at^2 \)</td>
+      <td>\( \theta = \omega_0 t + \tfrac{1}{2}\alpha t^2 \)</td>
+    </tr>
+    <tr>
+      <td>\( v^2 = v_0^2 + 2a\,\Delta x \)</td>
+      <td>\( \omega^2 = \omega_0^2 + 2\alpha\theta \)</td>
+    </tr>
+    <tr>
+      <td>\( x = \tfrac{1}{2}(v + v_0)t \)</td>
+      <td>\( \theta = \tfrac{1}{2}(\omega + \omega_0)t \)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Torque</h2>
+<p>Torque (\(\tau\)) is the rotational equivalent of force — it is what causes angular acceleration. Three things determine how much torque a force produces:</p>
+<ol>
+  <li><strong>Force magnitude (\(F\))</strong> — a larger force produces more torque.</li>
+  <li><strong>Distance from the pivot (\(r\))</strong> — force applied farther from the pivot produces more torque.</li>
+  <li><strong>Angle between the force and the lever arm (\(\theta\))</strong> — only the perpendicular component of the force contributes. Maximum torque occurs at \(\theta = 90°\).</li>
+</ol>
+<p class="eq">\( \tau = rF\sin\theta \qquad \text{[N·m]} \)</p>
+
+<div class="callout callout-analogy">
+  <span class="callout-title">🔧 Think of it like a wrench</span>
+  If you push along the wrench handle (\(\theta = 0°\)), the bolt won't turn — \(\sin(0°) = 0\). Push perpendicular to the handle (\(\theta = 90°\)), you get maximum torque — \(\sin(90°) = 1\). And a longer wrench (bigger \(r\)) always wins: the same force produces more turning power.
+</div>
+
+<div class="callout callout-mistake">
+  <span class="callout-title">⚠ Common Mistake</span>
+  Forgetting the \(\sin\theta\) factor. A 10 N force at 30° to a 2 m lever arm gives \(\tau = 2 \times 10 \times \sin(30°) = 10\) N·m — <em>not</em> 20 N·m. Only the force component <em>perpendicular</em> to the lever arm causes rotation.
+</div>
+
+<div class="sim-card">
+  <div class="sim-header">
+    Torque Simulator
+    <span>Adjust force, distance, and angle — watch how they affect torque</span>
+  </div>
+  <div class="sim-canvas-wrap">
+    <canvas id="torque-canvas" width="500" height="220"></canvas>
+  </div>
+  <div class="sim-controls">
+    <div class="sim-row">
+      <span class="sim-label">F</span>
+      <input type="range" id="sim-f" min="1" max="50" value="20" oninput="drawTorqueSim()"/>
+      <span class="sim-val"><span id="sim-f-val">20</span> N</span>
+    </div>
+    <div class="sim-row">
+      <span class="sim-label">r</span>
+      <input type="range" id="sim-r" min="0.2" max="2.0" step="0.1" value="1.5" oninput="drawTorqueSim()"/>
+      <span class="sim-val"><span id="sim-r-val">1.5</span> m</span>
+    </div>
+    <div class="sim-row">
+      <span class="sim-label">θ</span>
+      <input type="range" id="sim-theta" min="5" max="175" value="90" oninput="drawTorqueSim()"/>
+      <span class="sim-val"><span id="sim-theta-val">90</span>°</span>
+    </div>
+  </div>
+  <div class="sim-result">
+    <span class="sim-result-eq">τ = r F sin(θ) =</span>
+    <span class="sim-tau-val"><span id="sim-tau">30.0</span> N·m</span>
+    <span class="sim-dir" id="sim-dir">↺ CCW</span>
+  </div>
+</div>
+
+<h2>Moment of Inertia</h2>
+<p>Just as mass resists linear acceleration, <strong>moment of inertia</strong> (\(I\)) resists angular acceleration. The critical difference: \(I\) depends not just on how much mass an object has, but on <em>where</em> that mass is located relative to the axis of rotation.</p>
+<p class="eq">\( I = kmr^2 \qquad \text{[kg·m²]} \)</p>
+<ul>
+  <li>\(k\) — shape constant given in the problem (depends on mass distribution)</li>
+  <li>\(m\) — total mass [kg]</li>
+  <li>\(r\) — distance from the rotation axis [m]</li>
+</ul>
+
+<p> The value of K will change depending on the shape of the object, though you are not expected to memorize the k vlaues for certain shaped on the ap test.</p>
+
+
+<h2>Angular Acceleration and Torque</h2>
+<p>This is the rotational version of Newton's Second Law — the most important equation in this unit.</p>
+
+<div class="law-compare">
+  <div class="law-card">
+    <div class="law-card-header linear">Linear — Newton's 2nd Law</div>
+    <div class="law-card-body">
+      <div class="law-card-eq">\( a = \dfrac{F_\text{net}}{m} \)</div>
+      <ul>
+        <li>Net <strong>force</strong> causes linear acceleration</li>
+        <li><strong>Mass</strong> resists the acceleration</li>
+      </ul>
+    </div>
+  </div>
+  <div class="law-card">
+    <div class="law-card-header angular">Rotational — Newton's 2nd Law</div>
+    <div class="law-card-body">
+      <div class="law-card-eq">\( \alpha = \dfrac{\tau_\text{net}}{I} \)</div>
+      <ul>
+        <li>Net <strong>torque</strong> causes angular acceleration</li>
+        <li><strong>Moment of inertia</strong> resists rotation</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="callout callout-analogy">
+  <span class="callout-title">🔗 The pattern</span>
+  Force → Torque. &nbsp; Mass → Moment of Inertia. &nbsp; Linear acceleration → Angular acceleration.
+  If you can set up an \(F = ma\) equation, you can set up a \(\tau = I\alpha\) equation. Same logic, same structure.
+</div>
+
+<div class="callout callout-mistake">
+  <span class="callout-title">⚠ Common Mistake</span>
+  Using \(\alpha = \tau / m\) instead of \(\alpha = \tau / I\). Torque is resisted by moment of inertia, not mass. For a rotating object you must calculate \(I = kmr^2\) first.
+</div>
+
+<h2>Rotational Energy and Momentum</h2>
+<p>The same energy and momentum principles carry over directly — replace \(m \to I\) and \(v \to \omega\).</p>
+
+<table class="rot-table two-col">
+  <thead>
+    <tr>
+      <th>Translational (Linear)</th>
+      <th>Rotational (Angular)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Kinetic Energy: &nbsp;\(\displaystyle KE = \tfrac{1}{2}mv^2\)</td>
+      <td>Rotational KE: &nbsp;\(\displaystyle KE_\text{rot} = \tfrac{1}{2}I\omega^2\)</td>
+    </tr>
+    <tr>
+      <td>Momentum: &nbsp;\( p = mv \)</td>
+      <td>Angular Momentum: &nbsp;\( L = I\omega \)</td>
+    </tr>
+    <tr>
+      <td>\(\Delta p = F_\text{net}\,\Delta t\)</td>
+      <td>\(\Delta L = \tau_\text{net}\,\Delta t\)</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout callout-insight">
+  <span class="callout-title">💡 Conservation of Angular Momentum</span>
+  When there is <strong>no net external torque</strong> on a system, angular momentum is conserved:
+  \(L_i = L_f \;\Rightarrow\; I_1\omega_1 = I_2\omega_2\).
+  This is the rotational equivalent of conservation of linear momentum.
+</div>
+
+<h3>Ice Skater Example</h3>
+<p>If you have ever wathced ice skating in action, you may have noticed that when the skater pulls their arms in close to their body, they spin faster. This is due to the conservation of angular momentum! When the skater stars spinning with their arms out, they have a angular momentum. Though,
+  as they pull their arms in, they decreasen their moment of inertia because they are bringing their mass closer to the axis of rotation. Since angular momentum must be conserved ( \( L = I\omega \) ), the decrease in moment of inertia (\(I \downarrow\)) causes an increase in angular velocity (\( \omega \uparrow \)), making the skater spin faster!
+</p>
+
+<h3>Spinning bike Wheel Example</h3>
+<p>Imagine that a person is sitting on a rotating stool with a spinning bicycle wheel in their hands so it spins parallel to the ground counterclockwise. If they flip the wheel over, the stool will begin to rotate in the opposite direction that the wheel is spinning. This is because the initial angular momentum is posoitve as the wheel spings counterclockwise,
+  but when it gets flipped, the wheel's angular momentum becomes negative. To conserve angular momentum, the person and stool must start spinning in the opposite direction to balance out the change in angular momentum from the wheel, causing them to spin counterclockwise. Check out this video to see it in action:</p>
+
+<iframe width="560" height="315"
+  src="https://www.youtube.com/embed/iaauRiRX4do"
+  title="Spinning bike wheel — angular momentum conservation demo"
+  frameborder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  allowfullscreen
+  style="display:block; max-width:100%; border-radius:8px; margin:0.75rem 0;">
+</iframe>
+
+<h2>Practice Problems</h2>
+<p><em>One elementary question per topic — check your understanding before tackling harder problems.</em></p>
+
+<h3>Angular Displacement</h3>
+<ol>
+  <li>A wheel rotates from \(\theta = 0\) to \(\theta = 3\pi\) rad. What is the angular displacement?
+    <ol type="A">
+      <li>\(\pi\) rad</li>
+      <li>\(2\pi\) rad</li>
+      <li>\(3\pi\) rad</li>
+      <li>\(6\pi\) rad</li>
+    </ol>
+  </li>
+</ol>
+
+<h3>Angular Velocity</h3>
+<ol>
+  <li>A disk completes 4 full rotations in 2 seconds. What is its angular velocity?
+    <ol type="A">
+      <li>2 rad/s</li>
+      <li>\(2\pi\) rad/s</li>
+      <li>\(4\pi\) rad/s</li>
+      <li>\(8\pi\) rad/s</li>
+    </ol>
+  </li>
+</ol>
+
+<h3>Angular Acceleration</h3>
+<ol>
+  <li>A spinning top's angular velocity increases from 0 to 10 rad/s in 5 seconds. What is its angular acceleration?
+    <ol type="A">
+      <li>0.5 rad/s²</li>
+      <li>2 rad/s²</li>
+      <li>5 rad/s²</li>
+      <li>50 rad/s²</li>
+    </ol>
+  </li>
+</ol>
+
+<h3>Rotational Kinematics</h3>
+<ol>
+  <li>A wheel starts from rest and has a constant angular acceleration of 2 rad/s². How fast is it spinning after 3 seconds?
+    <ol type="A">
+      <li>2 rad/s</li>
+      <li>3 rad/s</li>
+      <li>6 rad/s</li>
+      <li>9 rad/s</li>
+    </ol>
+  </li>
+</ol>
+
+<h3>Torque</h3>
+<ol>
+  <li>A force of 10 N is applied perpendicular to a wrench 0.5 m from the bolt. What is the torque?
+    <ol type="A">
+      <li>0.5 N·m</li>
+      <li>2 N·m</li>
+      <li>5 N·m</li>
+      <li>20 N·m</li>
+    </ol>
+  </li>
+</ol>
+
+<h3>Moment of Inertia</h3>
+<ol>
+  <li>Two disks have the same mass. Disk A has its mass concentrated near the center. Disk B has its mass spread toward the rim. Which has the greater moment of inertia?
+    <ol type="A">
+      <li>Disk A</li>
+      <li>Disk B</li>
+      <li>They are equal</li>
+      <li>Cannot be determined without the radius</li>
+    </ol>
+  </li>
+</ol>
+
+<h3>Rotational Newton's 2nd Law</h3>
+<ol>
+  <li>A disk with moment of inertia \(I = 2\ \text{kg·m}^2\) experiences a net torque of 6 N·m. What is its angular acceleration?
+    <ol type="A">
+      <li>1 rad/s²</li>
+      <li>3 rad/s²</li>
+      <li>6 rad/s²</li>
+      <li>12 rad/s²</li>
+    </ol>
+  </li>
+</ol>
+
+<h3>Rotational Kinetic Energy</h3>
+<ol>
+  <li>A wheel with \(I = 4\ \text{kg·m}^2\) spins at \(\omega = 2\ \text{rad/s}\). What is its rotational kinetic energy?
+    <ol type="A">
+      <li>4 J</li>
+      <li>8 J</li>
+      <li>16 J</li>
+      <li>32 J</li>
+    </ol>
+  </li>
+</ol>
+
+<h3>Conservation of Angular Momentum</h3>
+<ol>
+  <li>A skater spinning with arms out has \(I = 3\ \text{kg·m}^2\) and \(\omega = 2\ \text{rad/s}\). She pulls her arms in so that \(I\) drops to \(1\ \text{kg·m}^2\). What is her new angular velocity?
+    <ol type="A">
+      <li>2 rad/s</li>
+      <li>4 rad/s</li>
+      <li>6 rad/s</li>
+      <li>9 rad/s</li>
+    </ol>
+  </li>
+</ol>
+
+<div style="text-align:center; margin: 2rem 0;">
+  <a href="#" onclick="toggleAnswerKey(event)" class="toggle-link" style="font-size:1.1rem; font-weight:600;">Answer Key</a>
+</div>
+
+<div id="answer-key" style="display:none;">
+  <div>
+    <h3 style="margin-top:0;">Answer Key</h3>
+
+    <p><strong>Angular Displacement — C (\(3\pi\) rad)</strong><br>
+    Angular displacement is just the final angle minus the initial: \(\Delta\theta = 3\pi - 0 = 3\pi\) rad.</p>
+
+    <p><strong>Angular Velocity — C (\(4\pi\) rad/s)</strong><br>
+    4 full rotations = \(4 \times 2\pi = 8\pi\) rad total. \(\omega = 8\pi / 2 = 4\pi\) rad/s.</p>
+
+    <p><strong>Angular Acceleration — B (2 rad/s²)</strong><br>
+    \(\alpha = \Delta\omega / \Delta t = (10 - 0) / 5 = 2\ \text{rad/s}^2\).</p>
+
+    <p><strong>Rotational Kinematics — C (6 rad/s)</strong><br>
+    Using \(\omega = \omega_0 + \alpha t = 0 + 2 \times 3 = 6\ \text{rad/s}\).</p>
+
+    <p><strong>Torque — C (5 N·m)</strong><br>
+    \(\tau = rF\sin\theta = 0.5 \times 10 \times \sin(90°) = 5\ \text{N·m}\).</p>
+
+    <p><strong>Moment of Inertia — B (Disk B)</strong><br>
+    \(I = kmr^2\) — mass farther from the axis contributes more to \(I\). Disk B has more mass at a larger \(r\), so its moment of inertia is greater.</p>
+
+    <p><strong>Rotational Newton's 2nd Law — B (3 rad/s²)</strong><br>
+    \(\alpha = \tau / I = 6 / 2 = 3\ \text{rad/s}^2\).</p>
+
+    <p><strong>Rotational Kinetic Energy — B (8 J)</strong><br>
+    \(KE_\text{rot} = \tfrac{1}{2}I\omega^2 = \tfrac{1}{2}(4)(2)^2 = 8\ \text{J}\).</p>
+
+    <p><strong>Conservation of Angular Momentum — C (6 rad/s)</strong><br>
+    \(L_i = L_f \Rightarrow I_1\omega_1 = I_2\omega_2 \Rightarrow 3 \times 2 = 1 \times \omega_2 \Rightarrow \omega_2 = 6\ \text{rad/s}\).</p>
+  </div>
+</div>
+
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  // ── Canvas drawing helpers ─────────────────────────────────────────
+
+  function drawArrow(ctx, x1, y1, x2, y2, color, lw) {
+    const hLen = 11, hAng = Math.PI / 7;
+    const ang  = Math.atan2(y2 - y1, x2 - x1);
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.fillStyle   = color;
+    ctx.lineWidth   = lw;
+    ctx.lineCap     = 'round';
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - hLen * Math.cos(ang - hAng), y2 - hLen * Math.sin(ang - hAng));
+    ctx.lineTo(x2 - hLen * Math.cos(ang + hAng), y2 - hLen * Math.sin(ang + hAng));
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+
+  function drawText(ctx, str, x, y, opts) {
+    ctx.save();
+    ctx.font         = (opts.w || 'normal') + ' ' + (opts.size || 13) + 'px ' + (opts.family || 'Inter, Arial, sans-serif');
+    ctx.fillStyle    = opts.color || '#1e293b';
+    ctx.textAlign    = opts.align || 'left';
+    ctx.textBaseline = opts.base  || 'middle';
+    ctx.fillText(str, x, y);
+    ctx.restore();
+  }
+
+  // ── Main render ───────────────────────────────────────────────────
+
+  window.drawTorqueSim = function () {
+    const canvas = document.getElementById('torque-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0, 0, W, H);
+
+    // Read slider values
+    const F     = parseFloat(document.getElementById('sim-f').value);
+    const r     = parseFloat(document.getElementById('sim-r').value);
+    const theta = parseFloat(document.getElementById('sim-theta').value) * Math.PI / 180;
+
+    // Update value labels
+    document.getElementById('sim-f-val').textContent     = F;
+    document.getElementById('sim-r-val').textContent     = r.toFixed(1);
+    document.getElementById('sim-theta-val').textContent = document.getElementById('sim-theta').value;
+
+    // Layout geometry
+    const pivX    = 72;               // pivot x position
+    const pivY    = H / 2;            // pivot y position (vertical center)
+    const scale   = 300 / 2.0;        // px per meter (2 m maps to 300 px)
+    const rPx     = r * scale;        // beam length in pixels
+    const beamEndX = pivX + rPx;
+    const beamEndY = pivY;
+
+    // ── Beam ────────────────────────────────────────────────────────
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(pivX, pivY);
+    ctx.lineTo(beamEndX, beamEndY);
+    ctx.strokeStyle = '#1e3a5f';
+    ctx.lineWidth   = 6;
+    ctx.lineCap     = 'round';
+    ctx.stroke();
+    ctx.restore();
+
+    // ── r dimension annotation ────────────────────────────────────
+    const dimY = pivY + 32;
+    ctx.save();
+    ctx.strokeStyle = '#94a3b8';
+    ctx.lineWidth   = 1;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath();
+    ctx.moveTo(pivX,     pivY + 8); ctx.lineTo(pivX,     dimY + 5);
+    ctx.moveTo(beamEndX, beamEndY + 8); ctx.lineTo(beamEndX, dimY + 5);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+    drawArrow(ctx, pivX + 6,     dimY, beamEndX - 6, dimY, '#94a3b8', 1);
+    drawArrow(ctx, beamEndX - 6, dimY, pivX + 6,     dimY, '#94a3b8', 1);
+    drawText(ctx, 'r', pivX + rPx / 2, dimY + 13, { w: '600', size: 12, color: '#64748b', align: 'center', family: 'Georgia, serif' });
+
+    // ── Pivot (triangle + hatching + pin circle) ──────────────────
+    ctx.save();
+    // Triangle
+    ctx.beginPath();
+    ctx.moveTo(pivX, pivY + 7);
+    ctx.lineTo(pivX - 14, pivY + 30);
+    ctx.lineTo(pivX + 14, pivY + 30);
+    ctx.closePath();
+    ctx.fillStyle = '#1e3a5f';
+    ctx.fill();
+    // Ground hatch lines
+    ctx.strokeStyle = '#1e3a5f';
+    ctx.lineWidth   = 1.5;
+    for (let i = -3; i <= 3; i++) {
+      ctx.beginPath();
+      ctx.moveTo(pivX + i * 8 - 4, pivY + 30);
+      ctx.lineTo(pivX + i * 8 + 4, pivY + 38);
+      ctx.stroke();
+    }
+    ctx.beginPath(); ctx.moveTo(pivX - 22, pivY + 30); ctx.lineTo(pivX + 22, pivY + 30);
+    ctx.lineWidth = 2; ctx.stroke();
+    // Pin circle
+    ctx.beginPath(); ctx.arc(pivX, pivY, 6.5, 0, Math.PI * 2);
+    ctx.fillStyle   = '#fff';   ctx.fill();
+    ctx.strokeStyle = '#1e3a5f'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.restore();
+
+    // ── Force arrow ───────────────────────────────────────────────
+    // Force direction at angle theta (CCW from beam = right):
+    // In canvas coords (y down): direction = (cos θ, −sin θ)
+    const fMaxPx = 80;
+    const fPx    = (F / 50) * fMaxPx;
+    const fDX    = Math.cos(theta);
+    const fDY    = -Math.sin(theta);
+    const fEndX  = beamEndX + fPx * fDX;
+    const fEndY  = beamEndY + fPx * fDY;
+
+    drawArrow(ctx, beamEndX, beamEndY, fEndX, fEndY, '#dc2626', 2.5);
+    drawText(ctx, 'F', fEndX + 8 * fDX, fEndY + 8 * fDY,
+      { w: '700', size: 14, color: '#dc2626', align: 'center', family: 'Georgia, serif', base: 'middle' });
+
+    // ── Perpendicular component F⊥ (dashed, pointing straight up) ─
+    const fPerpPx = fPx * Math.sin(theta);
+    if (fPerpPx > 5) {
+      ctx.save();
+      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = '#2563eb';
+      ctx.lineWidth   = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(beamEndX, beamEndY);
+      ctx.lineTo(beamEndX, beamEndY - fPerpPx);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+      if (fPerpPx > 16) {
+        drawText(ctx, 'F\u22A5', beamEndX + 7, beamEndY - fPerpPx / 2,
+          { size: 11, color: '#2563eb', base: 'middle' });
+      }
+    }
+
+    // ── θ angle arc ───────────────────────────────────────────────
+    // Arc sweeps from force direction (−theta in canvas) to 0 (right/beam),
+    // going counterclockwise on screen (anticlockwise = true).
+    if (theta > 0.09 && theta < Math.PI - 0.09) {
+      const arcR = 30;
+      ctx.save();
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth   = 1.5;
+      ctx.beginPath();
+      ctx.arc(beamEndX, beamEndY, arcR, -theta, 0, true);
+      ctx.stroke();
+      ctx.restore();
+      // θ label at arc midpoint
+      const midA = theta / 2;
+      drawText(ctx, '\u03B8',
+        beamEndX + (arcR + 11) * Math.cos(midA),
+        beamEndY - (arcR + 11) * Math.sin(midA),
+        { size: 12, color: '#b45309', w: '600', align: 'center', family: 'Georgia, serif', base: 'middle' });
+    }
+
+    // ── Result display ────────────────────────────────────────────
+    const tau = r * F * Math.sin(theta);
+    document.getElementById('sim-tau').textContent = Math.abs(tau).toFixed(1);
+
+    const dirEl = document.getElementById('sim-dir');
+    if (Math.abs(tau) < 0.1) {
+      dirEl.textContent   = '— No rotation';
+      dirEl.style.color   = '#94a3b8';
+    } else if (tau > 0) {
+      dirEl.textContent   = '↺  CCW';
+      dirEl.style.color   = '#16a34a';
+    } else {
+      dirEl.textContent   = '↻  CW';
+      dirEl.style.color   = '#dc2626';
+    }
+  };
+
+  // Draw once DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', drawTorqueSim);
+  } else {
+    drawTorqueSim();
+  }
+
+}());
+</script>
+
+</body>
+</html>
