@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Torque Balance Game — Physics Fun</title>
+<link rel="stylesheet" href="css/style.css"/>
+<style>
+main { max-width: 920px; margin: 0 auto; padding: 2rem 1.25rem 3rem; }
+h2.page-title { color: var(--primary); margin-bottom: 0.2rem; }
+.subtitle { color: var(--text-muted); font-size: 0.93rem; margin-bottom: 1.25rem; }
+
+/* HUD */
+.hud {
+  display: flex; gap: 1rem; flex-wrap: wrap;
+  align-items: center; justify-content: space-between;
+  background: var(--primary); color: #fff;
+  border-radius: 10px; padding: 0.65rem 1.2rem;
+  margin-bottom: 1rem;
+}
+.hud-item { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.hud-item .val { font-size: 1.35rem; font-weight: 700; line-height: 1; }
+.hud-item .lbl { font-size: 0.67rem; opacity: 0.72; text-transform: uppercase; letter-spacing: 0.06em; }
+.hud-btns { display: flex; gap: 0.5rem; }
+.btn {
+  padding: 7px 18px; border: none; border-radius: 7px;
+  font-size: 0.85rem; font-weight: 600; cursor: pointer;
+  transition: filter 0.15s;
+}
+.btn:hover:not(:disabled) { filter: brightness(1.12); }
+.btn-reset { background: #ef4444; color: #fff; }
+.btn-next  { background: #22c55e; color: #fff; }
+.btn-next:disabled { background: #6b7280; cursor: not-allowed; }
+
+/* Level card */
+.level-card {
+  background: #eff6ff; border-left: 4px solid var(--accent);
+  border-radius: 0 8px 8px 0; padding: 0.7rem 1rem;
+  margin-bottom: 0.9rem; font-size: 0.92rem; line-height: 1.55;
+}
+.level-card strong { color: var(--primary); }
+.place-indicator {
+  display: inline-block; margin-top: 0.3rem;
+  background: var(--accent); color: #fff;
+  border-radius: 5px; padding: 2px 10px;
+  font-size: 0.8rem; font-weight: 700;
+}
+
+/* Canvas */
+#game-canvas {
+  display: block; width: 100%;
+  background: #f0f4f8;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 2px 14px rgba(30,58,95,0.09);
+  cursor: crosshair;
+}
+
+/* Torque row */
+.torque-row {
+  display: flex; gap: 0.75rem; margin-top: 0.8rem; flex-wrap: wrap;
+}
+.torque-box {
+  flex: 1; min-width: 160px;
+  background: #fff; border: 1px solid var(--border);
+  border-radius: 10px; padding: 0.75rem 1rem;
+  text-align: center; transition: border-color 0.2s;
+}
+.torque-box .t-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); }
+.torque-box .t-val   { font-size: 1.5rem; font-weight: 700; margin: 0.15rem 0; line-height: 1.2; }
+.torque-box .t-sub   { font-size: 0.75rem; color: var(--text-muted); }
+.torque-box.left  { border-top: 3px solid #2563eb; }
+.torque-box.left  .t-val { color: #2563eb; }
+.torque-box.right { border-top: 3px solid #dc2626; }
+.torque-box.right .t-val { color: #dc2626; }
+.torque-box.status .t-val { font-size: 1rem; }
+.torque-box.balanced   { border-top: 3px solid #16a34a; }
+.torque-box.balanced   .t-val { color: #16a34a; font-size: 1.1rem; }
+.torque-box.unbalanced { border-top: 3px solid #f59e0b; }
+.torque-box.unbalanced .t-val { color: #b45309; font-size: 1rem; }
+
+/* Placement feedback strip */
+.placement-strip {
+  margin-top: 0.5rem; padding: 0.45rem 0.9rem;
+  background: #f8fafc; border: 1px solid var(--border);
+  border-radius: 7px; font-size: 0.85rem; color: var(--text-muted);
+  min-height: 2rem;
+}
+
+/* Summary */
+.summary {
+  display: none; margin-top: 1rem;
+  background: #fff; border: 1px solid var(--border);
+  border-radius: 10px; padding: 1rem 1.2rem;
+  box-shadow: 0 1px 8px rgba(30,58,95,0.06);
+}
+.summary.show { display: block; }
+.summary h3 { margin: 0 0 0.6rem; color: var(--primary); font-size: 1rem; }
+.summary table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+.summary td, .summary th { padding: 5px 10px; border-bottom: 1px solid var(--border); }
+.summary th { background: #f1f5f9; color: var(--primary); font-weight: 600; text-align: left; }
+.summary tr:last-child td { border-bottom: none; }
+.summary .yours td { background: #f0fdf4; }
+.summary .win  { color: #16a34a; font-weight: 700; }
+.summary .lose { color: #dc2626; font-weight: 700; }
+.summary .hint-text { font-style: italic; color: #64748b; font-size: 0.83rem; }
+
+/* Instructions */
+.instructions {
+  margin-top: 0.9rem;
+  background: #f8fafc; border: 1px solid var(--border);
+  border-radius: 8px; padding: 0.7rem 1rem;
+  font-size: 0.84rem; color: var(--text-muted);
+  display: flex; gap: 1.2rem; flex-wrap: wrap;
+}
+.instructions span { white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <h1 class="site-title">Physics Fun</h1>
+    <nav><ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="topics.html">Topics</a></li>
+      <li><a href="games.html">Games</a></li>
+    </ul></nav>
+  </div>
+</header>
+
+<main>
+  <h2 class="page-title">Torque Balance Challenge</h2>
+  <p class="subtitle">Place weights on the beam to balance it using real torque physics: τ = r × F</p>
+
+  <div class="hud">
+    <div class="hud-item"><span class="val" id="hud-level">1</span><span class="lbl">Level</span></div>
+    <div class="hud-item"><span class="val" id="hud-score">0</span><span class="lbl">Score</span></div>
+    <div class="hud-item"><span class="val" id="hud-best">0</span><span class="lbl">Best</span></div>
+    <div class="hud-btns">
+      <button class="btn btn-reset" onclick="resetLevel()">↺ Reset</button>
+      <button class="btn btn-next" id="btn-next" onclick="nextLevel()" disabled>Next Level →</button>
+    </div>
+  </div>
+
+  <div class="level-card" id="level-card">Loading…</div>
+
+  <canvas id="game-canvas" height="310"></canvas>
+
+  <div class="placement-strip" id="placement-strip">Hover over the beam to preview placement, then click to place your weight.</div>
+
+  <div class="torque-row">
+    <div class="torque-box left">
+      <div class="t-label">Left Torque (CCW ↺)</div>
+      <div class="t-val" id="t-left">0.0 N·m</div>
+      <div class="t-sub" id="t-left-sub">—</div>
+    </div>
+    <div class="torque-box status" id="status-box">
+      <div class="t-label">Balance Status</div>
+      <div class="t-val" id="t-status">—</div>
+    </div>
+    <div class="torque-box right">
+      <div class="t-label">Right Torque (CW ↻)</div>
+      <div class="t-val" id="t-right">0.0 N·m</div>
+      <div class="t-sub" id="t-right-sub">—</div>
+    </div>
+  </div>
+
+  <div class="summary" id="summary">
+    <h3 id="summary-title">Round Summary</h3>
+    <table>
+      <thead>
+        <tr><th>Weight</th><th>Mass (kg)</th><th>r (m)</th><th>F = mg (N)</th><th>τ = r·F (N·m)</th><th>Side</th></tr>
+      </thead>
+      <tbody id="summary-body"></tbody>
+    </table>
+    <p id="summary-verdict" style="margin: 0.65rem 0 0; font-size: 0.92rem;"></p>
+  </div>
+
+  <div class="instructions">
+    <span>🔵 Blue = fixed weight</span>
+    <span>🟢 Green = your weight</span>
+    <span>Click on the beam to place your weight</span>
+    <span>You can reposition before winning</span>
+    <span>Within 5% = balanced ✓</span>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container"><p>&copy; 2026 Physics Fun. All rights reserved.</p></div>
+</footer>
+
+<script>
+(function () {
+'use strict';
+
+/* ═══════════════════════════════════════
+   LEVELS  —  verified: left_τ = right_τ at solution
+═══════════════════════════════════════ */
+const LEVELS = [
+  {
+    desc: 'A <strong>5 kg</strong> weight sits <strong>1.0 m</strong> to the left. Place your <strong>5 kg</strong> weight on the <strong>RIGHT</strong> side to balance.',
+    fixed: [{ side:'L', mass:5, dist:1.0 }],
+    playerSide: 'R', playerMass: 5,
+    solution: 1.0,
+    hint: 'Equal masses balance at equal distances. Place at 1.0 m right. τ = 5×10×1.0 = 50 N·m each side.'
+  },
+  {
+    desc: 'A <strong>4 kg</strong> weight is <strong>1.5 m</strong> to the left. Place your <strong>6 kg</strong> weight on the <strong>RIGHT</strong> to balance.',
+    fixed: [{ side:'L', mass:4, dist:1.5 }],
+    playerSide: 'R', playerMass: 6,
+    solution: 1.0,
+    hint: 'Left τ = 4×10×1.5 = 60 N·m. Solve 6×10×r = 60 → r = 1.0 m right.'
+  },
+  {
+    desc: 'Fixed: <strong>3 kg at 2.0 m left</strong> and <strong>2 kg at 0.5 m right</strong>. Place your <strong>5 kg</strong> weight on the <strong>RIGHT</strong> to balance.',
+    fixed: [{ side:'L', mass:3, dist:2.0 }, { side:'R', mass:2, dist:0.5 }],
+    playerSide: 'R', playerMass: 5,
+    solution: 1.0,
+    hint: 'Left τ = 60 N·m. Right fixed τ = 10 N·m. Need 50 more: 5×10×r = 50 → r = 1.0 m right.'
+  },
+  {
+    desc: 'Fixed: <strong>8 kg at 0.75 m right</strong> and <strong>2 kg at 1.0 m left</strong>. Place your <strong>4 kg</strong> weight on the <strong>LEFT</strong> to balance.',
+    fixed: [{ side:'R', mass:8, dist:0.75 }, { side:'L', mass:2, dist:1.0 }],
+    playerSide: 'L', playerMass: 4,
+    solution: 1.0,
+    hint: 'Right τ = 60 N·m. Left fixed = 20 N·m. Need 40 more: 4×10×r = 40 → r = 1.0 m left.'
+  },
+  {
+    desc: 'Fixed: <strong>6 kg at 1.0 m left</strong>, <strong>3 kg at 0.5 m left</strong>, <strong>4 kg at 1.5 m right</strong>. Place your <strong>7 kg</strong> weight on the <strong>RIGHT</strong>.',
+    fixed: [{ side:'L', mass:6, dist:1.0 }, { side:'L', mass:3, dist:0.5 }, { side:'R', mass:4, dist:1.5 }],
+    playerSide: 'R', playerMass: 7,
+    solution: 0.2,
+    hint: 'Left τ = 60+15 = 75 N·m. Right fixed = 60 N·m. Need 15 more: 7×10×r = 15 → r ≈ 0.2 m right.'
+  },
+  {
+    desc: 'Expert! Fixed: <strong>5 kg at 2.0 m left</strong>, <strong>4 kg at 0.5 m left</strong>, <strong>2 kg at 1.0 m right</strong>, <strong>3 kg at 1.5 m right</strong>. Place your <strong>10 kg</strong> weight on the <strong>RIGHT</strong>.',
+    fixed: [{ side:'L', mass:5, dist:2.0 }, { side:'L', mass:4, dist:0.5 }, { side:'R', mass:2, dist:1.0 }, { side:'R', mass:3, dist:1.5 }],
+    playerSide: 'R', playerMass: 10,
+    solution: 0.55,
+    hint: 'Left τ = 100+20 = 120 N·m. Right fixed = 20+45 = 65 N·m. Need 55 more: 10×10×r = 55 → r = 0.55 m right (snap to 0.5 or 0.6 m).'
+  },
+];
+
+const g = 10;
+const BEAM_HALF = 2.0;   // metres each side
+const TOLERANCE = 0.05;  // 5%
+const SNAP = 0.1;        // snap to 0.1 m
+
+let level = 0, score = 0, best = 0;
+let playerWeight = null;  // { side, dist }
+let hoverWeight  = null;  // preview while hovering
+let beamAngle = 0, targetAngle = 0;
+let animId = null;
+let solved = false, placed = false;
+
+const canvas = document.getElementById('game-canvas');
+const ctx    = canvas.getContext('2d');
+
+/* ── sizing — HiDPI aware ── */
+let dpr = 1;
+function W() { return canvas.width  / dpr; }
+function H() { return canvas.height / dpr; }
+function pivotX() { return W() / 2; }
+function pivotY() { return H() * 0.64; }
+function scale()  { return (W() * 0.44) / BEAM_HALF; }
+
+const CSS_CANVAS_H = 310;
+
+function resize() {
+  dpr = window.devicePixelRatio || 1;
+  const cssW = canvas.offsetWidth;
+  canvas.width  = cssW * dpr;
+  canvas.height = CSS_CANVAS_H * dpr;
+  canvas.style.width  = cssW + 'px';
+  canvas.style.height = CSS_CANVAS_H + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  draw();
+}
+window.addEventListener('resize', resize);
+
+/* ── coord helpers ── */
+function beamXfromMeters(side, dist) {
+  return (side === 'L' ? -1 : 1) * dist * scale();
+}
+function metersFromCanvasX(cx) {
+  const dx = cx - pivotX();
+  const side = dx < 0 ? 'L' : 'R';
+  const dist = Math.max(SNAP, Math.min(BEAM_HALF, Math.round(Math.abs(dx) / scale() / SNAP) * SNAP));
+  return { side, dist };
+}
+
+/* ── torques ── */
+function calcTorques(useHover) {
+  const lv = LEVELS[level];
+  let tL = 0, tR = 0;
+  for (const w of lv.fixed) {
+    const t = w.mass * g * w.dist;
+    w.side === 'L' ? tL += t : tR += t;
+  }
+  const pw = useHover ? (hoverWeight || playerWeight) : playerWeight;
+  if (pw) {
+    const t = lv.playerMass * g * pw.dist;
+    pw.side === 'L' ? tL += t : tR += t;
+  }
+  return { tL, tR };
+}
+
+/* ══════════════════════════════════════════
+   DRAWING
+══════════════════════════════════════════ */
+function draw() {
+  ctx.clearRect(0, 0, W(), H());
+
+  /* -- background gradient -- */
+  const bg = ctx.createLinearGradient(0, 0, 0, H());
+  bg.addColorStop(0, '#e8f0fe');
+  bg.addColorStop(1, '#f8fafc');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W(), H());
+
+  /* -- stand (unrotated, drawn first so beam is on top) -- */
+  drawStand();
+
+  /* -- rotated beam group -- */
+  ctx.save();
+  ctx.translate(pivotX(), pivotY());
+  ctx.rotate(beamAngle);
+  drawBeam();
+  drawFixedWeights();
+  if (placed && playerWeight)  drawWeight(playerWeight.side,  playerWeight.dist,  LEVELS[level].playerMass, '#16a34a', '#15803d', 1.0);
+  if (!solved && hoverWeight)  drawWeight(hoverWeight.side,   hoverWeight.dist,   LEVELS[level].playerMass, '#16a34a', '#15803d', 0.38);
+  ctx.restore();
+
+  /* -- pivot knob (on top of everything, unrotated) -- */
+  ctx.save();
+  ctx.translate(pivotX(), pivotY());
+  ctx.beginPath(); ctx.arc(0, 0, 11, 0, Math.PI * 2);
+  ctx.fillStyle = '#fff'; ctx.strokeStyle = '#1e3a5f'; ctx.lineWidth = 2.5;
+  ctx.fill(); ctx.stroke();
+  // inner dot
+  ctx.beginPath(); ctx.arc(0, 0, 4, 0, Math.PI * 2);
+  ctx.fillStyle = '#1e3a5f'; ctx.fill();
+  ctx.restore();
+}
+
+function drawBeam() {
+  const bLen = BEAM_HALF * scale();
+  /* shadow */
+  ctx.shadowColor = 'rgba(30,58,95,0.22)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 3;
+  /* left half (blue tint) */
+  ctx.fillStyle = '#2d4a6e';
+  ctx.beginPath(); ctx.roundRect(-bLen, -9, bLen, 18, [4, 0, 0, 4]); ctx.fill();
+  /* right half (slightly different shade) */
+  ctx.fillStyle = '#3d3060';
+  ctx.beginPath(); ctx.roundRect(0, -9, bLen, 18, [0, 4, 4, 0]); ctx.fill();
+  ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+
+  /* center dividing line */
+  ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(0, -9); ctx.lineTo(0, 9); ctx.stroke();
+
+  /* tick marks & distance labels */
+  ctx.font = '500 10px Inter, Arial, sans-serif';
+  ctx.textAlign = 'center';
+  for (let d = SNAP; d <= BEAM_HALF + 0.001; d += SNAP) {
+    const px = d * scale();
+    const isMajor = Math.abs(Math.round(d / 0.5) * 0.5 - d) < 0.001;
+    const tickH = isMajor ? 6 : 3;
+    ctx.strokeStyle = isMajor ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.3)';
+    ctx.lineWidth = isMajor ? 1.5 : 1;
+    [-px, px].forEach(x => {
+      ctx.beginPath(); ctx.moveTo(x, -9); ctx.lineTo(x, -9 + tickH); ctx.stroke();
+    });
+    if (isMajor) {
+      ctx.fillStyle = 'rgba(255,255,255,0.75)';
+      ctx.textBaseline = 'top';
+      ctx.fillText(d.toFixed(1) + 'm', -px, -9 + tickH + 1);
+      ctx.fillText(d.toFixed(1) + 'm',  px, -9 + tickH + 1);
+    }
+  }
+}
+
+function drawFixedWeights() {
+  const lv = LEVELS[level];
+  for (const w of lv.fixed) {
+    drawWeight(w.side, w.dist, w.mass, '#2563eb', '#1d4ed8', 1.0);
+  }
+}
+
+function drawWeight(side, dist, mass, fill, stroke, alpha) {
+  const x = beamXfromMeters(side, dist);
+  const boxW = 50, boxH = 44;
+  const postH = 16;
+  /* weight sits on top of beam, connected by a small post */
+  const boxBottom = -(9 + postH);           // bottom of box
+  const boxTop    = boxBottom - boxH;       // top of box
+
+  ctx.save();
+  ctx.globalAlpha = alpha;
+
+  /* post */
+  ctx.fillStyle = '#64748b';
+  ctx.fillRect(x - 2, -(9 + postH), 4, postH);
+
+  /* box shadow */
+  ctx.shadowColor = 'rgba(0,0,0,0.18)'; ctx.shadowBlur = 7; ctx.shadowOffsetY = 3;
+
+  /* box fill */
+  ctx.fillStyle = fill;
+  ctx.strokeStyle = stroke;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.roundRect(x - boxW/2, boxTop, boxW, boxH, 7);
+  ctx.fill(); ctx.stroke();
+  ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+
+  /* mass label */
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 13px Inter, Arial, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(mass + ' kg', x, boxTop + boxH * 0.38);
+
+  /* torque label */
+  const tau = (mass * g * dist).toFixed(0);
+  ctx.font = '500 10px Inter, Arial, sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  ctx.fillText('τ = ' + tau + ' N·m', x, boxTop + boxH * 0.72);
+
+  ctx.restore();
+}
+
+function drawStand() {
+  const px = pivotX(), py = pivotY();
+  /* triangle */
+  ctx.fillStyle = '#1e3a5f';
+  ctx.beginPath();
+  ctx.moveTo(px, py + 10);
+  ctx.lineTo(px - 26, py + 72);
+  ctx.lineTo(px + 26, py + 72);
+  ctx.closePath(); ctx.fill();
+  /* base plate */
+  ctx.fillStyle = '#334155';
+  ctx.beginPath();
+  ctx.roundRect(px - 42, py + 70, 84, 14, 3);
+  ctx.fill();
+  /* ground hatching lines */
+  ctx.strokeStyle = '#475569'; ctx.lineWidth = 1.5;
+  for (let i = -3; i <= 3; i++) {
+    ctx.beginPath();
+    ctx.moveTo(px + i * 12 - 6, py + 84);
+    ctx.lineTo(px + i * 12 + 6, py + 98);
+    ctx.stroke();
+  }
+}
+
+/* ── animation ── */
+function animate() {
+  const diff = targetAngle - beamAngle;
+  beamAngle += diff * 0.1;
+  draw();
+  if (Math.abs(diff) > 0.0003) {
+    animId = requestAnimationFrame(animate);
+  } else {
+    beamAngle = targetAngle;
+    draw();
+  }
+}
+function startAnim() { if (animId) cancelAnimationFrame(animId); animId = requestAnimationFrame(animate); }
+
+/* ── hover preview ── */
+canvas.addEventListener('mousemove', function(e) {
+  if (solved) { hoverWeight = null; return; }
+  const rect = canvas.getBoundingClientRect();
+  // Stay in CSS-pixel space — matches pivotX/Y and all drawing coords
+  const cx = e.clientX - rect.left;
+  const cy = e.clientY - rect.top;
+
+  const lv = LEVELS[level];
+  if (cy < 0 || cy > pivotY() + 40) { hoverWeight = null; draw(); updateStripMsg(null); return; }
+
+  const { side, dist } = metersFromCanvasX(cx);
+  if (side !== lv.playerSide || dist < SNAP) { hoverWeight = null; draw(); updateStripMsg(null); return; }
+
+  hoverWeight = { side, dist };
+  updateStripMsg(hoverWeight);
+  draw();
+});
+
+canvas.addEventListener('mouseleave', function() {
+  hoverWeight = null;
+  draw();
+  updateStripMsg(null);
+});
+
+function updateStripMsg(hw) {
+  const el = document.getElementById('placement-strip');
+  if (!hw) {
+    el.textContent = solved
+      ? '✓ Level complete! Press Next Level to continue.'
+      : 'Hover over the beam to preview placement, then click to place your weight.';
+    return;
+  }
+  const lv = LEVELS[level];
+  const tau = (lv.playerMass * g * hw.dist).toFixed(1);
+  el.innerHTML = `Preview: <strong>${lv.playerMass} kg</strong> at <strong>${hw.dist.toFixed(1)} m ${hw.side === 'L' ? 'left' : 'right'}</strong> — τ = ${lv.playerMass} × ${g} × ${hw.dist.toFixed(1)} = <strong>${tau} N·m</strong> &nbsp;— Click to place`;
+}
+
+/* ── click to place ── */
+canvas.addEventListener('click', function(e) {
+  if (solved) return;
+  const rect = canvas.getBoundingClientRect();
+  // CSS-pixel space — must match pivotX/Y
+  const cx = e.clientX - rect.left;
+  const cy = e.clientY - rect.top;
+
+  if (cy < 0 || cy > pivotY() + 40) return;
+
+  const lv = LEVELS[level];
+  const { side, dist } = metersFromCanvasX(cx);
+
+  if (side !== lv.playerSide) {
+    const el = document.getElementById('placement-strip');
+    el.innerHTML = `⚠️ Place your weight on the <strong>${lv.playerSide === 'L' ? 'LEFT' : 'RIGHT'}</strong> side of the beam.`;
+    return;
+  }
+
+  playerWeight = { side, dist };
+  placed = true;
+  hoverWeight = null;
+  updateTorqueDisplay();
+  checkBalance();
+  draw();
+});
+
+/* ── torque display ── */
+function updateTorqueDisplay() {
+  const { tL, tR } = calcTorques(false);
+  const lv = LEVELS[level];
+
+  document.getElementById('t-left').textContent  = tL.toFixed(1) + ' N·m';
+  document.getElementById('t-right').textContent = tR.toFixed(1) + ' N·m';
+
+  // build breakdown strings
+  let leftParts = lv.fixed.filter(w => w.side === 'L').map(w => `${w.mass}×${g}×${w.dist.toFixed(1)}`);
+  let rightParts = lv.fixed.filter(w => w.side === 'R').map(w => `${w.mass}×${g}×${w.dist.toFixed(1)}`);
+  if (placed && playerWeight) {
+    const tau = `${lv.playerMass}×${g}×${playerWeight.dist.toFixed(1)}`;
+    playerWeight.side === 'L' ? leftParts.push(tau) : rightParts.push(tau);
+  }
+  document.getElementById('t-left-sub').textContent  = leftParts.join(' + ')  || '—';
+  document.getElementById('t-right-sub').textContent = rightParts.join(' + ') || '—';
+}
+
+/* ── balance check ── */
+function checkBalance() {
+  const { tL, tR } = calcTorques(false);
+  const maxT = Math.max(tL, tR);
+  const diff  = Math.abs(tL - tR);
+  const ratio = maxT > 0 ? diff / maxT : 0;
+
+  const statusBox = document.getElementById('status-box');
+  const statusVal = document.getElementById('t-status');
+
+  if (!placed) {
+    statusBox.className = 'torque-box status';
+    statusVal.textContent = '—';
+    targetAngle = 0;
+    startAnim();
+    return;
+  }
+
+  if (ratio <= TOLERANCE) {
+    statusBox.className = 'torque-box status balanced';
+    statusVal.textContent = '✓ Balanced!';
+    targetAngle = 0;
+    solved = true;
+    const pts = Math.max(1, 7 - level);
+    score += pts;
+    if (score > best) best = score;
+    document.getElementById('hud-score').textContent = score;
+    document.getElementById('hud-best').textContent  = best;
+    document.getElementById('btn-next').disabled = false;
+    updateStripMsg(null);
+    showSummary(true);
+  } else {
+    statusBox.className = 'torque-box status unbalanced';
+    statusVal.textContent = 'Off by ' + (ratio * 100).toFixed(1) + '%';
+    targetAngle = (tL > tR ? -1 : 1) * Math.min(ratio * 0.55, 0.32);
+    startAnim();
+    showSummary(false);
+  }
+}
+
+/* ── summary ── */
+function showSummary(won) {
+  const lv = LEVELS[level];
+  const tbody = document.getElementById('summary-body');
+  tbody.innerHTML = '';
+
+  const weights = lv.fixed.map((w, i) => ({ ...w, label: 'Fixed ' + (i + 1), yours: false }));
+  if (placed && playerWeight) weights.push({ ...playerWeight, mass: lv.playerMass, label: 'Your weight', yours: true });
+
+  for (const w of weights) {
+    const tr = document.createElement('tr');
+    if (w.yours) tr.className = 'yours';
+    tr.innerHTML =
+      `<td>${w.label}</td>` +
+      `<td>${w.mass}</td>` +
+      `<td>${w.dist.toFixed(2)}</td>` +
+      `<td>${(w.mass * g)}</td>` +
+      `<td>${(w.mass * g * w.dist).toFixed(1)}</td>` +
+      `<td>${w.side === 'L' ? 'Left' : 'Right'}</td>`;
+    tbody.appendChild(tr);
+  }
+
+  const { tL, tR } = calcTorques(false);
+  const verdict = document.getElementById('summary-verdict');
+  const title   = document.getElementById('summary-title');
+  if (won) {
+    title.textContent = '🎉 Balanced!';
+    verdict.innerHTML = `<span class="win">Left τ = ${tL.toFixed(1)} N·m &nbsp;|&nbsp; Right τ = ${tR.toFixed(1)} N·m — within tolerance!</span>`;
+  } else {
+    title.textContent = 'Not quite — try repositioning';
+    verdict.innerHTML =
+      `<span class="lose">Left τ = ${tL.toFixed(1)} N·m &nbsp;|&nbsp; Right τ = ${tR.toFixed(1)} N·m &nbsp;|&nbsp; Δ = ${Math.abs(tL - tR).toFixed(1)} N·m</span>` +
+      `<br><span class="hint-text">💡 ${lv.hint}</span>`;
+  }
+  document.getElementById('summary').classList.add('show');
+}
+
+/* ── level management ── */
+function loadLevel() {
+  solved = placed = false;
+  playerWeight = hoverWeight = null;
+  beamAngle = targetAngle = 0;
+
+  document.getElementById('btn-next').disabled = true;
+  document.getElementById('summary').classList.remove('show');
+  document.getElementById('status-box').className = 'torque-box status';
+  document.getElementById('t-status').textContent = '—';
+  document.getElementById('t-left').textContent   = '0.0 N·m';
+  document.getElementById('t-right').textContent  = '0.0 N·m';
+  document.getElementById('t-left-sub').textContent  = '—';
+  document.getElementById('t-right-sub').textContent = '—';
+  document.getElementById('hud-level').textContent = level + 1;
+
+  const lv = LEVELS[level];
+  const sideLabel = lv.playerSide === 'L' ? 'LEFT' : 'RIGHT';
+  document.getElementById('level-card').innerHTML =
+    `<strong>Level ${level + 1} of ${LEVELS.length}:</strong> ${lv.desc}` +
+    `<br><span class="place-indicator">▶ Place ${lv.playerMass} kg on the ${sideLabel} side</span>`;
+
+  updateStripMsg(null);
+  resize();
+}
+
+function resetLevel() { loadLevel(); }
+function nextLevel()  { level = (level + 1) % LEVELS.length; loadLevel(); }
+
+/* expose to global scope so onclick attributes work */
+window.resetLevel = resetLevel;
+window.nextLevel  = nextLevel;
+
+loadLevel();
+
+})();
+</script>
+</body>
+</html>

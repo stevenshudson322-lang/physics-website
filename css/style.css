@@ -326,11 +326,14 @@ button:hover {
 
 /* Topics nav cards */
 main > nav {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 10px;
   margin-top: 1rem;
-  max-width: 540px;
+  max-width: 780px;
+}
+@media (max-width: 520px) {
+  main > nav { grid-template-columns: 1fr; }
 }
 
 main > nav a {
