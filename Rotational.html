@@ -286,7 +286,6 @@ document.addEventListener('DOMContentLoaded', function () {
 <h3>Angular Displacement (\(\Delta\theta\))</h3>
 <p class="eq">\( \Delta\theta = \theta_f - \theta_i \qquad \text{[rad]} \)</p>
 
-<div class="concept-layout">
   <div>
     <p>The change in angular position, measured in radians. <strong>Counterclockwise = positive, clockwise = negative</strong> — the same sign convention as linear displacement.</p>
     <div class="callout callout-mistake">
@@ -294,8 +293,7 @@ document.addEventListener('DOMContentLoaded', function () {
       Don't confuse \(\theta\) (angular position) with \(\Delta\theta\) (change in position). This is the same distinction as \(x\) vs. \(\Delta x\) in linear motion.
     </div>
   </div>
-  <img src="Images/angular-displacement.svg" alt="Angular displacement diagram" width="175" style="border-radius:8px; flex-shrink:0;"/>
-</div>
+  
 
 <h3>Angular Velocity (\(\omega\))</h3>
 <p class="eq">\( \omega = \dfrac{\Delta\theta}{\Delta t} \qquad \text{[rad/s]} \)</p>
@@ -520,11 +518,61 @@ document.addEventListener('DOMContentLoaded', function () {
   style="display:block; max-width:100%; border-radius:8px; margin:0.75rem 0;">
 </iframe>
 
+<h2>Rolling Without Slipping</h2>
+<p>When a ball or cylinder rolls across a surface without skidding, it is doing something remarkable: every point where the object touches the ground is <strong>instantaneously at rest</strong>. This constraint links the translational and rotational motion together:</p>
+
+<p class="centered-text">\[ v_\text{cm} = \omega r \]</p>
+
+<p>where \(v_\text{cm}\) is the speed of the center of mass, \(\omega\) is the angular velocity, and \(r\) is the radius. If this condition holds, the object rolls without slipping.</p>
+
+<h3>How Friction Makes It Spin</h3>
+<p>Imagine pushing a ball that is initially sliding across the floor with no spin at all. Kinetic friction acts at the contact point — but because it acts <em>below</em> the center of mass, it also exerts a torque about the center:</p>
+
+<p class="centered-text">\[ \tau = f_k \cdot r \]</p>
+
+<p>This torque spins the ball up. At the same time, the friction force decelerates the translational motion. The ball gradually spins faster and slows down translationally until \(v_\text{cm} = \omega r\) — at which point it rolls without slipping, friction drops to zero, and the ball moves at constant speed. <strong>Friction is the mechanism that transfers energy between translation and rotation.</strong></p>
+
+<div class="boxed-text">
+  <p><strong>Key insight:</strong> For a ball already rolling without slipping on a flat surface, static friction does <em>no work</em> — the contact point is not moving, so \(W = F \cdot d = 0\). It still exerts a torque, but it costs no energy. On an incline, static friction is what <em>prevents</em> slipping and enforces the rolling constraint; it does not act like a brake.</p>
+</div>
+
+<h3>Energy of a Rolling Object</h3>
+<p>A rolling object has <em>both</em> translational and rotational kinetic energy at the same time:</p>
+
+<p class="centered-text">\[ KE_\text{total} = \tfrac{1}{2}mv_\text{cm}^2 + \tfrac{1}{2}I\omega^2 \]</p>
+
+<p>Substituting \(\omega = v_\text{cm}/r\):</p>
+
+<p class="centered-text">\[ KE_\text{total} = \tfrac{1}{2}mv_\text{cm}^2\!\left(1 + \frac{I}{mr^2}\right) \]</p>
+
+<p>The factor \(I/mr^2\) determines what fraction of the energy is rotational. A solid sphere (\(I = \tfrac{2}{5}mr^2\)) stores less energy in rotation than a hollow cylinder (\(I = mr^2\)), so the sphere accelerates faster down a ramp — even if both have the same mass and radius.</p>
+
+<table class="rot-table two-col">
+  <thead>
+    <tr>
+      <th>Object</th>
+      <th>\(I/mr^2\) — Rotational fraction</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>Solid sphere</td><td>\(2/5 = 0.4\)</td></tr>
+    <tr><td>Solid cylinder / disk</td><td>\(1/2 = 0.5\)</td></tr>
+    <tr><td>Hollow sphere</td><td>\(2/3 \approx 0.67\)</td></tr>
+    <tr><td>Thin-walled hollow cylinder (hoop)</td><td>\(1 = 1.0\)</td></tr>
+  </tbody>
+</table>
+
+<div class="callout callout-insight">
+  <span class="callout-title">💡 Race down a ramp</span>
+  Release any two objects of the same shape from the same height — regardless of mass or radius, the one with the smaller \(I/mr^2\) always wins. Shape is everything; mass cancels out.
+</div>
+
 <h2>Practice Problems</h2>
 <p><em>One elementary question per topic — check your understanding before tackling harder problems.</em></p>
 
 <h3>Angular Displacement</h3>
 <ol>
+
   <li>A wheel rotates from \(\theta = 0\) to \(\theta = 3\pi\) rad. What is the angular displacement?
     <ol type="A">
       <li>\(\pi\) rad</li>
@@ -533,10 +581,10 @@ document.addEventListener('DOMContentLoaded', function () {
       <li>\(6\pi\) rad</li>
     </ol>
   </li>
-</ol>
+
 
 <h3>Angular Velocity</h3>
-<ol>
+
   <li>A disk completes 4 full rotations in 2 seconds. What is its angular velocity?
     <ol type="A">
       <li>2 rad/s</li>
@@ -545,10 +593,10 @@ document.addEventListener('DOMContentLoaded', function () {
       <li>\(8\pi\) rad/s</li>
     </ol>
   </li>
-</ol>
+
 
 <h3>Angular Acceleration</h3>
-<ol>
+
   <li>A spinning top's angular velocity increases from 0 to 10 rad/s in 5 seconds. What is its angular acceleration?
     <ol type="A">
       <li>0.5 rad/s²</li>
@@ -557,10 +605,10 @@ document.addEventListener('DOMContentLoaded', function () {
       <li>50 rad/s²</li>
     </ol>
   </li>
-</ol>
+
 
 <h3>Rotational Kinematics</h3>
-<ol>
+
   <li>A wheel starts from rest and has a constant angular acceleration of 2 rad/s². How fast is it spinning after 3 seconds?
     <ol type="A">
       <li>2 rad/s</li>
@@ -569,10 +617,10 @@ document.addEventListener('DOMContentLoaded', function () {
       <li>9 rad/s</li>
     </ol>
   </li>
-</ol>
+
 
 <h3>Torque</h3>
-<ol>
+
   <li>A force of 10 N is applied perpendicular to a wrench 0.5 m from the bolt. What is the torque?
     <ol type="A">
       <li>0.5 N·m</li>
@@ -581,10 +629,10 @@ document.addEventListener('DOMContentLoaded', function () {
       <li>20 N·m</li>
     </ol>
   </li>
-</ol>
+
 
 <h3>Moment of Inertia</h3>
-<ol>
+
   <li>Two disks have the same mass. Disk A has its mass concentrated near the center. Disk B has its mass spread toward the rim. Which has the greater moment of inertia?
     <ol type="A">
       <li>Disk A</li>
@@ -593,10 +641,10 @@ document.addEventListener('DOMContentLoaded', function () {
       <li>Cannot be determined without the radius</li>
     </ol>
   </li>
-</ol>
+
 
 <h3>Rotational Newton's 2nd Law</h3>
-<ol>
+
   <li>A disk with moment of inertia \(I = 2\ \text{kg·m}^2\) experiences a net torque of 6 N·m. What is its angular acceleration?
     <ol type="A">
       <li>1 rad/s²</li>
@@ -605,10 +653,10 @@ document.addEventListener('DOMContentLoaded', function () {
       <li>12 rad/s²</li>
     </ol>
   </li>
-</ol>
+
 
 <h3>Rotational Kinetic Energy</h3>
-<ol>
+
   <li>A wheel with \(I = 4\ \text{kg·m}^2\) spins at \(\omega = 2\ \text{rad/s}\). What is its rotational kinetic energy?
     <ol type="A">
       <li>4 J</li>
@@ -617,10 +665,10 @@ document.addEventListener('DOMContentLoaded', function () {
       <li>32 J</li>
     </ol>
   </li>
-</ol>
+
 
 <h3>Conservation of Angular Momentum</h3>
-<ol>
+
   <li>A skater spinning with arms out has \(I = 3\ \text{kg·m}^2\) and \(\omega = 2\ \text{rad/s}\). She pulls her arms in so that \(I\) drops to \(1\ \text{kg·m}^2\). What is her new angular velocity?
     <ol type="A">
       <li>2 rad/s</li>
@@ -629,6 +677,139 @@ document.addEventListener('DOMContentLoaded', function () {
       <li>9 rad/s</li>
     </ol>
   </li>
+
+  <li>Two ball are connected by a massless rod that is a length of 4d. The ball of the left has a mass of m, and the rigth has a mass of 1/2 m. What is the moment of intertia as te system is rotated about the point 1/4 D from the left ball?
+      <ol type="A">
+        <li>5/4 m D²</li>
+        <li>3/2 m D²</li>
+        <li>11/2 m D²</li>
+        <li>2 m D²</li>
+      </ol>
+  </li>
+
+  <li>A horizontal disk is spinning about a firctionless axis with a moment of inertia. It is spinnign with a angular speed of \(\omega\). A second disk with half the moment of inertia of the first disk is dropped onto the first disk, and they stick together. What is the final angular speed of the system?</li>
+    <ol type="A">
+        <li>\(\omega/3\)</li>
+        <li>\(\omega/2\)</li>
+        <li>\(2\omega/3\)</li>
+        <li>\(\omega\)</li>
+    </ol>
+
+  </li>
+  <li>A carousel ride at the carnival with a radius r is initially at rest. I then begins to accelerate constantly until it has reached an angular velocity \(\omega\) after 2 complete revolutions. What is the angular acceleration of the carousel during this time?
+    <ol type="A">
+      <li> \( \frac{\omega^2}{4\pi} \)</li>
+      <li> \( \frac{\omega^2}{2\pi r} \)</li>
+      <li> \( \frac{\omega^2}{8\pi} \)</li>
+      <li> \( \frac{\omega}{4\pi}\)</li>
+    </ol>
+  </li>
+
+
+  <li>A solid sphere (\(I = \tfrac{2}{5}mr^2\)) and a thin-walled hollow cylinder (\(I = mr^2\)) have the same mass and radius. Both start from rest and roll without slipping down the same inclined plane. Which statement correctly describes their motion at the bottom?
+    <ol type="A">
+      <li>They arrive simultaneously because they have the same mass and starting height.</li>
+      <li>The hollow cylinder arrives first because a larger moment of inertia stores rotational energy more efficiently.</li>
+      <li>The solid sphere arrives first because a smaller fraction of its energy is stored as rotational kinetic energy.</li>
+      <li>The result cannot be determined without knowing the angle of the incline.</li>
+    </ol>
+  </li>
+
+
+  <li>A student sits at rest on a frictionless rotating stool, holding a spinning bicycle wheel whose axle points straight up. When viewed from above, the wheel spins counterclockwise with angular momentum \(L\). The student then flips the wheel so its axle points straight down. What happens to the student?
+    <ol type="A">
+      <li>The student remains stationary because flipping the wheel does not change its rotational speed.</li>
+      <li>The student spins clockwise (viewed from above) with angular momentum \(L\).</li>
+      <li>The student spins counterclockwise (viewed from above) with angular momentum \(2L\).</li>
+      <li>The student spins counterclockwise (viewed from above) with angular momentum \(L\).</li>
+    </ol>
+  </li>
+
+  <li>A rigid bar with a mass m and length 3/4L is free to rotate about a frictionless hinge at a wall. The bar has amoment of inertia I = 1/4 ML2 about the hinge, and is released from rest when it is in a horizontal position
+as shown. What is the instantaneous angular acceleration when the bar has swung down so that it makes an angle of 30° to the vertical?
+    <ol type="A">
+      <li>\(\frac{2g}{3L}\)</li>
+      <li>\(\frac{g}{3L}\)</li>
+      <li>\(\frac{3g}{4L}\)</li>
+      <li>\(\frac{g}{L}\)</li>
+    </ol>
+  </li>
+
+  <li>A wheel spins with the angular velocity of \(\omega\). Which of ther following represents the period of a rotation?
+    <ol type="A">
+      <li>\(2\pi\omega\)</li>
+      <li>\(\frac{1}{\omega}\)</li>
+      <li>\(\frac{2\pi}{\omega}\)</li>
+      <li>\(\frac{\omega}{2\pi}\)</li>
+    </ol>
+  </li>
+
+  <li> Torque is the rotational equivalent of which of the following linear quantities?
+    <ol type="A">
+      <li>Force</li>
+      <li>Mass</li>
+      <li>Acceleration</li>
+      <li>Velocity</li>
+    </ol>
+  </li>
+  <li> Two disks have the same radius but different masses: disk 1 has mass m and disk 2 has mass 3m. What is the ratio of moment of inertia from disk 1 to disk 2?
+    <ol type="A">
+      <li>1:3</li>
+      <li>3:1</li>
+      <li>1:9</li>
+      <li>9:1</li>
+    </ol>
+  </li>
+
+  <li>A wheel is placed on an axis free to rotate. It has rotational inertia of \(I\). The speed of the wheel in increased from 0 to \(\omega\) in t amount of seconds. <strong>What is the average torque during the time inerval t ?</strong>
+    <ol type="A">
+      <li>\(\frac{I\omega}{t}\)</li>
+      <li>\(\frac{I}{t}\)</li>
+      <li>\(\frac{\omega}{t}\)</li>
+      <li>\(\frac{I\omega}{2t}\)</li>
+    </ol>
+  </li>
+
+<h2>Free Response</h2>
+<p>These questions are in the style of AP Physics 1 free-response problems. Show all work, define any variables you introduce, and justify your reasoning in complete sentences where asked.</p>
+
+<ol start="20">
+  <li>
+    <p><strong>Wheel and Hanging Mass</strong></p>
+    <p>A wheel of mass \(M\), radius \(R\), and moment of inertia \(I\) is mounted onto a frictionless axis on a wall. A wire is wrapped around the wheel several times, with a mass \(m\) hanging from the free end. The mass is released from rest and accelerates toward the ground.</p>
+    <p>(a) What is the tension in the wire as the mass accelerates toward the ground?</p>
+    <p>(b) What is the angular acceleration of the wheel as the mass accelerates toward the ground?</p>
+    <p>(c) What is the angular velocity of the wheel after it has rotated two full revolutions?</p>
+    <p>(d) What is the angular momentum of the wheel after it has rotated two full revolutions?</p>
+  </li>
+  <br>
+  <li>
+    <p><strong>Cylinder Rolling Down an Incline</strong></p>
+    <p>A solid cylinder of mass \(m\) and radius \(r\) is released from rest at the top of an incline of angle \(\theta\) and length \(L\). The cylinder rolls without slipping and has moment of inertia \(I = \tfrac{1}{2}mr^2\).</p>
+    <p>(a) Draw the free-body diagram for the cylinder as it rolls down the incline. Label all forces and the point of application of each.</p>
+    <p>(b) Derive the linear acceleration of the cylinder's center of mass down the ramp in terms of \(g\) and \(\theta\).</p>
+    <p>(c) what is the smallest coefficient of friction that will prevent the cylinder from sliding?</p>
+    <p>The cylinder then rolls along the horizontal floor at the bottom of the incline without slipping and encounters a second ramp at the same angle \(\theta\). The second ramp has a coefficient of firction that is less than the what you previously calculated in the last question. </p>
+    <p>(d) Is the max heigth the ball reiched on the second ramp more, less, or equal to the heigth it initially started at on the first ramp?</p>
+    <p>(e) Is the magnitude of the angular accleration on the second ramp more, less, or equal to the magnitude on the first ramp?</p>
+  </li>
+  <br>
+  <li>
+    <p><strong>Disk and rod Collision</strong></p>
+    <img src="Images/disk-rod-collision.svg" alt="Top-view diagram: gray rod with pivot on right, disk below rod with velocity vector and dimension labels x and L" style="display:block; width:420px; max-width:100%; margin:1rem auto;">
+    <p> A rod of length \(L\) and mass \(m\) has the rigth side of it connected to a frictionless pivot on a flat frictionless horizontal surface. The Center of the rod is represented as point \(C\). The rod is initially as rest and is free to move around the pivot. A student will slide a disk of mass \(m_{disk}\) perpendicular to the rod at a speed of \(v_{disk}\) where is will stick a distanct of \(x\) away from the pivot).
+      The students goal is to have to rod-disk system to end up having the most angular momentum possible.</p>
+      <p> (a) To give the rod as much angular speed as possible, where should the student aim the disk?</p>
+      <p>
+      <div style="text-align:center; letter-spacing:0.01em;">
+        _____ At \(C\) &nbsp;&nbsp;&nbsp;&nbsp;
+        _____ The left of \(C\) &nbsp;&nbsp;&nbsp;&nbsp;
+        _____ The right of \(C\)
+      </div>
+      Explain your reasoning briefly without using equations.
+      </p>
+      <p>(b) Before the collision, the disk has a rotational inertia about the pivot of \(m_{disk}x^2\) and has a angular momentum of \(m_{disk} v_{disk} x\). Derive and equation that represents the angular speed of the rod after the collision. Use \(L , m_{disk}, v_{disk}, x\).</p>
+      <p>(c) Using the equation from part (b), determine how the angular speed of the rod would be different is the disk instead bounced off of the rod rather than sticking.</p>
 </ol>
 
 <div style="text-align:center; margin: 2rem 0;">
@@ -639,32 +820,86 @@ document.addEventListener('DOMContentLoaded', function () {
   <div>
     <h3 style="margin-top:0;">Answer Key</h3>
 
-    <p><strong>Angular Displacement — C (\(3\pi\) rad)</strong><br>
+    <p><strong>Q1 — C (\(3\pi\) rad)</strong><br>
     Angular displacement is just the final angle minus the initial: \(\Delta\theta = 3\pi - 0 = 3\pi\) rad.</p>
 
-    <p><strong>Angular Velocity — C (\(4\pi\) rad/s)</strong><br>
+    <p><strong>Q2 — C (\(4\pi\) rad/s)</strong><br>
     4 full rotations = \(4 \times 2\pi = 8\pi\) rad total. \(\omega = 8\pi / 2 = 4\pi\) rad/s.</p>
 
-    <p><strong>Angular Acceleration — B (2 rad/s²)</strong><br>
+    <p><strong>Q3 — B (2 rad/s²)</strong><br>
     \(\alpha = \Delta\omega / \Delta t = (10 - 0) / 5 = 2\ \text{rad/s}^2\).</p>
 
-    <p><strong>Rotational Kinematics — C (6 rad/s)</strong><br>
+    <p><strong>Q4 — C (6 rad/s)</strong><br>
     Using \(\omega = \omega_0 + \alpha t = 0 + 2 \times 3 = 6\ \text{rad/s}\).</p>
 
-    <p><strong>Torque — C (5 N·m)</strong><br>
+    <p><strong>Q5 — C (5 N·m)</strong><br>
     \(\tau = rF\sin\theta = 0.5 \times 10 \times \sin(90°) = 5\ \text{N·m}\).</p>
 
-    <p><strong>Moment of Inertia — B (Disk B)</strong><br>
+    <p><strong>Q6 — B (Disk B)</strong><br>
     \(I = kmr^2\) — mass farther from the axis contributes more to \(I\). Disk B has more mass at a larger \(r\), so its moment of inertia is greater.</p>
 
-    <p><strong>Rotational Newton's 2nd Law — B (3 rad/s²)</strong><br>
+    <p><strong>Q7 — B (3 rad/s²)</strong><br>
     \(\alpha = \tau / I = 6 / 2 = 3\ \text{rad/s}^2\).</p>
 
-    <p><strong>Rotational Kinetic Energy — B (8 J)</strong><br>
+    <p><strong>Q8 — B (8 J)</strong><br>
     \(KE_\text{rot} = \tfrac{1}{2}I\omega^2 = \tfrac{1}{2}(4)(2)^2 = 8\ \text{J}\).</p>
 
-    <p><strong>Conservation of Angular Momentum — C (6 rad/s)</strong><br>
+    <p><strong>Q9 — C (6 rad/s)</strong><br>
     \(L_i = L_f \Rightarrow I_1\omega_1 = I_2\omega_2 \Rightarrow 3 \times 2 = 1 \times \omega_2 \Rightarrow \omega_2 = 6\ \text{rad/s}\).</p>
+
+    <p><strong>Q10 — C (\(\tfrac{11}{2}mD^2\))</strong><br>
+    The pivot is \(\tfrac{1}{4}\) of the total rod length from the left ball: \(\tfrac{1}{4}(4D) = D\). The left ball is therefore distance \(D\) from the pivot and the right ball is \(4D - D = 3D\) away. Summing: \(I = mD^2 + \tfrac{1}{2}m(3D)^2 = mD^2 + \tfrac{9}{2}mD^2 = \tfrac{11}{2}mD^2\).</p>
+
+    <p><strong>Q11 — C (\(2\omega/3\))</strong><br>
+    No external torque acts, so angular momentum is conserved. Let the first disk have moment of inertia \(I\); the second has \(I/2\). Then \(I\omega = \bigl(I + \tfrac{I}{2}\bigr)\omega_f = \tfrac{3I}{2}\,\omega_f\), giving \(\omega_f = \tfrac{2\omega}{3}\).</p>
+
+    <p><strong>Q12 — C (\(\omega^2/8\pi\))</strong><br>
+    Starting from rest over \(\theta = 2\ \text{rev} = 4\pi\ \text{rad}\), use \(\omega^2 = \omega_0^2 + 2\alpha\theta\): \(\omega^2 = 2\alpha(4\pi)\), so \(\alpha = \dfrac{\omega^2}{8\pi}\). The radius \(r\) is irrelevant for angular kinematics.</p>
+
+    <p><strong>Q13 — C (solid sphere arrives first)</strong><br>
+    Energy conservation gives \(mgh = \tfrac{1}{2}mv^2 + \tfrac{1}{2}I\omega^2\). Substituting \(\omega = v/r\) yields \(v = \sqrt{\dfrac{2gh}{1 + I/mr^2}}\). For the solid sphere \(I/mr^2 = 2/5\); for the hollow cylinder \(I/mr^2 = 1\). The sphere's smaller rotational inertia ratio leaves more energy as translational KE, giving it a higher speed — and this holds for any incline angle.</p>
+
+    <p><strong>Q14 — C (counterclockwise, \(2L\))</strong><br>
+    The system (student + wheel) has no external torque, so total angular momentum is conserved. Initially \(L_\text{total} = +L\) (upward). After flipping, the wheel's angular momentum is \(-L\) (downward). To keep the total at \(+L\), the student must gain \(+2L\): \(L_\text{student} = L_\text{total} - L_\text{wheel} = +L - (-L) = +2L\). The student spins counterclockwise — the same direction the wheel was originally spinning — with angular momentum \(2L\).</p>
+
+    <p><strong>Q15 — C (\(3g/4L\))</strong><br>
+    The center of mass of the bar is at its midpoint, a distance \(\tfrac{1}{2} \times \tfrac{3}{4}L = \tfrac{3L}{8}\) from the hinge. At 30° from vertical, the perpendicular distance from the hinge to the weight vector is \(\tfrac{3L}{8}\sin 30° = \tfrac{3L}{16}\). Torque: \(\tau = Mg \cdot \tfrac{3L}{16}\). Angular acceleration: \(\alpha = \tau/I = \dfrac{Mg \cdot 3L/16}{ML^2/4} = \dfrac{3g}{4L}\).</p>
+
+    <p><strong>Q16 — C (\(2\pi/\omega\))</strong><br>
+    Angular velocity is defined as \(\omega = 2\pi/T\), so solving for the period gives \(T = 2\pi/\omega\). Choice B (\(1/\omega\)) is the period for linear frequency \(f\), not angular frequency — a common trap.</p>
+
+    <p><strong>Q17 — A (Force)</strong><br>
+    Torque \(\tau = rF\sin\theta\) is the rotational analogue of force: it causes angular acceleration just as force causes linear acceleration (\(\tau = I\alpha\) mirrors \(F = ma\)).</p>
+
+    <p><strong>Q18 — A (1:3)</strong><br>
+    Both disks are solid with the same radius, so \(I = \tfrac{1}{2}mr^2\). The ratio \(I_1 : I_2 = \tfrac{1}{2}mr^2 : \tfrac{1}{2}(3m)r^2 = 1:3\). The \(\tfrac{1}{2}r^2\) cancels, leaving just the mass ratio.</p>
+
+    <p><strong>Q19 — A (\(I\omega/t\))</strong><br>
+    Average torque equals the rate of change of angular momentum: \(\tau_\text{avg} = \Delta L / \Delta t = I\Delta\omega / t\). Starting from rest, \(\Delta\omega = \omega\), so \(\tau_\text{avg} = I\omega/t\).</p>
+
+    <hr style="margin: 1.5rem 0; border-color: var(--border);">
+
+    <h3>Free Response Answer Key</h3>
+
+    <p><strong>FR 1 — Wheel and Hanging Mass</strong></p>
+    <p>(a) Apply Newton's second law to the hanging mass: \(mg - T = ma\). Apply the rotational form to the wheel: \(\tau = TR = I\alpha\). Since the wire doesn't slip, \(a = \alpha R\), so \(\alpha = a/R\). From the rotational equation: \(T = I\alpha/R = Ia/R^2\). Substituting into the linear equation: \(mg - Ia/R^2 = ma\), giving \(a = \dfrac{mg}{m + I/R^2}\). Substituting back: \(\boxed{T = \dfrac{mgI}{mR^2 + I}}\).</p>
+    <p>(b) From above, \(\alpha = a/R = \dfrac{mg}{R(m + I/R^2)} = \boxed{\dfrac{mgR}{mR^2 + I}}\).</p>
+    <p>(c) Two full revolutions = \(\theta = 4\pi\) rad. Starting from rest, use \(\omega^2 = 2\alpha\theta\): \(\boxed{\omega = \sqrt{8\pi\alpha}}\), where \(\alpha\) is from part (b).</p>
+    <p>(d) Angular momentum \(L = I\omega\), with \(\omega\) from part (c): \(\boxed{L = I\sqrt{8\pi\alpha}}\).</p>
+
+    <p><strong>FR 2 — Cylinder Rolling Down an Incline</strong></p>
+    <p>(a) The free-body diagram should show: gravity \(mg\) downward at the center of mass, the normal force \(N\) perpendicular to the ramp surface at the contact point, and static friction \(f_s\) directed up the ramp at the contact point (friction is what provides the torque that causes rolling).</p>
+    <p>(b) Apply Newton's second law along the ramp: \(mg\sin\theta - f_s = ma\). Apply the rotational equation about the center: \(f_s r = I\alpha = \tfrac{1}{2}mr^2 \cdot (a/r) = \tfrac{1}{2}mra\), so \(f_s = \tfrac{1}{2}ma\). Substituting: \(mg\sin\theta - \tfrac{1}{2}ma = ma\), giving \(\boxed{a = \dfrac{2g\sin\theta}{3}}\).</p>
+    <p>(c) For rolling without slipping, static friction must satisfy \(f_s \leq \mu_s N\). From part (b), \(f_s = \tfrac{1}{2}ma = \tfrac{mg\sin\theta}{3}\) and \(N = mg\cos\theta\). So the minimum coefficient is \(\mu_\text{min} = \dfrac{f_s}{N} = \boxed{\dfrac{\tan\theta}{3}}\).</p>
+    <p>(d) <strong>Less.</strong> On the first ramp the cylinder rolls without slipping, so static friction does no work and all potential energy converts to kinetic energy — no energy is lost. On the second ramp the cylinder slips, meaning kinetic friction acts and converts some mechanical energy into thermal energy. The cylinder arrives at the bottom of the second ramp with less total kinetic energy than it had, so it cannot climb to the original height.</p>
+    <p>(e) <strong>Less.</strong> On the first ramp the static friction force is \(f_s = mg\sin\theta/3\), giving \(\alpha_1 = f_s r/I = \dfrac{2g\sin\theta}{3r}\). On the second ramp kinetic friction applies: \(f_k = \mu_k mg\cos\theta\), where \(\mu_k < \tan\theta/3\), so \(f_k < mg\sin\theta/3\). Since \(\alpha = fr/I\), a smaller friction force produces a smaller angular acceleration: \(\alpha_2 < \alpha_1\).</p>
+
+    <p><strong>FR 3 — Disk and Rod Collision</strong></p>
+    <p>(a) <strong>At the far end (left end) of the rod, farthest from the pivot.</strong> Angular momentum transferred to the rod equals \(L = m_\text{disk}\,v_\text{disk}\,x\). Since \(v_\text{disk}\) is fixed, maximizing \(x\) (the distance from the pivot to the impact point) maximizes the angular momentum — and therefore the angular speed — given to the rod. The maximum possible \(x\) is the full length \(L\) of the rod, so the student should aim at the far end.</p>
+    <p>(b) Angular momentum is conserved about the pivot (no external torque). Before the collision: \(L_i = m_\text{disk}\,v_\text{disk}\,x\). After the collision the disk sticks to the rod, so the system rotates together. The moment of inertia of the rod about its end is \(\tfrac{1}{3}mL^2\), and the disk (now at distance \(x\) from the pivot) contributes \(m_\text{disk}\,x^2\). Setting \(L_i = L_f\):
+    \[ m_\text{disk}\,v_\text{disk}\,x = \left(\tfrac{1}{3}mL^2 + m_\text{disk}\,x^2\right)\omega_f \]
+    \[ \boxed{\omega_f = \frac{m_\text{disk}\,v_\text{disk}\,x}{\tfrac{1}{3}mL^2 + m_\text{disk}\,x^2}} \]</p>
+    <p>(c) <strong>The rod would spin faster.</strong> If the disk bounces off instead of sticking, it leaves with angular momentum in the opposite direction (negative). Since the total angular momentum of the system is still conserved, the rod must receive more angular momentum to compensate — more than in the sticking case. A larger angular momentum transferred to the rod means a larger \(\omega_f\) for the rod.</p>
   </div>
 </div>
 

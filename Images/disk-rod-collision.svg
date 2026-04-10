@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 270" width="400" height="270" font-family="Georgia, 'Times New Roman', serif">
+
+  <rect width="400" height="270" fill="#f8fafc"/>
+
+  <text x="370" y="262" font-size="10" fill="#555" font-style="italic" text-anchor="end">top view</text>
+
+  <defs>
+    <marker id="arrowhead" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <polygon points="0 0, 7 3.5, 0 7" fill="#000"/>
+    </marker>
+    <marker id="dimhead" markerWidth="6" markerHeight="6" refX="5.5" refY="3" orient="auto">
+      <polygon points="0 0, 6 3, 0 6" fill="#555"/>
+    </marker>
+    <marker id="dimhead-rev" markerWidth="6" markerHeight="6" refX="0.5" refY="3" orient="auto">
+      <polygon points="6 0, 0 3, 6 6" fill="#555"/>
+    </marker>
+  </defs>
+
+  <!-- Rod: from x=55 to x=345, y=105 -->
+  <rect x="55" y="98" width="290" height="14" rx="2" fill="#b0b0b0" stroke="#555" stroke-width="1.2"/>
+
+  <!-- Point C at center (x=200) -->
+  <circle cx="200" cy="105" r="3.5" fill="#000"/>
+  <text x="200" y="94" font-size="13" fill="#000" font-style="italic" text-anchor="middle">C</text>
+
+  <!-- Pivot: open circle on right end (x=345) -->
+  <circle cx="345" cy="105" r="8" fill="#f8fafc" stroke="#000" stroke-width="1.8"/>
+  <text x="345" y="94" font-size="11" fill="#000" text-anchor="middle">pivot</text>
+
+  <!-- Disk: below rod at x=260, y=200 -->
+  <circle cx="260" cy="200" r="9" fill="#000"/>
+
+  <!-- Short velocity vector upward from disk -->
+  <line x1="260" y1="191" x2="260" y2="161" stroke="#000" stroke-width="1.8" marker-end="url(#arrowhead)"/>
+  <text x="268" y="180" font-size="13" fill="#000" font-style="italic">V</text>
+  <text x="277" y="184" font-size="10" fill="#000">disk</text>
+
+  <!-- === Dimension line for x (disk to pivot), sits below the rod === -->
+  <!-- drop tick at x=260 -->
+  <line x1="260" y1="118" x2="260" y2="135" stroke="#555" stroke-width="1" stroke-dasharray="3,2"/>
+  <!-- drop tick at x=345 -->
+  <line x1="345" y1="118" x2="345" y2="135" stroke="#555" stroke-width="1" stroke-dasharray="3,2"/>
+  <!-- double-ended arrow -->
+  <line x1="263" y1="130" x2="342" y2="130" stroke="#555" stroke-width="1.2" marker-end="url(#dimhead)" marker-start="url(#dimhead-rev)"/>
+  <text x="302" y="145" font-size="13" fill="#000" font-style="italic" text-anchor="middle">x</text>
+
+  <!-- === Dimension line for rod length L, sits above the rod === -->
+  <!-- drop tick at x=55 -->
+  <line x1="55" y1="88" x2="55" y2="72" stroke="#555" stroke-width="1" stroke-dasharray="3,2"/>
+  <!-- drop tick at x=345 -->
+  <line x1="345" y1="88" x2="345" y2="72" stroke="#555" stroke-width="1" stroke-dasharray="3,2"/>
+  <!-- double-ended arrow -->
+  <line x1="58" y1="77" x2="342" y2="77" stroke="#555" stroke-width="1.2" marker-end="url(#dimhead)" marker-start="url(#dimhead-rev)"/>
+  <text x="200" y="68" font-size="13" fill="#000" font-style="italic" text-anchor="middle">L</text>
+
+</svg>
