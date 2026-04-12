@@ -64,6 +64,7 @@
 
     // ── EASY-TO-EDIT SETTINGS ───────────────────────────────────
     const TITLE_TEXT   = "Physics Explained"; // ← change your title here
+    const BYLINE_TEXT  = "by Hudson Stevens";
     const BG_COLOR     = "#0f0f14";           // dark background
     const BLUE_COLOR   = "#3BA6FF";           // left particle color
     const ORANGE_COLOR = "#FF7A2F";           // right particle color
@@ -123,7 +124,7 @@
       oc.font         = `bold ${fontSize}px Inter, system-ui, sans-serif`;
       oc.textAlign    = "center";
       oc.textBaseline = "middle";
-      oc.fillText(TITLE_TEXT, W / 2, H / 2);
+      oc.fillText(TITLE_TEXT, W / 2, H * 0.43);
 
       const data = oc.getImageData(0, 0, W, H).data;
       const step = Math.max(3, Math.round(W / 260)); // adaptive density
@@ -329,6 +330,19 @@
           ctx.fill();
           ctx.restore();
         });
+
+        // Byline fades in as glow settles
+        const bylineAlpha = easeOut(sp);
+        const bylineFontSize = Math.max(13, Math.round(W * 0.022));
+        ctx.save();
+        ctx.globalAlpha = bylineAlpha * 0.72;
+        ctx.font        = `300 ${bylineFontSize}px Georgia, 'Times New Roman', serif`;
+        ctx.fillStyle   = "#c8d8f0";
+        ctx.textAlign   = "center";
+        ctx.textBaseline = "middle";
+        ctx.letterSpacing = "0.12em";
+        ctx.fillText(BYLINE_TEXT, W / 2, H * 0.43 + Math.max(28, Math.round(W * 0.09)) * 0.78);
+        ctx.restore();
 
         // Animation complete — draw final settled state and stop
         if (t >= T_SETTLE) {
